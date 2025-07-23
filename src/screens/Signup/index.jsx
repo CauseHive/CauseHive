@@ -5,7 +5,8 @@ import googleLogo from '../../assets/google-logo.svg';
 import facebookLogo from '../../assets/facebook-logo.svg';
 import { Link } from 'react-router-dom';
 
-const OrganiserSignup = () => {
+
+const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -24,10 +25,10 @@ const OrganiserSignup = () => {
 
       <main className={styles.mainContent}>
         <h1 className={styles.welcome}>
-          Join the Movement, Lead the Change <span role="img" aria-label="person waving">🧑‍🤝‍🧑</span>
+          Join CauseHive <span role="img" aria-label="person waving">🧑‍🤝‍🧑</span>
         </h1>
         <p className={styles.subtext}>
-          Create your account to start empowering communities, rally supporters and make a lasting impact with CauseHive
+          Sign up to connect, support causes, and make a difference with CauseHive. Everyone is welcome!
         </p>
 
         <form className={styles.form}>
@@ -120,4 +121,4 @@ const OrganiserSignup = () => {
   );
 };
 
-export default OrganiserSignup;
+export default Signup;
