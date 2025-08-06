@@ -130,6 +130,31 @@ class AdminPaymentsListView(APIView):
                 status=status.HTTP_202_ACCEPTED
             )
 
+class AdminWithdrawalRequestsListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        # Check for recent cached withdrawal requests list
+        now = timezone.now()
+        one_hour_ago = now - timedelta(hours=1)
+
+        report = CachedReportData.objects.filter(
+            report_type='withdrawal_requests_list',
+            generated_at__gte=one_hour_ago
+        ).first()
+
+        if report:
+            serializer = CachedReportDataSerializer(report)
+            return Response(serializer.data['data'])
+        else:
+            # Trigger fresh report generation
+            generate_fresh_report.delay()
+            return Response(
+                {"detail": "No recent data available. Generating fresh report, please try again shortly."},
+                status=status.HTTP_202_ACCEPTED
+            )
+
+
 class RefreshReportView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 

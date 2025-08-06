@@ -1,6 +1,6 @@
 # Donation Processing Service
 
-A Django-based microservice for handling donations, payments, and cart management for the CauseHive platform. This service integrates with Paystack for payment processing and manages the complete donation flow from cart to payment completion.
+A Django-based microservice for handling donations, payments, cart management, and withdrawal processing for the CauseHive platform. This service integrates with Paystack for payment processing and money transfers, managing the complete financial flow from donations to withdrawals.
 
 ## 🏗️ Architecture
 
@@ -8,9 +8,10 @@ This service is part of the CauseHive microservices architecture and handles:
 - **Cart Management**: Shopping cart functionality for causes
 - **Donation Processing**: Recording and managing donations
 - **Payment Integration**: Paystack payment gateway integration
+- **Withdrawal Management**: Fund withdrawal processing for cause organizers
 - **Webhook Handling**: Payment status updates via webhooks
 
-## 🪶 Features
+## �� Features
 
 ### Cart Management
 - Add/remove items from cart
@@ -23,14 +24,23 @@ This service is part of the CauseHive microservices architecture and handles:
 - Link donations to causes
 - Track donation status
 - Filter donations by user
+- Donation statistics and reporting
 
 ### Payment Integration
 - Paystack payment gateway integration
 - Payment initiation and verification
 - Webhook handling for payment status updates
-- Transaction tracking
+- Transaction tracking and history
 
-## 🔗 API Endpoints
+### Withdrawal Management
+- Withdrawal request creation and processing
+- Paystack money transfer integration
+- Support for bank transfers and mobile money
+- Withdrawal status tracking
+- Email notifications for withdrawal completion
+- Recipient management for efficient transfers
+
+## �� API Endpoints
 
 ### Cart Endpoints
 - `GET /api/cart/` - Get current user's cart
@@ -57,6 +67,14 @@ This service is part of the CauseHive microservices architecture and handles:
 - `GET /api/payments/verify/<reference>/` - Verify payment by reference
 - `POST /api/payments/webhook/` - Paystack webhook endpoint
 
+### Withdrawal Endpoints
+- `GET /api/withdrawals/` - List user's withdrawal requests
+- `POST /api/withdrawals/` - Create withdrawal request
+- `GET /api/withdrawals/statistics/` - Get withdrawal statistics
+- `GET /api/withdrawals/admin/requests/` - Admin: List all withdrawal requests
+- `GET /api/withdrawals/admin/statistics/` - Admin: Get withdrawal statistics
+- `POST /api/withdrawals/admin/retry/<id>/` - Admin: Retry failed withdrawal
+
 ## ⚒️ Workflow
 
 ### Cart to Donation Flow
@@ -73,17 +91,26 @@ This service is part of the CauseHive microservices architecture and handles:
 4. System verifies payment and updates transaction status
 5. Donation status is updated based on payment result
 
+### Withdrawal Processing Flow
+1. Cause organizer creates withdrawal request (`POST /api/withdrawals/`)
+2. System validates user, cause, and withdrawal amount
+3. System extracts payment details from user's profile
+4. Paystack transfer is initiated with recipient creation/reuse
+5. Transfer status is tracked and updated
+6. Email notification sent on successful withdrawal
+7. Admin can retry failed withdrawals
+
 ## ⚙️ Configuration
 
-### Paystack Webhook Setup
-1. In your Paystack dashboard, go to Settings → Webhooks
-2. Add webhook URL: `https://yourdomain.com/api/payments/webhook/`
-3. Select events: `charge.success`, `charge.failed`
+### Paystack Integration
+- **Payment Gateway**: For processing donations
+- **Money Transfer API**: For processing withdrawals
+- **Webhook Setup**: For payment status updates
 
 ### External Service Integration
 The service integrates with external services for validation:
-- **User Service**: Validates user IDs
-- **Causes Service**: Validates cause IDs
+- **User Service**: Validates user IDs and retrieves payment information
+- **Causes Service**: Validates cause IDs and retrieves cause details
 
 ## 📊 Database Schema
 
@@ -97,16 +124,31 @@ The service integrates with external services for validation:
 ### Payment Models
 - `PaymentTransaction`: Payment records linked to donations with Paystack integration
 
+### Withdrawal Models
+- `WithdrawalRequest`: Withdrawal requests with status tracking, payment details, and transaction information
+
 ## 🔒 Security
 
 - All sensitive data (API keys, database credentials) stored in environment variables
 - Proper permission classes on API endpoints
 - Input validation and sanitization
+- JWT authentication for secure API access
+
+## �� Email Templates
+
+- **Withdrawal Success Email**: Notifies users of successful withdrawals
+- **Payment Confirmation Email**: Confirms successful donations
+
+## �� Background Tasks
+
+- **Payment Verification**: Asynchronous payment status verification
+- **Withdrawal Processing**: Background withdrawal transfer processing
+- **Transfer Status Verification**: Periodic verification of transfer status
 
 ---
 
-## 🧩 Related Services
+## �� Related Services
 
-- **User Service**: User management and authentication
+- **User Service**: User management, authentication, and profile management
 - **Causes Service**: Cause and event management
-- **Frontend Application**: User interface for the platform
+- **Admin Reporting Service**: Analytics and reporting dashboard

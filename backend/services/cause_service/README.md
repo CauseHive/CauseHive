@@ -10,6 +10,7 @@ This service is part of the CauseHive microservices architecture and handles:
 - **Event Scheduling**: Start and end date management for causes
 - **Image Management**: Cover image handling for causes
 - **Status Tracking**: Monitoring cause status (upcoming, ongoing, completed, cancelled)
+- **Admin Operations**: Cause approval and status management for administrators
 
 ## 🎯 Features
 
@@ -19,6 +20,7 @@ This service is part of the CauseHive microservices architecture and handles:
 - Delete causes when needed
 - Track fundraising progress (target vs current amount)
 - Manage cause scheduling and location information
+- Cause approval workflow for administrators
 
 ### Category System
 - Organize causes into categories for better discoverability
@@ -26,82 +28,37 @@ This service is part of the CauseHive microservices architecture and handles:
 - Automatic slug generation for SEO-friendly URLs
 
 ### Status Management
-- Track cause status: upcoming, ongoing, completed, cancelled
+- Track cause status: upcoming, ongoing, completed, cancelled, under_review
 - Automatic status updates based on dates
 - Progress tracking for fundraising goals
+- Admin approval workflow for new causes
 
 ### Image Handling
 - Upload and manage cover images for causes
 - Automatic image storage and organization
 - Support for cause visual representation
 
-## 📋 Prerequisites
-
-- Python 3.8+
-- PostgreSQL
-- External services:
-  - User Service (for organizer validation)
-
-## 🛠️ Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd cause_service
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   # or using uv
-   uv sync
-   ```
-
-3. **Set up environment variables**
-   Create a `.env` file in the project root:
-   ```env
-   # Django
-   SECRET_KEY=your-django-secret-key
-   DEBUG=True
-   ALLOWED_HOSTS=localhost,127.0.0.1
-
-   # Database
-   DB_NAME=cause_service
-   DB_USER=your_db_user
-   DB_PASSWORD=your_db_password
-   DB_HOST=localhost
-   DB_PORT=5432
-
-   # External Services
-   USER_SERVICE_URL=http://localhost:8000/user/api/auth
-   ```
-
-4. **Run migrations**
-   ```bash
-   python manage.py migrate
-   ```
-
-5. **Create superuser (optional)**
-   ```bash
-   python manage.py createsuperuser
-   ```
-
-6. **Run the development server**
-   ```bash
-   python manage.py runserver
-   ```
+### Admin Features
+- Review and approve pending causes
+- Monitor cause status and progress
+- Manage cause categories and organization
 
 ## �� API Endpoints
 
-### Cause Endpoints
+### Public Cause Endpoints
 - `GET /causes/list/` - List all causes
-- `POST /causes/create/` - Create a new cause
 - `GET /causes/details/<uuid:id>/` - Get specific cause details
+- `GET /causes/categories/` - List all categories
+
+### Organizer Endpoints
+- `POST /causes/create/` - Create a new cause
+- `PUT /causes/update/<uuid:id>/` - Update cause details
 - `DELETE /causes/delete/<uuid:id>/` - Delete a cause
 
-### Category Endpoints
-- Category management endpoints (CRUD operations)
-- Category listing and filtering
+### Admin Endpoints
+- `GET /causes/admin/causes/` - List all causes with admin data
+- `PATCH /causes/admin/causes/<uuid:id>/status/` - Update cause status
+- `GET /causes/admin/causes?status=under_review` - Get pending causes for review
 
 ## 📊 Data Models
 
@@ -125,6 +82,7 @@ class Causes(models.Model):
 ```
 
 **Status Options:**
+- `under_review` - Cause is pending admin approval
 - `upcoming` - Cause is scheduled but not yet started
 - `ongoing` - Cause is currently active and accepting donations
 - `completed` - Cause has finished successfully
@@ -139,31 +97,42 @@ class Category(models.Model):
     slug = models.SlugField(unique=True)
 ```
 
-## 🔄 Workflow
+## ⚒️ Workflow
 
 ### Cause Creation Flow
 1. Organizer creates a new cause via `POST /causes/create/`
 2. System validates organizer ID against User Service
-3. Cause is created with 'upcoming' status
+3. Cause is created with 'under_review' status
 4. Cover image is uploaded and stored
 5. Slug is automatically generated from cause name
+6. Admin reviews and approves the cause
 
 ### Cause Lifecycle
-1. **Upcoming**: Cause is created and scheduled
-2. **Ongoing**: Cause becomes active (based on start_date)
-3. **Completed**: Cause finishes (based on end_date or target reached)
-4. **Cancelled**: Cause is cancelled by organizer
+1. **Under Review**: Cause is created and awaiting admin approval
+2. **Upcoming**: Cause is approved and scheduled
+3. **Ongoing**: Cause becomes active (based on start_date)
+4. **Completed**: Cause finishes (based on end_date or target reached)
+5. **Cancelled**: Cause is cancelled by organizer or admin
 
-### Integration with Donation Service
+### Admin Approval Workflow
+1. Admin receives notification of new pending cause
+2. Admin reviews cause details and documentation
+3. Admin approves or rejects the cause
+4. Status is updated accordingly
+5. Organizer is notified of the decision
+
+### Integration with Other Services
 - Cause IDs are referenced by the donation processing service
 - Current amount is updated when donations are received
 - Status may change based on fundraising progress
+- Admin reporting service monitors cause statistics
 
 ## ⚙️ Configuration
 
 ### External Service Integration
 The service integrates with external services for validation:
 - **User Service**: Validates organizer IDs and user permissions
+- **Admin Reporting Service**: Provides cause data for analytics and reporting
 
 ### Image Storage
 - Cover images are stored in `causes_images/` directory
@@ -177,17 +146,7 @@ The service integrates with external services for validation:
 - Proper permission validation for cause management
 - Input validation and sanitization
 - Slug generation prevents URL manipulation
-
-```
-
-### Database Configuration
-```env
-DB_NAME=cause_service_prod
-DB_USER=production_user
-DB_PASSWORD=secure_password
-DB_HOST=your-db-host
-DB_PORT=5432
-```
+- Admin-only access to approval endpoints
 
 ## 📈 Monitoring
 
@@ -197,12 +156,14 @@ DB_PORT=5432
 - Category popularity
 - Image upload success rates
 - API response times
+- Cause approval rates and processing times
 
 ### Health Checks
 - Database connectivity
 - External service availability
 - Image storage accessibility
 - API endpoint responsiveness
+- Admin notification system
 
 ## 🔧 Maintenance
 
@@ -212,16 +173,18 @@ DB_PORT=5432
 - Monitor image storage usage
 - Backup cause data
 - Update category structure as needed
+- Process admin notifications
 
 ### Data Management
 - Archive completed causes
 - Clean up unused images
 - Optimize database queries
 - Monitor storage growth
-
+- Maintain cause approval queue
 
 ## �� Related Services
 
-- **User Service**: User management and authentication
+- **User Service**: User management and organizer validation
 - **Donation Processing Service**: Handles donations for causes
+- **Admin Reporting Service**: Analytics and reporting for causes
 - **Frontend Application**: User interface for cause management

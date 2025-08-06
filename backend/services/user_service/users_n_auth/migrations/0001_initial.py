@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
                 ('profile_picture', models.ImageField(blank=True, default='profile_pictures/default.jpg', null=True, upload_to='profile_pictures/')),
                 ('phone_number', models.CharField(blank=True, max_length=20, null=True)),
                 ('address', models.CharField(blank=True, max_length=255, null=True)),
-                ('preferred_payment_method', models.CharField(blank=True, max_length=50, null=True)),
+                ('withdrawal_wallet', models.CharField(blank=True, max_length=50, null=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='profile', to=settings.AUTH_USER_MODEL)),
             ],

@@ -3,7 +3,7 @@ from rest_framework import serializers
 from django.conf import settings
 
 def validate_user_id_with_service(value, request=None):
-    user_service_url = getattr(settings, 'USER_SERVICE_URL', 'http://localhost:8000/user/api/auth')
+    user_service_url = getattr(settings, 'USER_SERVICE_URL', 'http://localhost:8000/user/auth')
     url = f"{user_service_url}/users/{value}/"
     headers = {}
     if request and hasattr(request, 'headers'):

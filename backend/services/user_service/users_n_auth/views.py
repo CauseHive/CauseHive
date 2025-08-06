@@ -1,10 +1,12 @@
 from tokenize import TokenError
 
+import requests
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
+from django.core.cache import cache
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
@@ -213,3 +215,128 @@ class UserAccountDeleteView(generics.DestroyAPIView):
         user = self.get_object()
         user.delete()
         return Response({"message": "User account deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+
+class BankListAPIView(APIView):
+    """Fetch list of Ghanaian banks from Paystack"""
+
+    def get(self, request):
+        # Check cache first
+        cache_key = 'ghana_banks'
+        banks = cache.get(cache_key)
+
+        if not banks:
+            try:
+                url = "https://api.paystack.co/bank?currency=GHS"
+                headers = {
+                    "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+                    "Content-Type": "application/json"
+                }
+
+                response = requests.get(url, headers=headers)
+                response.raise_for_status()
+
+                data = response.json()
+                banks = data.get('data', [])
+
+                # Cache for 24 hours (banks don't change often)
+                cache.set(cache_key, banks, 60 * 60 * 24)
+
+            except requests.RequestException as e:
+                return Response(
+                    {"error": "Failed to fetch banks from Paystack"},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+
+        return Response({
+            "status": "success",
+            "data": banks
+        })
+
+
+class MobileMoneyListAPIView(APIView):
+    """Fetch list of Ghanaian mobile money providers from Paystack"""
+
+    def get(self, request):
+        # Check cache first
+        cache_key = 'ghana_mobile_money'
+        mobile_money = cache.get(cache_key)
+
+        if not mobile_money:
+            try:
+                url = "https://api.paystack.co/bank?currency=GHS&type=mobile_money"
+                headers = {
+                    "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+                    "Content-Type": "application/json"
+                }
+
+                response = requests.get(url, headers=headers)
+                response.raise_for_status()
+
+                data = response.json()
+                mobile_money = data.get('data', [])
+
+                # Cache for 24 hours
+                cache.set(cache_key, mobile_money, 60 * 60 * 24)
+
+            except requests.RequestException as e:
+                return Response(
+                    {"error": "Failed to fetch mobile money providers from Paystack"},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE
+                )
+
+        return Response({
+            "status": "success",
+            "data": mobile_money
+        })
+
+
+class ValidateBankAccountAPIView(APIView):
+    """Validate bank account number with Paystack"""
+
+    def post(self, request):
+        bank_code = request.data.get('bank_code')
+        account_number = request.data.get('account_number')
+
+        if not bank_code or not account_number:
+            return Response(
+                {"error": "bank_code and account_number are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            url = "https://api.paystack.co/bank/resolve"
+            headers = {
+                "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
+                "Content-Type": "application/json"
+            }
+            data = {
+                "account_number": account_number,
+                "bank_code": bank_code
+            }
+
+            response = requests.post(url, json=data, headers=headers)
+            response.raise_for_status()
+
+            result = response.json()
+
+            if result.get('status'):
+                return Response({
+                    "status": "success",
+                    "data": {
+                        "account_name": result['data']['account_name'],
+                        "account_number": result['data']['account_number'],
+                        "bank_id": result['data']['bank_id']
+                    }
+                })
+            else:
+                return Response({
+                    "status": "error",
+                    "message": result.get('message', 'Invalid account details')
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+        except requests.RequestException as e:
+            return Response(
+                {"error": "Failed to validate account with Paystack"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )

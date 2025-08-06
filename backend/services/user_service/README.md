@@ -1,6 +1,6 @@
 # User Service
 
-A Django-based microservice for user management, authentication, and profile handling for the CauseHive platform. This service provides comprehensive user functionality including registration, authentication, social login, and profile management.
+A Django-based microservice for user management, authentication, and profile handling for the CauseHive platform. This service provides comprehensive user functionality including registration, authentication, profile management, and withdrawal address configuration.
 
 ## 🏗️ Architecture
 
@@ -8,7 +8,8 @@ This service is part of the CauseHive microservices architecture and handles:
 - **User Management**: Registration, profile management, and account operations
 - **Authentication**: JWT-based authentication with social login support
 - **Authorization**: Role-based access control (regular users vs organizers)
-- **Profile Management**: Extended user profiles with personal information
+- **Profile Management**: Extended user profiles with personal information and withdrawal addresses
+- **Payment Information**: Bank and mobile money provider management for withdrawals
 - **Security**: Password management, rate limiting, and account protection
 
 ## �� Features
@@ -25,6 +26,12 @@ This service is part of the CauseHive microservices architecture and handles:
 - **Profile Management**: Extended user profiles with personal information
 - **Role Management**: Distinction between regular users and organizers
 - **Account Operations**: Profile updates, account deletion, and data management
+
+### Withdrawal Address Management
+- **Bank Account Configuration**: Store and manage bank account details for withdrawals
+- **Mobile Money Setup**: Configure mobile money provider information
+- **Address Validation**: Validate bank accounts and mobile money numbers
+- **Provider Lists**: Fetch available banks and mobile money providers from Paystack
 
 ### Security Features
 - **Rate Limiting**: Protection against brute force attacks and abuse
@@ -61,7 +68,7 @@ class UserProfile(models.Model):
     profile_picture = models.ImageField(upload_to='profile_pictures/')
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
-    preferred_payment_method = models.CharField(max_length=50, blank=True, null=True)
+    withdrawal_address = models.JSONField(blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
 ```
 
@@ -69,9 +76,9 @@ class UserProfile(models.Model):
 - Extended user information beyond basic auth data
 - Profile picture management with automatic storage
 - Contact information and personal details
-- Payment preference tracking for donation processing
+- JSON-based withdrawal address storage for flexible payment configuration
 
-## 🔗 API Endpoints
+## �� API Endpoints
 
 ### Authentication Endpoints
 - `POST /user/api/auth/signup/` - User registration
@@ -93,6 +100,11 @@ class UserProfile(models.Model):
 - `PUT /user/api/auth/profile/` - Update user profile
 - `GET /user/api/auth/users/<uuid:id>/` - Get specific user details
 - `DELETE /user/api/auth/profile/delete` - Delete user account
+
+### Withdrawal Address Management
+- `GET /user/api/auth/banks/` - Get list of available banks
+- `GET /user/api/auth/mobile-money/` - Get list of mobile money providers
+- `POST /user/api/auth/validate-bank/` - Validate bank account details
 
 ## 🔒 Security Configuration
 
@@ -117,12 +129,6 @@ SIMPLE_JWT = {
 }
 ```
 
-### Social Authentication (Yet to be implemented)
-- **Google OAuth**: Configured with email and profile scope
-- **PKCE Enabled**: Enhanced security for OAuth flows
-- **Offline Access**: Support for refresh tokens
-
-
 ## ⚒️ Workflow
 
 ### User Registration Flow
@@ -139,19 +145,12 @@ SIMPLE_JWT = {
 4. User can access protected endpoints using Bearer token
 5. Tokens can be refreshed or blacklisted on logout
 
-### Social Login Flow
-1. User initiates Google OAuth via `POST /user/api/auth/google/`
-2. System redirects to Google for authentication
-3. Google returns user information
-4. System creates or updates user account
-5. JWT tokens are issued for authenticated session
-
-### Password Reset Flow
-1. User requests password reset via `POST /user/api/auth/password-reset/`
-2. System validates email and rate limiting
-3. Reset email is sent with secure token
-4. User clicks link and submits new password
-5. Password is updated and user can log in
+### Withdrawal Address Setup Flow
+1. User fetches available banks/providers via API endpoints
+2. User configures withdrawal address in profile
+3. System validates bank account or mobile money details
+4. Withdrawal address is stored in JSON format
+5. Address is available for withdrawal processing
 
 ## ⚙️ Configuration
 
@@ -169,6 +168,10 @@ DB_PASSWORD=your_db_password
 DB_HOST=localhost
 DB_PORT=5432
 
+# Paystack Integration
+PAYSTACK_SECRET_KEY=your_paystack_secret_key
+PAYSTACK_PUBLIC_KEY=your_paystack_public_key
+
 # External Services
 FRONTEND_URL=http://localhost:5173
 BACKEND_URL=https://localhost:8000
@@ -182,6 +185,7 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 - **PostgreSQL**: Primary database for user data
 - **UUID Primary Keys**: Enhanced security and scalability
 - **One-to-One Relationships**: User profiles linked to main user accounts
+- **JSONField**: Flexible storage for withdrawal address configuration
 
 ### File Storage
 - **Profile Pictures**: Stored in `profile_pictures/` directory
@@ -196,7 +200,8 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 - Social login usage
 - Password reset requests
 - Profile update frequency
-- Account deletion rates
+- Withdrawal address configuration rates
+- Bank validation success rates
 
 ### Health Checks
 - Database connectivity
@@ -204,12 +209,14 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 - Social authentication providers
 - File storage accessibility
 - Rate limiting effectiveness
+- Paystack API connectivity
 
 ## 🔄 Integration
 
 ### External Service Dependencies
 - **Cause Service**: Validates organizer permissions
-- **Donation Processing Service**: Validates user IDs for donations
+- **Donation Processing Service**: Validates user IDs for donations and retrieves withdrawal addresses
+- **Admin Reporting Service**: Provides user data for analytics
 - **Frontend Application**: User interface for authentication and profiles
 
 ### API Integration Points
@@ -217,9 +224,11 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret
 - Profile data sharing for personalization
 - Authentication token validation across services
 - Role-based access control for organizer features
+- Withdrawal address retrieval for payment processing
 
-## Related Services
+## �� Related Services
 
 - **Cause Service**: Uses user data for organizer validation
-- **Donation Processing Service**: Validates user IDs for donation tracking
+- **Donation Processing Service**: Validates user IDs and retrieves withdrawal addresses
+- **Admin Reporting Service**: Provides user analytics and reporting
 - **Frontend Application**: User interface for authentication and profile management

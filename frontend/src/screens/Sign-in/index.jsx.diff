@@ -1,0 +1,9 @@
+<button type="submit" className={styles.signInButton}>Sign Up</button>
+        </form>
+=======
+          <div className={styles.socialButtons}>
+            {/* Social login buttons can be added here */}
+          </div>
+
+          <button type="submit" className={styles.signInButton}>Sign In</button>
+        </form>

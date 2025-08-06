@@ -20,7 +20,7 @@ class CauseListView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        return Causes.objects.exclude(status='under_review' and 'rejected')
+        return Causes.objects.exclude(status__in=['under_review', 'rejected'])
 
 class CauseDetailView(generics.RetrieveAPIView):
     queryset = Causes.objects.all()

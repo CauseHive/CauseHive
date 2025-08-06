@@ -9,7 +9,7 @@ class AdminNotification(models.Model):
         ('cause_pending', 'Cause Pending'),
     ]
     notif_type = models.CharField(max_length=50, choices=NOTIF_TYP_CHOICES)
-    entity_id = models.CharField(max_length=100),
+    entity_id = models.CharField(max_length=100, default='')
     message = models.TextField()
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

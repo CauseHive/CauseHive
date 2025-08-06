@@ -24,7 +24,7 @@ class Causes(models.Model):
     # It is up to the application logic to ensure this references a valid user in the user-service.
     target_amount = models.DecimalField(max_digits=10, decimal_places=2)
     current_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    rejection_reason = models.TextField(blank=True, null=True),
+    rejection_reason = models.TextField(blank=True, null=True)
     # start_date = models.DateTimeField()
     # end_date = models.DateTimeField()
     # location = models.CharField(max_length=255)

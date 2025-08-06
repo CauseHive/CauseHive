@@ -8,7 +8,14 @@ def generate_fresh_report():
     try:
         # Fetch users and donations stats
         users = fetch_admin_data('http://localhost:8000/user/admin-see/users/')
+        donations_list = fetch_admin_data('http://localhost:8002/donations/admin/donations/')
+        if isinstance(donations_list, dict) and 'results' in donations_list:
+            donations_list = donations_list['results']
+        elif not isinstance(donations_list, list):
+            donations_list = []
         donations_stats = fetch_admin_data('http://localhost:8002/donations/admin/donations/statistics/')
+        withdrawal_request_list = fetch_admin_data('http://localhost:8002/withdrawals/admin/requests/')
+        withdrawals_stats = fetch_admin_data('http://localhost:8002/withdrawals/admin/statistics/')
 
         # Fetch causes (handle paginated or non-paginated)
         causes_data = fetch_admin_data('http://localhost:8001/causes/admin/causes/')
@@ -33,11 +40,14 @@ def generate_fresh_report():
             report_type='dashboard_metrics',
             data={
                 'users': users,
-                'donations': donations_stats,
+                'donation_list': donations_list,
+                'donations_stats': donations_stats,
                 'causes_list': causes_list,
                 'causes_count': causes_count,
                 'payments_list': payments_list,
                 'payments_count': payments_count,
+                'withdrawal_request_list': withdrawal_request_list,
+                'withdrawals_stats': withdrawals_stats,
                 'generated_at': timezone.now().isoformat()
             },
             generated_at=timezone.now()
@@ -58,6 +68,14 @@ def generate_fresh_report():
             generated_at=timezone.now()
         )
 
+        # Save donations stats
+        donations_stats = fetch_admin_data('http://localhost:8002/donations/admin/statistics/')
+        CachedReportData.objects.create(
+            report_type='donations_stats',
+            data=donations_stats,
+            generated_at=timezone.now()
+        )
+
         # Save causes list
         CachedReportData.objects.create(
             report_type='causes_list',
@@ -69,6 +87,13 @@ def generate_fresh_report():
         CachedReportData.objects.create(
             report_type='payments_list',
             data=payments_list,
+            generated_at=timezone.now()
+        )
+
+        # Save withdrawals stats
+        CachedReportData.objects.create(
+            report_type='withdrawals_stats',
+            data=withdrawals_stats,
             generated_at=timezone.now()
         )
 

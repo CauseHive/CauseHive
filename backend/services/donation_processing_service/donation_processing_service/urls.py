@@ -20,10 +20,12 @@ from rest_framework.routers import DefaultRouter
 
 from donations.views import DonationViewSet
 from payments.views import PaymentTransactionViewSet
+from withdrawal_transfer.views import WithdrawalRequestViewSet
 
 router = DefaultRouter()
 router.register(r'donations', DonationViewSet)
 router.register(r'payments', PaymentTransactionViewSet, basename='paymenttransaction')
+router.register(r'withdrawals', WithdrawalRequestViewSet, basename='withdrawaltransfer')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,4 +33,5 @@ urlpatterns = [
     path('payments/', include('payments.urls')),
     path('cart/', include('cart.urls')),
     path('donations/', include('donations.urls')),
+    path('withdrawals/', include('withdrawal_transfer.urls')),
 ]

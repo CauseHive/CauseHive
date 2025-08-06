@@ -10,11 +10,11 @@ def poll_new_pending_causes():
     if isinstance(causes, dict) and 'results' in causes:
         causes = causes['results']
     for cause in causes:
-        cause_id = cause['cause_id']
+        cause_id = cause['id']
         # Notify if not already notified
-        if not AdminNotification.objects.filter(entity_id=cause_id['id'], notif_type='cause_pending').exists():
+        if not AdminNotification.objects.filter(entity_id=cause_id, notif_type='cause_pending').exists():
             AdminNotification.objects.create(
                 notif_type='cause_pending',
-                entity_id=cause['id'],
+                entity_id=cause_id,
                 message=f"New cause '{cause['name']}' is awaiting review."
             )

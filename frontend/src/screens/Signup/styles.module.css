@@ -1,0 +1,370 @@
+.signupPage {
+  background: #f0f0f5;
+  min-height: 100vh;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #222;
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+  flex-wrap: nowrap;
+  min-width: 320px;
+}
+
+.navLinks {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin: 15px 0;
+  font-weight: 600;
+  color: black;
+  flex-wrap: nowrap;
+  min-width: 320px;
+}
+
+.navLinks a {
+  color: black;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.logo {
+  font-weight: 900;
+  font-size: 1.8rem;
+  color: #1a1a2e;
+  text-align: center;
+  width: 100%;
+}
+
+.searchBar {
+  flex-grow: 1;
+  margin: 0 20px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background-color: #d9d4d4;
+  font-size: 1rem;
+  color: #555;
+}
+
+.authButtons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+  z-index: 10;
+}
+
+.signIn {
+  color: #000;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.signUpButton {
+  background-color: #1a1a2e;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  position: relative;
+  z-index: 20;
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  display: none;
+  flex-direction: column;
+  min-width: 120px;
+  overflow: hidden;
+}
+
+.signUpButton:hover .dropdown {
+  display: flex;
+}
+
+.dropdownItem {
+  padding: 10px 15px;
+  color: #333;
+  text-decoration: none;
+  cursor: pointer;
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+.dropdownItem:hover {
+  background-color: #e0e0e0;
+}
+
+.dropdownItemActive {
+  background-color: #1a1a2e;
+  color: white;
+}
+
+.mainContent {
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.welcome {
+  font-weight: 900;
+  font-size: 2rem;
+  margin-bottom: 5px;
+}
+
+.subtext {
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.error {
+  color: red;
+  font-weight: 700;
+}
+
+.success {
+  color: green;
+  font-weight: 700;
+}
+
+.inputGroup {
+  display: flex;
+  align-items: center;
+  background-color: #d9d4d4;
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.iconUser,
+.iconLock {
+  font-size: 1.2rem;
+  margin-right: 10px;
+  color: #555;
+}
+
+.input {
+  border: none;
+  background: transparent;
+  flex-grow: 1;
+  font-size: 1rem;
+  outline: none;
+}
+
+.rememberMe {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  color: #555;
+  font-weight: 600;
+}
+
+.divider hr {
+  flex-grow: 1;
+  border: none;
+  border-top: 1px solid #aaa;
+}
+
+.socialButtons {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+.socialLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #333333;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.socialIcon {
+  width: 24px;
+  height: 24px;
+}
+
+.socialLink img[alt="Facebook logo"] {
+  background-color: #1877F2;
+  border-radius: 50%;
+  padding: 4px;
+  box-sizing: content-box;
+}
+
+.signInButton {
+  background-color: #1a1a2e;
+  color: white;
+  border: none;
+  padding: 12px 0;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 15px;
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+}
+
+.links {
+  font-size: 0.9rem;
+  color: #222;
+}
+
+.links a {
+  color: black;
+  text-decoration: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.alreadyAccountLink a,
+.alreadyAccountLink a:hover,
+.alreadyAccountLink a:focus,
+.alreadyAccountLink a:active {
+  text-decoration: underline !important;
+}
+
+.forgotPassword {
+  display: block;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.chatBubble {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #1a1a2e;
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  max-width: 180px;
+  box-shadow: 0 0 10px rgba(26, 26, 46, 0.7);
+}
+
+.chatIcon {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  background: radial-gradient(circle, #3a3aff, #00008b);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.backgroundCircle1 {
+  position: fixed;
+  top: 100px;
+  right: 60px;
+  width: 80px;
+  height: 80px;
+  background-color: #3a3aff;
+  background: linear-gradient(180deg, #3a3aff 0%, #1e40ff 100%);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.backgroundCircle2 {
+  position: fixed;
+  bottom: 180px;
+  left: 20px;
+  width: 50px;
+  height: 50px;
+  background-color: #3a3aff;
+  background: linear-gradient(180deg, #3a3aff 0%, #1e40ff 100%);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+/* Responsive styles */
+.nameRow {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.nameRow > .inputGroup {
+  max-width: none;
+  width: 100%;
+}
+
+.nameRow > .inputGroup:first-child {
+  flex-grow: 1;
+}
+
+.nameRow > .inputGroup:last-child {
+  flex-grow: 1;
+}
+
+.inputGroup {
+  display: flex;
+  align-items: center;
+  background-color: #d9d4d4;
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 100%;
+  max-width: 400px;
+}
+
+@media (max-width: 768px) {
+  .nameRow {
+    flex-direction: column;
+  }
+}
+
+.alignedInput {
+  max-width: 190px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .alignedInput {
+    max-width: 100%;
+  }
+}

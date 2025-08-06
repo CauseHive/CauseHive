@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 from .views import (register_user, LoginView, LogoutView, GoogleLogin, request_password_reset, reset_password_confirm,
-                    UserProfileDetailView, UserAccountDeleteView, UserDetailView, AdminUserListView)
+                    UserProfileDetailView, UserAccountDeleteView, UserDetailView, AdminUserListView, BankListAPIView, MobileMoneyListAPIView, ValidateBankAccountAPIView)
 
 # JWT Authentication URLs
 jwt_urlpatterns = [
@@ -30,6 +30,9 @@ urlpatterns = [
     path('users/<uuid:id>/', UserDetailView.as_view(), name='user_detail'),
     path('profile/delete', UserAccountDeleteView.as_view(), name='account_delete'),
     path('admin-see/users/', AdminUserListView.as_view(), name='user_list'),
+    path('banks/', BankListAPIView.as_view(), name='bank_list'),
+    path('mobile-money/', MobileMoneyListAPIView.as_view(), name='mobile_money_list'),
+    path('validate-bank-account/', ValidateBankAccountAPIView.as_view(), name='validate_bank_account'),
 ]
 
 urlpatterns += jwt_urlpatterns

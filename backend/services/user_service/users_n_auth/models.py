@@ -47,8 +47,53 @@ class UserProfile(models.Model):
     profile_picture = models.ImageField(upload_to='profile_pictures/', default='profile_pictures/default.jpg',blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
-    preferred_payment_method = models.CharField(max_length=50, blank=True, null=True)
+    withdrawal_address = models.JSONField(blank=True, null=True, help_text="Stores complete withdrawal payment info.")
+    withdrawal_wallet = models.CharField(max_length=50, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Profile of {self.user.first_name} {self.user.last_name}"
+
+    def get_withdrawal_info(self):
+        if not self.withdrawal_address:
+            return None
+
+        withdrawal_data = self.withdrawal_address
+        payment_method = withdrawal_data.get('payment_method', 'bank_transfer')
+
+        if payment_method == 'bank_transfer':
+            return {
+                'payment_method': 'bank_transfer',
+                'bank_code': withdrawal_data.get('bank_code'),
+                'account_number': withdrawal_data.get('account_number'),
+                'account_name': withdrawal_data.get('account_name'),
+            }
+        elif payment_method == 'mobile_money':
+            return {
+                'payment_method': 'mobile_money',
+                'phone_number': withdrawal_data.get('phone_number'),
+                'country': withdrawal_data.get('country'),
+            }
+        else:
+            return {
+                'payment_method': 'bank_transfer',
+                'bank_code': withdrawal_data.get('bank_code'),
+                'account_number': withdrawal_data.get('account_number'),
+                'account_name': withdrawal_data.get('account_name'),
+            }
+
+    def has_complete_withdrawal_info(self):
+        if not self.withdrawal_address:
+            return False
+
+        data = self.withdrawal_address
+        payment_method = data.get('payment_method')
+
+        if payment_method == 'bank_transfer':
+            required_fields = ['bank_code', 'account_number', 'account_name']
+        elif payment_method == 'mobile_money':
+            required_fields = ['phone_number', 'provider']
+        else:
+            required_fields = ['bank_code', 'account_number', 'account_name']
+
+        return all(field in data and data[field] for field in required_fields)
