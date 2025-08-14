@@ -24,12 +24,12 @@ const LandingPage = () => {
             Services
             <i className={styles.dropdownArrow}></i>
           </a>
-          <a href="/signup" className={styles.navLink}>
+          <a href="#" className={styles.navLink}>
             Join us
             <i className={styles.dropdownArrow}></i>
           </a>
           <a href="#" className={styles.navLink}>Contact us</a>
-          <a href="/sign-in" className={styles.loginLink}>Log in</a>
+          <a href="#" className={styles.loginLink}>Log in</a>
           <button className={styles.donateButton}>Donate</button>
         </div>
       </nav>
