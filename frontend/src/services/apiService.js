@@ -30,9 +30,17 @@ class ApiService {
     try {
       const response = await fetch(url, config);
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({})); // Try to parse error response
+        throw new Error(
+          `API Error: ${response.status} ${response.statusText} - ${JSON.stringify(errorData)}`
+        );
       }
-      return await response.json();
+      // Handle cases where response might be empty
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.indexOf('application/json') !== -1) {
+        return await response.json();
+      }
+      return await response.text();
     } catch (error) {
       console.error('API Request failed:', error);
       throw error;
@@ -40,12 +48,12 @@ class ApiService {
   }
 
   // GET request
-  async get(endpoint) {
+  get(endpoint) {
     return this.request(endpoint, { method: 'GET' });
   }
 
   // POST request
-  async post(endpoint, data) {
+  post(endpoint, data) {
     return this.request(endpoint, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -53,7 +61,7 @@ class ApiService {
   }
 
   // PUT request
-  async put(endpoint, data) {
+  put(endpoint, data) {
     return this.request(endpoint, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -61,75 +69,100 @@ class ApiService {
   }
 
   // DELETE request
-  async delete(endpoint) {
+  delete(endpoint) {
     return this.request(endpoint, { method: 'DELETE' });
   }
 
-  // Donation APIs
-  async getDonationStatistics() {
-    return this.get('/api/donations/statistics/');
-  }
-
-  async createDonation(donationData) {
-    return this.post('/api/donations/', donationData);
-  }
-
-  async getDonations(page = 1) {
-    return this.get(`/api/donations/?page=${page}`);
-  }
-
-  // Cause APIs
-  async getCauses(page = 1) {
-    return this.get(`/api/causes/?page=${page}`);
-  }
-
-  async getCauseById(id) {
-    return this.get(`/api/causes/${id}/`);
-  }
-
-  async createCause(causeData) {
-    return this.post('/api/causes/', causeData);
-  }
+  // --- Specific API Methods ---
 
   // User APIs
-  async registerUser(userData) {
+  registerUser(userData) {
     return this.post('/api/auth/register/', userData);
   }
 
-  async loginUser(credentials) {
+  loginUser(credentials) {
     return this.post('/api/auth/login/', credentials);
   }
 
-  async googleAuth(token) {
+  googleAuth(token) {
     return this.post('/api/auth/google/', { access_token: token });
   }
 
-  // Success Stories / Blogs APIs (if implemented)
-  async getSuccessStories() {
+  // Cause APIs
+  getCauses(page = 1) {
+    return this.get(`/api/causes/?page=${page}`);
+  }
+
+  getCauseById(id) {
+    return this.get(`/api/causes/${id}/`);
+  }
+
+  createCause(causeData) {
+    // Assuming causeData is FormData
+    return this.request('/api/causes/', {
+      method: 'POST',
+      body: causeData,
+      headers: { ...this.headers, 'Content-Type': undefined }, // Let browser set content type for FormData
+    });
+  }
+
+
+  // Donation APIs
+  getDonationStatistics() {
+    return this.get('/api/donations/statistics/');
+  }
+
+  createDonation(donationData) {
+    return this.post('/api/donations/', donationData);
+  }
+
+  getDonations(page = 1) {
+    return this.get(`/api/donations/?page=${page}`);
+  }
+
+  // Cart APIs
+  getCart() {
+    return this.get('/api/cart/');
+  }
+
+  addToCart(itemData) {
+    return this.post('/api/cart/add/', itemData);
+  }
+
+  removeFromCart(itemId) {
+    return this.post(`/api/cart/remove/${itemId}/`);
+  }
+
+  updateCartItem(itemId, quantity) {
+    return this.put(`/api/cart/update/${itemId}/`, { quantity });
+  }
+
+  // Success Stories / Blogs APIs
+  getSuccessStories() {
     return this.get('/api/success-stories/');
   }
 
-  async getBlogPosts() {
+  getBlogPosts() {
     return this.get('/api/blog-posts/');
   }
 
   // Contributors / Users APIs
-  async getContributors() {
+  getContributors() {
     return this.get('/api/contributors/');
   }
 
   // Testimonials APIs
-  async getTestimonials() {
+  getTestimonials() {
     return this.get('/api/testimonials/');
   }
 
   // Statistics APIs
-  async getStatistics() {
+  getStatistics() {
     return this.get('/api/statistics/');
   }
 
   // Newsletter subscription
-  async subscribeToNewsletter(email) {
+  subscribeToNewsletter(email) {
     return this.post('/api/newsletter/subscribe/', { email });
   }
 }

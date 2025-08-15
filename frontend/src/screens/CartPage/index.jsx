@@ -1,35 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import apiService from '../../services/apiService';
 import styles from './styles.module.css';
 
-import { useNavigate } from 'react-router-dom';
+const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
+  const [quantity, setQuantity] = useState(item.quantity);
 
-// Sidebar icons omitted for brevity (assumed already implemented)
+  const handleQuantityChange = (e) => {
+    const newQuantity = parseInt(e.target.value, 10);
+    setQuantity(newQuantity);
+    onUpdateQuantity(item.id, newQuantity);
+  };
 
-const CartIcon = () => (
-  <svg width="24" height="24" fill="#2f3e46" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <path d="M7 18c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zm10 0c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zm-12.83-2l1.72-7h11.22l1.72 7h-14.66zm15.83-9h-16l-1-4h-2v2h1l3.6 7.59-1.35 2.44c-.16.28-.25.61-.25.97 0 1.104.896 2 2 2h12v-2h-11.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49-1.74-1z"/>
-  </svg>
-);
-
-const CartItem = ({ selected, onSelect }) => {
   return (
     <div className={styles.cartItem}>
-      <div
-        className={selected ? styles.checkboxSelected : styles.checkbox}
-        onClick={onSelect}
-        role="checkbox"
-        aria-checked={selected}
-        tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter') onSelect(); }}
-      />
       <div className={styles.cartItemInfo}>
-        <span>Help Agnes go to school</span>
-        <span>Goal: GHS3000</span>
-        <span>Created by: Janet Ofori</span>
+        <Link to={`/causes/${item.cause.id}`}>
+          <img src={item.cause.image_url || 'https://via.placeholder.com/100'} alt={item.cause.title} className={styles.causeImage} />
+        </Link>
+        <div>
+          <Link to={`/causes/${item.cause.id}`} className={styles.causeTitleLink}>
+            {item.cause.title}
+          </Link>
+          <p>Goal: ${item.cause.goal_amount}</p>
+          <button onClick={() => onRemove(item.id)} className={styles.removeButton}>Remove</button>
+        </div>
       </div>
       <div className={styles.priceBox}>
-        <span>GHS 0</span>
-        <button className={styles.dropdownButton} aria-label="Price dropdown">&#9660;</button>
+        <input
+          type="number"
+          value={quantity}
+          onChange={handleQuantityChange}
+          min="1"
+          className={styles.quantityInput}
+        />
+        <span>${(item.cause.goal_amount / 100) * quantity}</span> {/* Example calculation */}
       </div>
     </div>
   );
@@ -37,60 +42,84 @@ const CartItem = ({ selected, onSelect }) => {
 
 const CartPage = () => {
   const navigate = useNavigate();
-  const [selectedItems, setSelectedItems] = useState([true, true, false, false, false, false]);
+  const [cart, setCart] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleLogout = () => {
-    navigate('/sign-in');
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
+  const fetchCart = async () => {
+    try {
+      setLoading(true);
+      const cartData = await apiService.getCart();
+      setCart(cartData);
+      setError(null);
+    } catch (err) {
+      setError('Failed to fetch cart. Please try again.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const toggleSelect = (index) => {
-    const newSelected = [...selectedItems];
-    newSelected[index] = !newSelected[index];
-    setSelectedItems(newSelected);
+  const handleRemoveItem = async (itemId) => {
+    try {
+      await apiService.removeFromCart(itemId);
+      fetchCart(); // Refresh cart after removing
+    } catch (err) {
+      alert('Failed to remove item.');
+    }
   };
 
-  const selectedCount = selectedItems.filter(Boolean).length;
+  const handleUpdateQuantity = async (itemId, quantity) => {
+    try {
+      await apiService.updateCartItem(itemId, quantity);
+      fetchCart(); // Refresh cart after updating
+    } catch (err) {
+      alert('Failed to update quantity.');
+    }
+  };
+
+  const handleCheckout = () => {
+    // Navigate to a checkout page, which is not yet created
+    navigate('/checkout');
+  };
+
+  if (loading) return <p>Loading your cart...</p>;
+  if (error) return <p className={styles.error}>{error}</p>;
+  if (!cart || cart.items.length === 0) return <p>Your cart is empty.</p>;
+
+  const totalAmount = cart.items.reduce((total, item) => total + (item.cause.goal_amount / 100) * item.quantity, 0);
 
   return (
     <div className={styles.container}>
-      {/* Sidebar */}
       <aside className={styles.sidebar}>
-        {/* Sidebar buttons with icons and logout handler */}
-        {/* ... (assumed implemented as before) */}
+        {/* Sidebar content would go here */}
       </aside>
 
-      {/* Main content */}
       <main className={styles.mainContent}>
         <header className={styles.header}>
-          <h1 className={styles.logo}>CauseHive.</h1>
+          <Link to="/" className={styles.logo}><strong>CauseHive.</strong></Link>
           <h2 className={styles.title}>Your Cart</h2>
           <input type="text" placeholder="Search" className={styles.searchInput} />
-          <div className={styles.userAvatar}>
-            <img src="/path/to/avatar.png" alt="User Avatar" />
-            <button className={styles.dropdownButton} aria-label="User menu">&#9660;</button>
-          </div>
         </header>
 
-        <section className={styles.filters}>
-          <div className={styles.filterInputWrapper}>
-            <input type="text" placeholder="filter by" className={styles.filterInput} />
-            <button className={styles.dropdownButton} aria-label="Filter dropdown">&#9660;</button>
-          </div>
-          <div className={styles.filterInputWrapper}>
-            <input type="text" className={styles.filterInput} />
-            <button className={styles.dropdownButtonAlt} aria-label="Filter dropdown">&#9660;</button>
-          </div>
-        </section>
-
         <section className={styles.cartList}>
-          {selectedItems.map((selected, i) => (
-            <CartItem key={i} selected={selected} onSelect={() => toggleSelect(i)} />
+          {cart.items.map((item) => (
+            <CartItem
+              key={item.id}
+              item={item}
+              onRemove={handleRemoveItem}
+              onUpdateQuantity={handleUpdateQuantity}
+            />
           ))}
         </section>
 
         <footer className={styles.footer}>
-          <span>{selectedCount} selected</span>
-          <button className={styles.checkoutButton}>Checkout</button>
+          <span>Total: ${totalAmount.toFixed(2)}</span>
+          <button onClick={handleCheckout} className={styles.checkoutButton}>Checkout</button>
         </footer>
       </main>
     </div>
