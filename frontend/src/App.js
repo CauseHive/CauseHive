@@ -33,20 +33,20 @@ function App() {
         <Route path="/donation" element={<Donation />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/donationhistory" element={<DonationHistory />} />
-         <Route path="/profilepage" element={<Profilepage />} />
-         <Route path="/profilesettings" element={<Profilesettings />} />
-         <Route path="/cartpage" element={<CartPage />} />
-         <Route path="/multidonation" element={<MultiDonation />} />
-         <Route path="/notificationspage" element={<Notificationspage />} />
-          <Route path="/desktoppage" element={<Desktoppage />} />
-          <Route path="/admindashboard" element={<AdminDashboard />} />
-          <Route path="/causedetailpage" element={<CausedetailPage />} />
-          <Route path="/causereviewpage" element={<CauseReviewPage />} />
-          <Route path="/organizerprofilepage" element={<OrganizerProfilePage />} />
-          <Route path="/organizersignuppage" element={<OrganizerSignUpPage />} />
-          <Route path="/redirectingmodal" element={<RedirectingModal />} />
-          <Route path="/organizerprofilesettings" element={<OrganizerProfileSettings />} />
-           <Route path="/causelistpage" element={<CauseListpage />} />
+        <Route path="/profilepage" element={<Profilepage />} />
+        <Route path="/profilesettings" element={<Profilesettings />} />
+        <Route path="/cartpage" element={<CartPage />} />
+        <Route path="/multidonation" element={<MultiDonation />} />
+        <Route path="/notificationspage" element={<Notificationspage />} />
+        <Route path="/desktoppage" element={<Desktoppage />} />
+        <Route path="/admindashboard" element={<AdminDashboard />} />
+        <Route path="/causedetailpage" element={<CausedetailPage />} />
+        <Route path="/causereviewpage" element={<CauseReviewPage />} />
+        <Route path="/organizerprofilepage" element={<OrganizerProfilePage />} />
+        <Route path="/organizersignuppage" element={<OrganizerSignUpPage />} />
+        <Route path="/redirectingmodal" element={<RedirectingModal />} />
+        <Route path="/organizerprofilesettings" element={<OrganizerProfileSettings />} />
+        <Route path="/causelistpage" element={<CauseListpage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
