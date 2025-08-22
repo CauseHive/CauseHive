@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import styles from './styles.module.css';
 import apiService from '../../services/apiService';
@@ -14,7 +14,7 @@ const countryCodes = [
 ];
 
 const Donation = () => {
-  const [selectedCountry, setSelectedCountry] = useState(countryCodes[0]);
+  // Removed unused selectedCountry state
   const toast = useToast();
   const [searchParams] = useSearchParams();
   const prefill = useMemo(() => ({
@@ -27,13 +27,10 @@ const Donation = () => {
     const amt = (prefill.amount && !Number.isNaN(Number(prefill.amount))) ? prefill.amount : '';
     const amountInput = document.getElementById('donationAmount');
     if (amountInput && amt) amountInput.value = amt;
-  }, [prefill]);
+  }, [prefill, searchParams]);
 
   const handleCountryChange = (e) => {
-    const country = countryCodes.find(c => c.code === e.target.value);
-    if (country) {
-      setSelectedCountry(country);
-    }
+    // Removed setSelectedCountry (was unused)
   };
 
   return (

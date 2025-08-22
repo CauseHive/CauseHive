@@ -23,7 +23,7 @@ const OrganizerProfilePage = () => {
         setMyCauses(mine);
       } catch (_) {}
     })();
-  }, []);
+  }, [toast]);
 
   const name = useMemo(() => {
     if (!profile) return '—';

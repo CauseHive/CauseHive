@@ -64,7 +64,7 @@ const CartPage = () => {
       }));
       setMetaByCause(prev => ({ ...prev, ...Object.fromEntries(entries) }));
     })();
-  }, [items]);
+  }, [items, metaByCause]);
 
   const categories = useMemo(() => {
     const set = new Set();

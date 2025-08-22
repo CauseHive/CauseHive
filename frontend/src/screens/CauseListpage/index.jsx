@@ -68,14 +68,12 @@ const CauseListpage = () => {
     }
   }, [itemsRaw, sortBy, search]);
 
-  const handleIconClick = (item) => {
-    console.log(`${item} clicked`);
-  };
+ 
 
   const handleAddToCart = async (id) => {
     try {
-      const res = await apiService.addToCart({ cause_id: id, donation_amount: 10, quantity: 1 });
-      if (res && res.item) {
+      const result = await apiService.addToCart({ cause_id: id, donation_amount: 10, quantity: 1 });
+      if (result && result.item) {
         setCartCount((c) => c + 1);
         toast.success('Added to cart');
       } else {

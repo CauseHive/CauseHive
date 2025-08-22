@@ -1,20 +1,9 @@
 // API Configuration (Vite + fallback)
-let API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE)
-  || process.env.REACT_APP_API_BASE
-  || process.env.REACT_APP_API_URL;
-if (!API_BASE_URL) {
-  try {
-    if (typeof window !== 'undefined' && window.location && window.location.hostname) {
-      API_BASE_URL = window.location.hostname.includes('causehive.tech')
-        ? 'https://causehive.tech'
-        : 'http://localhost:8000';
-    } else {
-      API_BASE_URL = 'http://localhost:8000';
-    }
-  } catch (_) {
-    API_BASE_URL = 'http://localhost:8000';
-  }
-}
+const API_BASE_URL = process.env.REACT_APP_API_URL ||
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
+  (window && window.location && window.location.hostname.includes('causehive.tech')
+    ? 'https://causehive.tech/api'
+    : 'http://localhost:8000/api');
 
 // API Service Class
 class ApiService {
@@ -62,17 +51,22 @@ class ApiService {
       headers: this.headers,
       ...options,
     };
-
-    const resp = await fetch(url, config);
-    if (!resp.ok) {
-      const text = await resp.text().catch(() => '');
-      throw new Error(`API ${resp.status} ${resp.statusText}: ${text}`);
-    }
-    const contentType = resp.headers.get('content-type') || '';
-    if (contentType.includes('application/json')) {
-      return resp.json();
-    }
-    return resp.text();
+    try {
+      const resp = await fetch(url, config);
+      if (!resp.ok) {
+        const text = await resp.text().catch(() => '');
+        throw new Error(`API ${resp.status} ${resp.statusText}: ${text}`);
+      }
+      const contentType = resp.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        return resp.json();
+      }
+      return resp.text();
+    } catch (error) {
+        // Centralized error handling
+        console.error('API request failed:', error);
+        throw error;
+      }
   }
 
   async get(endpoint) {

@@ -19,17 +19,17 @@ class DatabaseRouter:
     # Route apps to their respective databases
     route_app_labels = {
         'users_n_auth': 'default',
-        'causes': 'causes_db',
-        'categories': 'causes_db',
-        'donations': 'donations_db',
-        'cart': 'donations_db',
-        'payments': 'donations_db',
-        'withdrawal_transfer': 'donations_db',
-        'admin_auth': 'admin_db',
-        'dashboard': 'admin_db',
-        'auditlog': 'admin_db',
-        'notifications': 'admin_db',
-        'management': 'admin_db',
+        'causes': 'causes',
+        'categories': 'categories',
+        'donations': 'donations',
+        'cart': 'cart',
+        'payments': 'payments',
+        'withdrawal_transfer': 'withdrawal_transfer',
+        'admin_auth': 'admin_auth',
+        'dashboard': 'dashboard',
+        'auditlog': 'auditlog',
+        'notifications': 'notifications',
+        'management': 'management',
     }
 
     def db_for_read(self, model, **hints):

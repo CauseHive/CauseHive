@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styles from './styles.module.css';
 import { FaUser, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import googleLogo from '../../assets/google-logo.svg';
-import facebookLogo from '../../assets/facebook-logo.svg';
+// facebookLogo import removed as it's not used
 import { Link, useNavigate } from 'react-router-dom';
 import apiService from '../../services/apiService';
 import { useToast } from '../../components/Toast/ToastProvider';
@@ -89,6 +89,7 @@ const Signup = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
             />
           </div>
 
@@ -102,6 +103,7 @@ const Signup = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              autoComplete="new-password"
             />
             <div className={styles.eyeIcon} onClick={toggleShowPassword} style={{ cursor: 'pointer' }}>
               {showPassword ? <FaEye /> : <FaEyeSlash />}
@@ -117,6 +119,7 @@ const Signup = () => {
               value={password2}
               onChange={(e) => setPassword2(e.target.value)}
               required
+              autoComplete="new-password"
             />
             <div className={styles.eyeIcon} onClick={toggleShowConfirmPassword} style={{ cursor: 'pointer' }}>
               {showConfirmPassword ? <FaEye /> : <FaEyeSlash />}

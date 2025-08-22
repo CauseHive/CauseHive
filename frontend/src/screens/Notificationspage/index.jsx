@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
+import WebSocketClient from '../../utils/WebSocketClient';
 import styles from './styles.module.css';
 import SidebarNav from '../../components/SidebarNav';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +13,7 @@ const NotificationsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [items, setItems] = useState([]);
   const [profile, setProfile] = useState(null);
+  const wsRef = useRef(null);
 
   useEffect(() => {
     (async () => {
@@ -29,7 +31,32 @@ const NotificationsPage = () => {
         toast.info('Showing sample notifications');
       }
     })();
-  }, []);
+
+    // WebSocket integration for live notifications
+    wsRef.current = new WebSocketClient(
+      (msg) => {
+        try {
+          const data = JSON.parse(msg);
+          if (data && data.type === 'notification') {
+            setItems(prev => [{
+              id: data.id || Date.now(),
+              message: data.message,
+              cause: data.cause || '',
+            }, ...prev]);
+            toast.info('New notification received');
+          }
+        } catch (err) {
+          // Ignore invalid messages
+        }
+      },
+      () => { /* onOpen */ },
+      () => { /* onClose */ },
+      (err) => { toast.error('WebSocket error'); }
+    );
+    return () => {
+      if (wsRef.current) wsRef.current.close();
+    };
+  }, [toast]);
 
   const filtered = useMemo(() => {
     if (!searchTerm) return items;

@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Signup from './screens/Signup';
 import Dashboard from './screens/Dashboard'; // Importing the new Dashboard
 import DonationHistory from './screens/DonationHistory'
@@ -54,7 +54,7 @@ function App() {
           <Route path="/redirectingmodal" element={<RedirectingModal />} />
           <Route path="/organizerprofilesettings" element={<OrganizerProfileSettings />} />
           <Route path="/causelistpage" element={<CauseListpage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<LandingPage />} />
         </Routes>
       </Router>
     </ToastProvider>

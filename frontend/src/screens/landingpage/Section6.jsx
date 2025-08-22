@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import ErrorBoundary from '../../components/ErrorBoundary';
 import styles from './styles.module.css';
 import Section6Image from './assets/section6_image.png';
 import apiService from '../../services/apiService';
 
-const Section6 = () => {
+const Section6Content = () => {
   const [contributors, setContributors] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -72,4 +73,9 @@ const Section6 = () => {
   );
 };
 
+const Section6 = () => (
+  <ErrorBoundary>
+    <Section6Content />
+  </ErrorBoundary>
+);
 export default Section6;

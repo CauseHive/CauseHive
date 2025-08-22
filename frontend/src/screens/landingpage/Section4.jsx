@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import ErrorBoundary from '../../components/ErrorBoundary';
 import styles from './styles.module.css';
 import apiService from '../../services/apiService';
 
-const Section4 = () => {
+const Section4Content = () => {
   const [donationData, setDonationData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -133,4 +134,9 @@ const Section4 = () => {
   );
 };
 
+const Section4 = () => (
+  <ErrorBoundary>
+    <Section4Content />
+  </ErrorBoundary>
+);
 export default Section4;

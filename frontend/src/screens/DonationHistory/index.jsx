@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import styles from "./styles.module.css";
 import SidebarNav from "../../components/SidebarNav";
 import { useNavigate } from "react-router-dom";
-import { ShoppingCart, ChevronDown, RotateCcw, ChevronUp } from "lucide-react";
+import { ChevronDown, RotateCcw, ChevronUp } from "lucide-react";
 import apiService from "../../services/apiService";
 import { useToast } from "../../components/Toast/ToastProvider";
 import AppTopBar from "../../components/AppTopBar";
@@ -22,7 +22,7 @@ const DonationHistory = () => {
 
   const filters = ["Date", "Amount", "Organizer", "Category"];
 
-  const refetch = async () => {
+  const refetch = React.useCallback(async () => {
     try {
       const data = await apiService.getDonations(1);
       const arr = Array.isArray(data) ? data : (data.results || []);
@@ -37,14 +37,14 @@ const DonationHistory = () => {
       toast.error('Failed to load donation history');
       setDonations([]);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     (async () => {
       await refetch();
       try { const p = await apiService.getProfile(); setProfile(p); } catch(_) {}
     })();
-  }, []);
+  }, [refetch]);
 
   const rows = useMemo(() => {
     const arr = [...(donations || [])].map(d => ({

@@ -23,7 +23,7 @@ const Profilepage = () => {
         setMyCauses(mine);
       } catch (_) {}
     })();
-  }, []);
+  }, [toast]);
 
   const name = useMemo(() => {
     if (!profile) return '—';

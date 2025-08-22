@@ -36,7 +36,7 @@ const PaymentStatus = () => {
         toast.error('Payment not successful or verification failed');
       }
     })();
-  }, [searchParams]);
+  }, [searchParams, toast]);
 
   return (
     <div style={{ padding: 24 }}>

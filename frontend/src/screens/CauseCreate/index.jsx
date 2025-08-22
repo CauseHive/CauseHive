@@ -52,7 +52,8 @@ const CauseCreate = () => {
         category_data: categoryName ? { name: categoryName } : undefined,
         cover_image: coverImage || undefined,
       };
-      const res = await apiService.createCause(payload);
+      // API call to create cause
+      await apiService.createCause(payload);
       toast.success('Cause created successfully.');
       setTimeout(() => navigate(-1), 1200);
       setName('');
