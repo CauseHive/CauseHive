@@ -20,6 +20,7 @@ import OrganizerProfileSettings from "./screens/OrganizerProfileSettings";
 import RedirectingModal from "./screens/RedirectingModal";
 import OrganizerSignUpPage from "./screens/OrganizerSignUpPage";
 import CausedetailPage from './screens/CausedetailPage'; // Importing CausedetailPage
+import CauseCreate from './screens/CauseCreate';
 
 
 function App() {
@@ -41,13 +42,15 @@ function App() {
         <Route path="/desktoppage" element={<Desktoppage />} />
         <Route path="/admindashboard" element={<AdminDashboard />} />
         <Route path="/causedetailpage" element={<CausedetailPage />} />
+        <Route path="/causes/:id" element={<CausedetailPage />} />
+        <Route path="/causes/create" element={<CauseCreate />} />
         <Route path="/causereviewpage" element={<CauseReviewPage />} />
         <Route path="/organizerprofilepage" element={<OrganizerProfilePage />} />
         <Route path="/organizersignuppage" element={<OrganizerSignUpPage />} />
         <Route path="/redirectingmodal" element={<RedirectingModal />} />
         <Route path="/organizerprofilesettings" element={<OrganizerProfileSettings />} />
         <Route path="/causelistpage" element={<CauseListpage />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

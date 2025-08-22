@@ -1,8 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from '../Signup/styles.module.css';
 import { FaUser, FaLock } from 'react-icons/fa';
+import apiService from '../../services/apiService';
 
 const SignIn = () => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSubmitting(true);
+    try {
+      const data = await apiService.loginUser({ email, password });
+      if (data && data.access) {
+        navigate('/dashboard');
+      } else {
+        navigate('/');
+      }
+    } catch (err) {
+      setError('Sign-in failed');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className={styles.signupPage}>
       <header className={styles.header}>
@@ -14,7 +40,7 @@ const SignIn = () => {
           aria-label="Search for events"
         />
         <div className={styles.authButtons}>
-          <a href="/signin" className={styles.signIn}>Sign In</a>
+          <a href="/sign-in" className={styles.signIn}>Sign In</a>
           <div className={styles.signUpButton}>
             <>
               Sign Up
@@ -35,14 +61,17 @@ const SignIn = () => {
           Glad to have you back
         </p>
 
-        <form className={styles.form}>
+        <form className={styles.form} onSubmit={onSubmit}>
           <div className={styles.inputGroup}>
             <FaUser className={styles.iconUser} />
             <input
-              type="text"
-              placeholder="Email/Username/Contact"
+              type="email"
+              placeholder="Email"
               className={styles.input}
-              aria-label="Email, Username or Contact"
+              aria-label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
 
@@ -53,6 +82,9 @@ const SignIn = () => {
               placeholder="Password"
               className={styles.input}
               aria-label="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
 
@@ -60,6 +92,8 @@ const SignIn = () => {
             <input type="checkbox" />
             Remember me
           </label>
+
+          {error ? <div role="alert" style={{ marginTop: 8 }}>{error}</div> : null}
 
           <div className={styles.divider}>
             <hr />
@@ -70,7 +104,7 @@ const SignIn = () => {
             {/* Social login buttons can be added here */}
           </div>
 
-          <button type="submit" className={styles.signInButton}>Sign In</button>
+          <button type="submit" className={styles.signInButton} disabled={submitting}>{submitting ? 'Signing in...' : 'Sign In'}</button>
         </form>
       </main>
 

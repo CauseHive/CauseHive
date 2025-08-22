@@ -1,23 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import styles from './styles.module.css';
 import PaulStatamImage from '../../assets/PaulStatamImage.png';
 import Causelist_image1 from '../../assets/Causelist_image1.png';
 import Causelist_image2 from '../../assets/Causelist_image2.png';
+import apiService from '../../services/apiService';
 
 const CauseListpage = () => {
   const [timeFrame, setTimeFrame] = useState('One week');
   const [cartCount, setCartCount] = useState(2);
+  const [causes, setCauses] = useState([]);
 
-  const pendingCauses = [
-    { id: 1, image: Causelist_image1, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 2, image: Causelist_image2, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 3, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 4, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 5, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 6, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 7, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 8, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await apiService.getCausesList();
+        const results = Array.isArray(data) ? data : (data.results || []);
+        if (mounted && results.length) setCauses(results);
+      } catch (e) {
+        // Fallback to static items if API fails
+        if (mounted) setCauses([]);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  const fallbackCauses = [
+    { id: '1', image: Causelist_image1, name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+    { id: '2', image: Causelist_image2, name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+    { id: '3', name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+    { id: '4', name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+    { id: '5', name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+    { id: '6', name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+    { id: '7', name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+    { id: '8', name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
   ];
+
+  const items = (causes && causes.length ? causes : fallbackCauses);
 
   const handleIconClick = (item) => {
     console.log(`${item} clicked`);
@@ -27,6 +47,32 @@ const CauseListpage = () => {
     console.log(`Added to cart: ${id}`);
     setCartCount(cartCount + 1);
   };
+
+  const renderCard = (cause) => {
+    const title = cause.title || cause.name;
+    const desc = cause.description || '';
+    const id = cause.id;
+    const img = cause.image || (cause.cover_image ? `${apiService.baseURL}${cause.cover_image}` : null);
+    return (
+      <div key={id} className={styles.causeCard}>
+        {img ? (
+          <img src={img} alt={title} className={styles.causeImage} />
+        ) : null}
+        <button className={styles.addToCartButton} onClick={() => handleAddToCart(id)}>
+          Add to cart
+        </button>
+        <div className={styles.causeDetails}>
+          <h3 className={styles.causeTitle}>
+            <Link to={`/causes/${id}`}>{title}</Link>
+          </h3>
+          <p className={styles.causeDescription}>{desc}</p>
+        </div>
+      </div>
+    );
+  };
+
+  const left = items.slice(0, Math.ceil(items.length / 2));
+  const right = items.slice(Math.ceil(items.length / 2));
 
   return (
     <div className={styles.container}>
@@ -105,36 +151,10 @@ const CauseListpage = () => {
         <div className={styles.content}>
           <div className={styles.causeGrid}>
             <div className={styles.leftColumn}>
-              {pendingCauses.slice(0, 4).map((cause) => (
-                <div key={cause.id} className={styles.causeCard}>
-                  {cause.image ? (
-                    <img src={cause.image} alt={cause.title} className={styles.causeImage} />
-                  ) : null}
-                  <button className={styles.addToCartButton} onClick={() => handleAddToCart(cause.id)}>
-                    Add to cart
-                  </button>
-                  <div className={styles.causeDetails}>
-                    <h3 className={styles.causeTitle}>{cause.title}</h3>
-                    <p className={styles.causeDescription}>{cause.description}</p>
-                  </div>
-                </div>
-              ))}
+              {left.map(renderCard)}
             </div>
             <div className={styles.rightColumn}>
-              {pendingCauses.slice(4, 8).map((cause) => (
-                <div key={cause.id} className={styles.causeCard}>
-                  {cause.image ? (
-                    <img src={cause.image} alt={cause.title} className={styles.causeImage} />
-                  ) : null}
-                  <button className={styles.addToCartButton} onClick={() => handleAddToCart(cause.id)}>
-                    Add to cart
-                  </button>
-                  <div className={styles.causeDetails}>
-                    <h3 className={styles.causeTitle}>{cause.title}</h3>
-                    <p className={styles.causeDescription}>{cause.description}</p>
-                  </div>
-                </div>
-              ))}
+              {right.map(renderCard)}
             </div>
           </div>
         </div>
