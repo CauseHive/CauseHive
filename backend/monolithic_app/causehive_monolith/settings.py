@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 import environ
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,11 +41,14 @@ FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:5173')
 AUTH_USER_MODEL = 'users_n_auth.User'
 
 # Account settings for allauth
+# Account settings for allauth
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 EMAIL_VERIFICATION = 'optional'
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
 ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
 ACCOUNT_SESSION_REMEMBER = True

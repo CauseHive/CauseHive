@@ -137,3 +137,5 @@ if __name__ == '__main__':
     else:
         success = migrate_all_databases()
         sys.exit(0 if success else 1)
+
+print("\nDatabases: default, user_service, cause_service, donation_service, admin_service")
