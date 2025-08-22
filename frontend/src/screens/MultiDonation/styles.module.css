@@ -139,6 +139,28 @@ textarea {
   cursor: pointer;
 }
 
+.donationSummary {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.donationSummary h4 {
+  margin-top: 0;
+}
+
+.donationSummary ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.donationSummary li {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
 .donationRow {
   display: flex;
   gap: 20px;

@@ -40,23 +40,23 @@ def register_user(request):
         user = serializer.save()
 
         # Send verification email
-        # token = default_token_generator.make_token(user)
-        # uid = urlsafe_base64_encode(force_bytes(user.pk))
-        # verification_url = f"{settings.FRONTEND_URL}/verify-email/{uid}/{token}/"
-        #
-        # html_message = render_to_string('email/verification_email.html', {
-        #     'user': user,
-        #     'verification_url': verification_url
-        # })
-        # plain_message = strip_tags(html_message)
-        #
-        # send_mail(
-        #     subject='Verify your email address',
-        #     message=plain_message,
-        #     from_email=settings.DEFAULT_FROM_EMAIL,
-        #     recipient_list=[user.email],
-        #     html_message=html_message
-        # )
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        verification_url = f"{settings.FRONTEND_URL}/verify-email/{uid}/{token}/"
+
+        html_message = render_to_string('email/verification_email.html', {
+            'user': user,
+            'verification_url': verification_url
+        })
+        plain_message = strip_tags(html_message)
+
+        send_mail(
+            subject='Verify your email address',
+            message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            html_message=html_message
+        )
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

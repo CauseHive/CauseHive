@@ -52,6 +52,26 @@ class ApiService {
     });
   }
 
+  // PATCH request
+  async patch(endpoint, data) {
+    return this.request(endpoint, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // PATCH request with FormData
+  async patchWithFormData(endpoint, formData) {
+    const headers = { ...this.headers };
+    delete headers['Content-Type'];
+
+    return this.request(endpoint, {
+      method: 'PATCH',
+      headers,
+      body: formData,
+    });
+  }
+
   // PUT request
   async put(endpoint, data) {
     return this.request(endpoint, {
@@ -63,6 +83,27 @@ class ApiService {
   // DELETE request
   async delete(endpoint) {
     return this.request(endpoint, { method: 'DELETE' });
+  }
+
+  // Cart APIs
+  async getCart() {
+    return this.get('/api/cart/');
+  }
+
+  async addToCart(itemData) {
+    return this.post('/api/cart/add/', itemData);
+  }
+
+  async updateCartItem(itemId, itemData) {
+    return this.put(`/api/cart/update/${itemId}/`, itemData);
+  }
+
+  async removeFromCart(itemId) {
+    return this.delete(`/api/cart/remove/${itemId}/`);
+  }
+
+  async checkout() {
+    return this.post('/api/cart/checkout/');
   }
 
   // Donation APIs
@@ -78,13 +119,26 @@ class ApiService {
     return this.get(`/api/donations/?page=${page}`);
   }
 
+  // Payments APIs
+  async initiatePayment(paymentData) {
+    return this.post('/api/payments/initiate/', paymentData);
+  }
+
+  async verifyPayment(reference) {
+    return this.get(`/api/payments/verify/${reference}/`);
+  }
+
   // Cause APIs
   async getCauses(page = 1) {
     return this.get(`/api/causes/?page=${page}`);
   }
 
+  async getNewCauses(page = 1) {
+    return this.get(`/api/causes/list/?page=${page}`);
+  }
+
   async getCauseById(id) {
-    return this.get(`/api/causes/${id}/`);
+    return this.get(`/api/causes/details/${id}/`);
   }
 
   async createCause(causeData) {
@@ -92,6 +146,29 @@ class ApiService {
   }
 
   // User APIs
+  async getUserProfile() {
+    return this.get('/api/user/profile/');
+  }
+
+  async updateUserProfile(profileData) {
+    const formData = new FormData();
+    for (const key in profileData) {
+      if (profileData[key] !== null && profileData[key] !== undefined) {
+        // If the key is 'user', we need to handle it differently
+        if (key === 'user' && typeof profileData[key] === 'object') {
+            for (const userKey in profileData[key]) {
+                if (profileData[key][userKey] !== null && profileData[key][userKey] !== undefined) {
+                    formData.append(`user.${userKey}`, profileData[key][userKey]);
+                }
+            }
+        } else {
+            formData.append(key, profileData[key]);
+        }
+      }
+    }
+    return this.patchWithFormData('/api/user/profile/', formData);
+  }
+
   async registerUser(userData) {
     return this.post('/api/auth/register/', userData);
   }
@@ -102,6 +179,15 @@ class ApiService {
 
   async googleAuth(token) {
     return this.post('/api/auth/google/', { access_token: token });
+  }
+
+  // Organizer/Admin APIs
+  async getPendingCauses() {
+    return this.get('/api/causes/admin/causes/?status=under_review');
+  }
+
+  async updateCauseStatus(causeId, statusData) {
+    return this.patch(`/api/causes/admin/causes/${causeId}/update/`, statusData);
   }
 
   // Success Stories / Blogs APIs (if implemented)
@@ -131,6 +217,36 @@ class ApiService {
   // Newsletter subscription
   async subscribeToNewsletter(email) {
     return this.post('/api/newsletter/subscribe/', { email });
+  }
+
+  // Dashboard APIs
+  async getDashboardMetrics() {
+    return this.get('/api/admin/dashboard/metrics/');
+  }
+
+  async getAdminUsers() {
+    return this.get('/api/admin/dashboard/users/');
+  }
+
+  async getAdminDonations() {
+    return this.get('/api/admin/dashboard/donations/');
+  }
+
+  async getAdminCauses() {
+    return this.get('/api/admin/dashboard/causes/');
+  }
+
+  async getAdminPayments() {
+    return this.get('/api/admin/dashboard/payments/');
+  }
+
+  async getAdminWithdrawals() {
+    return this.get('/api/admin/dashboard/withdrawals/');
+  }
+
+  // Notifications APIs
+  async getNotifications() {
+    return this.get('/api/admin/notifications/');
   }
 }
 

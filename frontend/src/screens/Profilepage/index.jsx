@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "./styles.module.css";
 import {
   Home,
@@ -13,14 +14,49 @@ import {
   Menu,
   CheckCircle,
 } from "lucide-react";
+import apiService from "../../services/apiService";
 
 // ✅ Import your local images from assets
-import PaulStatamImage from "../../assets/PaulStatamImage.png"; 
-import Thornimage from "../../assets/Thornimage.png"; 
-import CircularFemaleImage from "../../assets/Circular_female.png"; 
+import PaulStatamImage from "../../assets/PaulStatamImage.png";
+import Thornimage from "../../assets/Thornimage.png";
+import CircularFemaleImage from "../../assets/Circular_female.png";
 
 const Profilepage = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("grid");
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const data = await apiService.getUserProfile();
+        setProfile(data);
+        setLoading(false);
+      } catch (error) {
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  if (loading) {
+    return <div className={styles.container}><p>Loading profile...</p></div>;
+  }
+
+  if (error) {
+    return <div className={styles.container}><p>Error fetching profile: {error}</p></div>;
+  }
+
+  if (!profile) {
+    return <div className={styles.container}><p>No profile found.</p></div>;
+  }
+
+  const { user } = profile;
 
   return (
     <div className={styles.container}>
@@ -58,10 +94,12 @@ const Profilepage = () => {
             className={`${styles.icon} ${activeTab === "user" ? styles.active : ""}`}
             onClick={() => setActiveTab("user")}
           />
-          <Settings
-            className={`${styles.icon} ${activeTab === "settings" ? styles.active : ""}`}
-            onClick={() => setActiveTab("settings")}
-          />
+          <Link to="/profilesettings">
+            <Settings
+              className={`${styles.icon} ${activeTab === "settings" ? styles.active : ""}`}
+              onClick={() => setActiveTab("settings")}
+            />
+          </Link>
           <Power
             className={`${styles.icon} ${activeTab === "power" ? styles.active : ""}`}
             onClick={() => setActiveTab("power")}
@@ -71,12 +109,13 @@ const Profilepage = () => {
 
       {/* Main Content */}
       <div className={styles.main}>
+        <button onClick={() => navigate(-1)} style={{marginBottom: '1rem'}}>Back</button>
         {/* Top Right User */}
         <div className={styles.topBar}>
-          <span className={styles.username}>Paul Statham</span>
+          <span className={styles.username}>{user.first_name} {user.last_name}</span>
           <img
-            src={PaulStatamImage}
-            alt="Paul Statham"
+            src={profile.profile_picture || PaulStatamImage}
+            alt={`${user.first_name} ${user.last_name}`}
             className={styles.topAvatar}
           />
         </div>
@@ -92,7 +131,7 @@ const Profilepage = () => {
         {/* Profile Avatar */}
         <div className={styles.profilePicWrapper}>
           <img
-            src={CircularFemaleImage}
+            src={profile.profile_picture || CircularFemaleImage}
             alt="Profile Avatar"
             className={styles.profilePic}
           />
@@ -103,14 +142,14 @@ const Profilepage = () => {
         <div className={styles.profileSection}>
           <div className={styles.profileBox}>
             <div className={styles.boxHeader}>
-              <b>Name</b> John Mayer
-              <span className={styles.edit}>Edit</span>
+              <b>Name</b> {user.first_name} {user.last_name}
+              <Link to="/profilesettings" className={styles.edit}>Edit</Link>
             </div>
-            <p><b>Occupation</b><br />Professional Plumber</p>
-            <p><b>Email</b><br />johnplumber@email.com</p>
-            <p><b>Interests</b><br />I love to go fishing to see things happen in the open</p>
-            <p><b>Contact</b><br />+233546091384</p>
-            <p><b>Address</b><br />PaulHam Street, NY, USA</p>
+            <p><b>Occupation</b><br />{profile.occupation || 'Not specified'}</p>
+            <p><b>Email</b><br />{user.email}</p>
+            <p><b>Interests</b><br />{profile.interests || 'Not specified'}</p>
+            <p><b>Contact</b><br />{profile.phone_number || 'Not specified'}</p>
+            <p><b>Address</b><br />{profile.address || 'Not specified'}</p>
           </div>
 
           <div className={styles.profileBox}>

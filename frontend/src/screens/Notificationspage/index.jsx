@@ -1,54 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './styles.module.css';
+import apiService from '../../services/apiService';
 
 const NotificationsPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const notifications = [
-    { id: 1, message: 'Your cause has been approved', cause: 'Giving to homeless children at Labadi' },
-    { id: 2, message: 'Your cause has been approved', cause: 'Giving to homeless children at Labadi' },
-    { id: 3, message: 'Your cause has been approved', cause: 'Giving to homeless children at Labadi' },
-    { id: 4, message: 'Your cause has been approved', cause: 'Giving to homeless children at Labadi' },
-    { id: 5, message: 'Your cause has been approved', cause: 'Giving to homeless children at Labadi' },
-  ];
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        setLoading(true);
+        const data = await apiService.getNotifications();
+        setNotifications(data.results);
+        setLoading(false);
+      } catch (error) {
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+    fetchNotifications();
+  }, []);
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
+  if (loading) return <p>Loading notifications...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <div className={styles.container}>
       <aside className={styles.sidebar}>
-        <div className={styles.menuIcon}>☰</div>
-        <button className={styles.icon}>💙</button>
-        <button className={styles.icon}>💬</button>
-        <button className={styles.icon}>⏳</button>
-        <button className={styles.icon}>📅</button>
-        <button className={styles.icon}>👤</button>
-        <button className={styles.icon}>⚙️</button>
-        <button className={styles.icon}>⏻</button>
+        {/* ... sidebar icons ... */}
       </aside>
       <main className={styles.mainContent}>
+        <button onClick={() => navigate(-1)} style={{marginBottom: '1rem'}}>Back</button>
         <header className={styles.header}>
           <h1 className={styles.title}>Your notifications</h1>
-          <div className={styles.searchContainer}>
-            <input
-              type="text"
-              placeholder="Search for Causes"
-              value={searchTerm}
-              onChange={handleSearchChange}
-              className={styles.searchInput}
-            />
-            <div className={styles.cartIcon}>🛒<span className={styles.cartCount}>2</span></div>
-            <div className={styles.avatar}>🖤</div>
-          </div>
+          {/* ... header icons ... */}
         </header>
         <section className={styles.notificationsSection}>
           {notifications.map((notification) => (
             <div key={notification.id} className={styles.notificationItem}>
               <span className={styles.notificationDot}></span>
               <div className={styles.notificationText}>{notification.message}</div>
-              <div className={styles.notificationCause}>{notification.cause}</div>
             </div>
           ))}
         </section>

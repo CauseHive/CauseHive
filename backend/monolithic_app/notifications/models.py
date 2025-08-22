@@ -7,6 +7,8 @@ class AdminNotification(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     NOTIF_TYP_CHOICES = [
         ('cause_pending', 'Cause Pending'),
+        ('cause_approved', 'Cause Approved'),
+        ('cause_rejected', 'Cause Rejected'),
     ]
     notif_type = models.CharField(max_length=50, choices=NOTIF_TYP_CHOICES)
     entity_id = models.CharField(max_length=100, default='')

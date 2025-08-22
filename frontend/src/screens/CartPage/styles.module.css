@@ -320,3 +320,17 @@
   .cardMeta{ flex-wrap:wrap; gap:10px; }
   .amountBox{ min-width:112px; }
 }
+
+.removeBtn {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.removeBtn:hover {
+  background-color: #d32f2f;
+}

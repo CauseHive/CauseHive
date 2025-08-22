@@ -1,23 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './styles.module.css';
 import PaulStatamImage from '../../assets/PaulStatamImage.png';
 import Causelist_image1 from '../../assets/Causelist_image1.png';
 import Causelist_image2 from '../../assets/Causelist_image2.png';
+import apiService from '../../services/apiService';
 
 const CauseListpage = () => {
+  const navigate = useNavigate();
   const [timeFrame, setTimeFrame] = useState('One week');
   const [cartCount, setCartCount] = useState(2);
+  const [causes, setCauses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const pendingCauses = [
-    { id: 1, image: Causelist_image1, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 2, image: Causelist_image2, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 3, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 4, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 5, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 6, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 7, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 8, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-  ];
+  useEffect(() => {
+    const fetchCauses = async () => {
+      try {
+        setLoading(true);
+        const data = await apiService.getNewCauses();
+        setCauses(data.results || []);
+        setLoading(false);
+      } catch (error) {
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+
+    fetchCauses();
+  }, []);
 
   const handleIconClick = (item) => {
     console.log(`${item} clicked`);
@@ -75,6 +86,7 @@ const CauseListpage = () => {
         </a>
       </aside>
       <main className={styles.main}>
+        <button onClick={() => navigate(-1)} style={{marginBottom: '1rem'}}>Back</button>
         <header className={styles.header}>
           <div className={styles.headerContent}>
             <h1 className={styles.title}>Causes</h1>
@@ -93,50 +105,58 @@ const CauseListpage = () => {
             </div>
           </div>
           <div className={styles.headerControls}>
-            <div className={styles.cart}>
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="#666" className={styles.cartIcon}>
-                <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-0.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-0.16 0.28-0.25 0.61-0.25 0.96 0 1.1 0.9 2 2 2h10v-2H7.42c-0.14 0-0.25-0.11-0.25-0.25l0.03-0.12 0.9-1.63h7.45c0.75 0 1.41-0.41 1.75-1.03l3.58-6.49c0.08-0.14 0.12-0.31 0.12-0.48 0-0.41-0.33-0.75-0.75-0.75H5.21l-0.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s0.89 2 1.99 2 2-0.9 2-2-0.9-2-2-2z" />
-              </svg>
-              <span className={styles.cartCount}>{cartCount}</span>
-            </div>
-            <img src={PaulStatamImage} alt="Profile" className={styles.profileIcon} />
+            <Link to="#">
+              <div className={styles.cart}>
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="#666" className={styles.cartIcon}>
+                  <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-0.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-0.16 0.28-0.25 0.61-0.25 0.96 0 1.1 0.9 2 2 2h10v-2H7.42c-0.14 0-0.25-0.11-0.25-0.25l0.03-0.12 0.9-1.63h7.45c0.75 0 1.41-0.41 1.75-1.03l3.58-6.49c0.08-0.14 0.12-0.31 0.12-0.48 0-0.41-0.33-0.75-0.75-0.75H5.21l-0.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s0.89 2 1.99 2 2-0.9 2-2-0.9-2-2-2z" />
+                </svg>
+                <span className={styles.cartCount}>{cartCount}</span>
+              </div>
+            </Link>
+            <Link to="/profilepage">
+              <img src={PaulStatamImage} alt="Profile" className={styles.profileIcon} />
+            </Link>
           </div>
         </header>
         <div className={styles.content}>
-          <div className={styles.causeGrid}>
-            <div className={styles.leftColumn}>
-              {pendingCauses.slice(0, 4).map((cause) => (
-                <div key={cause.id} className={styles.causeCard}>
-                  {cause.image ? (
-                    <img src={cause.image} alt={cause.title} className={styles.causeImage} />
-                  ) : null}
-                  <button className={styles.addToCartButton} onClick={() => handleAddToCart(cause.id)}>
-                    Add to cart
-                  </button>
-                  <div className={styles.causeDetails}>
-                    <h3 className={styles.causeTitle}>{cause.title}</h3>
-                    <p className={styles.causeDescription}>{cause.description}</p>
-                  </div>
-                </div>
-              ))}
+          {loading && <p>Loading causes...</p>}
+          {error && <p>Error fetching causes: {error}</p>}
+          {!loading && !error && (
+            <div className={styles.causeGrid}>
+              <div className={styles.leftColumn}>
+                {causes.slice(0, Math.ceil(causes.length / 2)).map((cause) => (
+                  <Link to={`/causedetailpage/${cause.id}`} key={cause.id} className={styles.causeCardLink}>
+                    <div className={styles.causeCard}>
+                      <img src={cause.image || Causelist_image1} alt={cause.title} className={styles.causeImage} />
+                      <button className={styles.addToCartButton} onClick={(e) => { e.preventDefault(); handleAddToCart(cause.id); }}>
+                        Add to cart
+                      </button>
+                      <div className={styles.causeDetails}>
+                        <h3 className={styles.causeTitle}>{cause.title}</h3>
+                        <p className={styles.causeDescription}>{cause.description}</p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              <div className={styles.rightColumn}>
+                {causes.slice(Math.ceil(causes.length / 2)).map((cause) => (
+                  <Link to={`/causedetailpage/${cause.id}`} key={cause.id} className={styles.causeCardLink}>
+                    <div className={styles.causeCard}>
+                      <img src={cause.image || Causelist_image2} alt={cause.title} className={styles.causeImage} />
+                      <button className={styles.addToCartButton} onClick={(e) => { e.preventDefault(); handleAddToCart(cause.id); }}>
+                        Add to cart
+                      </button>
+                      <div className={styles.causeDetails}>
+                        <h3 className={styles.causeTitle}>{cause.title}</h3>
+                        <p className={styles.causeDescription}>{cause.description}</p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
-            <div className={styles.rightColumn}>
-              {pendingCauses.slice(4, 8).map((cause) => (
-                <div key={cause.id} className={styles.causeCard}>
-                  {cause.image ? (
-                    <img src={cause.image} alt={cause.title} className={styles.causeImage} />
-                  ) : null}
-                  <button className={styles.addToCartButton} onClick={() => handleAddToCart(cause.id)}>
-                    Add to cart
-                  </button>
-                  <div className={styles.causeDetails}>
-                    <h3 className={styles.causeTitle}>{cause.title}</h3>
-                    <p className={styles.causeDescription}>{cause.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
         </div>
       </main>
     </div>

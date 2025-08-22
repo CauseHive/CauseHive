@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from .models import Causes
 from .permissions import IsAdminService
 from .serializers import CausesSerializer
+from notifications.models import AdminNotification
 
 
 # Create your views here.
@@ -50,12 +51,19 @@ class AdminCauseUpdateView(generics.UpdateAPIView):
     def perform_update(self, serializer):
         instance = serializer.save()
         if instance.status == 'rejected' and instance.rejection_reason:
-            # Send notification to the organizer
-            pass
+            AdminNotification.objects.create(
+                notif_type='cause_rejected',
+                entity_id=str(instance.id),
+                message=f"Your cause '{instance.title}' was rejected. Reason: {instance.rejection_reason}"
+            )
         if instance.status == 'approved':
             instance.status = 'ongoing'
             instance.save()
-            # Send notification to the organizer about approval
+            AdminNotification.objects.create(
+                notif_type='cause_approved',
+                entity_id=str(instance.id),
+                message=f"Your cause '{instance.title}' has been approved and is now ongoing."
+            )
 
 class AdminCauseApproveView(generics.UpdateAPIView):
     permission_classes = [IsAdminService]

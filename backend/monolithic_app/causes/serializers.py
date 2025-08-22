@@ -7,8 +7,11 @@ from categories.models import Category
 from .utils import validate_organizer_id_with_service
 
 
+from django.conf import settings
+
 class CausesSerializer(serializers.ModelSerializer):
-    organizer_id = serializers.UUIDField(required=True) # You were the problem.
+    organizer_name = serializers.SerializerMethodField()
+    organizer_id = serializers.UUIDField(required=True)
     category = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(), required=False, allow_null=True
     )
@@ -17,6 +20,17 @@ class CausesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Causes
         fields = '__all__'
+
+    def get_organizer_name(self, obj):
+        user_service_url = f"{settings.USER_SERVICE_URL}/users/{obj.organizer_id}/"
+        try:
+            response = requests.get(user_service_url)
+            if response.status_code == 200:
+                user_data = response.json()
+                return f"{user_data.get('first_name', '')} {user_data.get('last_name', '')}".strip()
+        except requests.RequestException:
+            pass
+        return "Unknown Organizer"
 
     def validate_organizer_id(self, value):
         try:

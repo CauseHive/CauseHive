@@ -30,7 +30,7 @@ function App() {
         <Route path="/landingpage" element={<LandingPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/sign-in" element={<SignIn />} />
-        <Route path="/donation" element={<Donation />} />
+        <Route path="/donation/:causeId" element={<Donation />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/donationhistory" element={<DonationHistory />} />
          <Route path="/profilepage" element={<Profilepage />} />
@@ -40,7 +40,7 @@ function App() {
          <Route path="/notificationspage" element={<Notificationspage />} />
           <Route path="/desktoppage" element={<Desktoppage />} />
           <Route path="/admindashboard" element={<AdminDashboard />} />
-          <Route path="/causedetailpage" element={<CausedetailPage />} />
+          <Route path="/causedetailpage/:id" element={<CausedetailPage />} />
           <Route path="/causereviewpage" element={<CauseReviewPage />} />
           <Route path="/organizerprofilepage" element={<OrganizerProfilePage />} />
           <Route path="/organizersignuppage" element={<OrganizerSignUpPage />} />

@@ -120,42 +120,6 @@ def add_to_cart(request):
         }, status=status.HTTP_201_CREATED)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    # serializer = CartItemSerializer(data=request.data)
-    # if serializer.is_valid():
-    #     if is_authenticated(request):
-    #         validate_user_id_with_service(request.user_id, request)
-    #         user_id = request.user_id
-    #     else:
-    #         user_id = None # Anonymous donor
-    #
-    #     validate_cause_with_service(serializer.validated_data['cause_id'], request)
-    #
-    #     try:
-    #         cart, created = get_or_create_user_cart(user_id)
-    #     except Cart.DoesNotExist:
-    #          # Create a new cart if it doesn't exist
-    #         cart = create_user_cart(user_id)
-    #
-    #     existing_item = CartItem.objects.filter(
-    #         cart=cart,
-    #         cause_id=serializer.validated_data['cause_id']
-    #     ).first()
-    #
-    #     if existing_item:
-    #         existing_item.quantity += serializer.validated_data.get('quantity', 1)
-    #         existing_item.donation_amount = serializer.validated_data['donation_amount']
-    #         existing_item.save()
-    #         return Response(CartItemSerializer(existing_item).data, status=status.HTTP_200_OK)
-    #     else:
-    #         cart_item = CartItem.objects.create(
-    #             cart=cart,
-    #             cause_id=serializer.validated_data['cause_id'],
-    #             quantity=serializer.validated_data.get('quantity', 1),
-    #             donation_amount=serializer.validated_data['donation_amount']
-    #         )
-    #         return Response(CartItemSerializer(cart_item).data, status=status.HTTP_201_CREATED)
-    #
-    # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['PATCH'])
 @permission_classes([AllowAny])
@@ -180,22 +144,6 @@ def update_cart_item(request, item_id):
     cart_item.save()
     return Response({"message": "Cart item updated"}, status=status.HTTP_200_OK)
 
-    # if is_authenticated(request):
-    #     validate_user_id_with_service(request.user_id, request)
-    #     cart_item = get_object_or_404(CartItem, id=item_id, cart__user_id=request.user_id)
-    # else:
-    #     cart_item = get_object_or_404(CartItem, id=item_id, cart__user_id=None)
-    #
-    # quantity = request.data.get('quantity', cart_item.quantity)
-    #
-    # if quantity <= 0:
-    #     cart_item.delete()
-    #     return Response({"message": "Item removed from cart"}, status=status.HTTP_204_NO_CONTENT)
-    #
-    # cart_item.quantity = quantity
-    # cart_item.save()
-    # return Response({"message": "Cart item updated"}, status=status.HTTP_200_OK)
-
 @api_view(['DELETE'])
 @permission_classes([AllowAny])
 @extract_user_from_token
@@ -211,14 +159,6 @@ def remove_from_cart(request, item_id):
         return Response({"error": "cart_id is required for anonymous users"}, status=status.HTTP_400_BAD_REQUEST)
     cart_item.delete()
     return Response({"message": "Item removed from cart"}, status=status.HTTP_204_NO_CONTENT)
-
-    # if is_authenticated(request):
-    #     validate_user_id_with_service(request.user_id, request)
-    #     cart_item = get_object_or_404(CartItem, id=item_id, cart__user_id=request.user_id)
-    # else:
-    #     cart_item = get_object_or_404(CartItem, id=item_id, cart__user_id=None)
-    # cart_item.delete()
-    # return Response({"message": "Item removed from cart"}, status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['DELETE'])
 @permission_classes([AllowAny])
@@ -242,21 +182,6 @@ def delete_cart(request):
     cart.items.all().delete()
     cart.delete()
     return Response({"message": "Cart deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
-
-    # if is_authenticated(request):
-    #     try:
-    #         cart, created = get_or_create_user_cart(request.user_id)
-    #
-    #         # Delete items in the cart
-    #         cart.items.all().delete()
-    #         # Delete the cart itself
-    #         cart.delete()
-    #
-    #         return Response({"message": "Cart deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
-    #     except Cart.DoesNotExist:
-    #         return Response({"message": "No active cart found"}, status=status.HTTP_404_NOT_FOUND)
-    # else:
-    #     return Response({"message": "You have no cart"}, status=HTTP_400_BAD_REQUEST)
 
 
 

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./styles.module.css";
 import {
   Bell,
@@ -13,64 +14,44 @@ import {
   LogOut,
   Search,
 } from "lucide-react";
+import apiService from "../../services/apiService";
 
 const Dashboard = () => {
+    const navigate = useNavigate();
+    const [metrics, setMetrics] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchMetrics = async () => {
+            try {
+                setLoading(true);
+                const data = await apiService.getDashboardMetrics();
+                setMetrics(data);
+                setLoading(false);
+            } catch (error) {
+                setError(error.message);
+                setLoading(false);
+            }
+        };
+        fetchMetrics();
+    }, []);
+
+    if (loading) return <p>Loading dashboard...</p>;
+    if (error) return <p>Error: {error}</p>;
+
   return (
      <div className={styles.container}>
-      {/* Sidebar */}
       <aside className={styles.sidebar}>
-        <div className={styles.sidebarTop}>
-          <button className={styles.menuBtn} aria-label="Menu">☰</button>
-        </div>
-        <nav className={styles.nav} aria-label="Main">
-          <button className={styles.navItem} aria-label="Dashboard"><Grid /></button>
-          <button className={styles.navItem} aria-label="Favorites"><Heart /></button>
-          <button className={styles.navItem} aria-label="Messages"><MessageSquare /></button>
-          <button className={styles.navItem} aria-label="Layers"><Layers /></button>
-          <button className={styles.navItem} aria-label="Calendar"><Calendar /></button>
-        </nav>
-        <div className={styles.sidebarBottom}>
-          <button className={styles.navItem} aria-label="Profile"><User /></button>
-          <button className={styles.navItem} aria-label="Settings"><Settings /></button>
-          <button className={styles.navItem} aria-label="Logout"><LogOut /></button>
-        </div>
+        {/* ... sidebar ... */}
       </aside>
 
-      {/* Main Content */}
       <main className={styles.main}>
-        {/* HEADER (Top row): Search + Bell + Profile */}
+        <button onClick={() => navigate(-1)} style={{marginBottom: '1rem'}}>Back</button>
         <header className={styles.header}>
-          <div className={styles.searchContainer}>
-            <Search className={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Search"
-              className={styles.searchInput}
-              aria-label="Search"
-            />
-          </div>
-
-          <div className={styles.headerRight}>
-            <div className={styles.iconWrapper} aria-label="Notifications">
-              <Bell />
-              <span className={styles.badge}>9</span>
-            </div>
-
-            <div className={styles.profile}>
-              <img
-                src="https://i.pravatar.cc/40"
-                alt="Moni Roy"
-                className={styles.avatar}
-              />
-              <div className={styles.profileInfo}>
-                <p className={styles.profileName}>Moni Roy</p>
-                <p className={styles.profileRole}>Admin</p>
-              </div>
-            </div>
-          </div>
+            {/* ... header ... */}
         </header>
 
-        {/* Second row: Dashboard (left) + Cart (right) */}
         <div className={styles.topBar}>
           <h2 className={styles.title}>
             Dashboard <User className={styles.userIcon} />
@@ -81,15 +62,14 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Dashboard Content */}
         <section className={styles.topSection}>
           <div className={styles.welcomeBox}>Welcome, User.</div>
           <div className={styles.causesBox}>
             <h4>Your Causes</h4>
             <div className={styles.causesCards}>
-              <div className={styles.causeCard}></div>
-              <div className={styles.causeCard}></div>
-              <div className={styles.causeCard}></div>
+              {metrics && metrics.causes_list.slice(0, 3).map(cause => (
+                <div key={cause.id} className={styles.causeCard}>{cause.title}</div>
+              ))}
             </div>
           </div>
         </section>
@@ -97,9 +77,12 @@ const Dashboard = () => {
         <section className={styles.recentDonations}>
           <h3>Your recent donations</h3>
           <div className={styles.donationsRow}>
-            <div className={styles.donationCard}></div>
-            <div className={styles.donationCard}></div>
-            <div className={styles.donationCard}></div>
+            {metrics && metrics.donation_list.slice(0, 3).map(donation => (
+                <div key={donation.id} className={styles.donationCard}>
+                    <p>{donation.cause?.title || 'Cause'}</p>
+                    <p>GHS {donation.amount}</p>
+                </div>
+            ))}
           </div>
         </section>
 
@@ -122,18 +105,19 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className={styles.tableCause}>
-                  <span className={styles.causeIcon}>⌂</span>
-                  Apple Watch
-                </td>
-                <td>6096 Marjolaine Landing</td>
-                <td>12.09.2019 - 12.53 PM</td>
-                <td>Healthcare</td>
-                <td>$34,295</td>
-                <td><span className={styles.status}>Ongoing</span></td>
-              </tr>
-              {/* add more rows as needed */}
+              {metrics && metrics.causes_list.map(cause => (
+                <tr key={cause.id}>
+                    <td className={styles.tableCause}>
+                        <span className={styles.causeIcon}>⌂</span>
+                        {cause.title}
+                    </td>
+                    <td>{cause.location || 'N/A'}</td>
+                    <td>{new Date(cause.created_at).toLocaleString()}</td>
+                    <td>{cause.category?.name || 'N/A'}</td>
+                    <td>{cause.current_amount}</td>
+                    <td><span className={styles.status}>{cause.status}</span></td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </section>
