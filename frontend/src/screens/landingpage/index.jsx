@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import styles from './styles.module.css';
 import NewHeroImage1 from './assets/New_Hero_Section_Image1.png';
 import HeroImage2 from './assets/Hero_Section_Image2.png';
@@ -19,18 +20,18 @@ const LandingPage = () => {
       <nav className={styles.navbar}>
         <div className={styles.navbarLeft}>CauseHive.</div>
         <div className={styles.navbarRight}>
-          <a href="#" className={styles.navLink}>Home</a>
-          <a href="#" className={styles.navLink}>
+          <Link to="/" className={styles.navLink}>Home</Link>
+          <Link to="/causelistpage" className={styles.navLink}>
             Services
             <i className={styles.dropdownArrow}></i>
-          </a>
-          <a href="#" className={styles.navLink}>
+          </Link>
+          <Link to="/signup" className={styles.navLink}>
             Join us
             <i className={styles.dropdownArrow}></i>
-          </a>
-          <a href="#" className={styles.navLink}>Contact us</a>
-          <a href="#" className={styles.loginLink}>Log in</a>
-          <button className={styles.donateButton}>Donate</button>
+          </Link>
+          <Link to="#" className={styles.navLink}>Contact us</Link>
+          <Link to="/sign-in" className={styles.loginLink}>Log in</Link>
+          <Link to="/causelistpage" className={styles.donateBtn}>Donate</Link>
         </div>
       </nav>
 
@@ -40,8 +41,8 @@ const LandingPage = () => {
             Seeking Financial Aid for Medical Emergencies or Social Causes?
           </h1>
           <div className={styles.heroButtons}>
-            <a href="/request-donation" className={styles.requestDonationButton} role="button">REQUEST DONATION</a>
-            <a href="/donate-and-help" className={styles.donateAndHelpButton} role="button">DONATE AND HELP</a>
+            <Link to="/causes/create" className={styles.requestDonationButton} role="button">REQUEST DONATION</Link>
+            <Link to="/causelistpage" className={styles.donateAndHelpButton} role="button">DONATE AND HELP</Link>
           </div>
           <h2 className={styles.changeLivesHeading}>Change lives and communities</h2>
         </div>
@@ -64,27 +65,27 @@ const LandingPage = () => {
               <img src={Section3Image1} alt="Create a cause" className={styles.serviceIcon} />
             </div>
             <div className={styles.serviceTitle}>Create a cause</div>
-            <a href="#" className={styles.serviceLink}>
+            <Link to="/causes/create" className={styles.serviceLink}>
               Create Cause <i className={styles.serviceLinkArrow}></i>
-            </a>
+            </Link>
           </div>
           <div className={styles.serviceCard}>
             <div className={`${styles.serviceIconContainer} ${styles.serviceIcon2}`}>
               <img src={Section3Image2} alt="Donate to causes" className={styles.serviceIcon} />
             </div>
             <div className={styles.serviceTitle}>Donate to causes</div>
-            <a href="#" className={styles.serviceLink}>
+            <Link to="/causelistpage" className={styles.serviceLink}>
               Donate <i className={styles.serviceLinkArrow}></i>
-            </a>
+            </Link>
           </div>
           <div className={styles.serviceCard}>
             <div className={`${styles.serviceIconContainer} ${styles.serviceIcon3}`}>
               <img src={Section3Image3} alt="Give us your feedback" className={styles.serviceIcon} />
             </div>
             <div className={styles.serviceTitle}>Give us your feedback</div>
-            <a href="#" className={styles.serviceLink}>
+            <Link to="/profilesettings" className={styles.serviceLink}>
               Feedback <i className={styles.serviceLinkArrow}></i>
-            </a>
+            </Link>
           </div>
         </div>
       </section>

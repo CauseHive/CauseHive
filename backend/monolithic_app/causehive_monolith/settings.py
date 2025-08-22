@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 import environ
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,10 +32,10 @@ ADMIN_SERVICE_API_KEY = env('ADMIN_SERVICE_API_KEY', default='admin-api-key')
 DEBUG = env.bool('DEBUG', default=False)
 
 # Railway deployment settings
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost', '*.railway.app'])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost', '*.railway.app', 'causehive.tech', 'www.causehive.tech'])
 
 # Frontend and external URLs
-FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:5173')
+FRONTEND_URL = env('FRONTEND_URL', default='https://causehive.tech')
 
 # User and authentication settings
 AUTH_USER_MODEL = 'users_n_auth.User'
@@ -120,8 +121,8 @@ LOCAL_APPS = [
     'management',
 ]
 
-INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
-
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS + ['channels',]
+ASGI_APPLICATION = 'causehive_monolith.asgi.application'
 # Django sites framework
 SITE_ID = 1
 
@@ -161,23 +162,26 @@ WSGI_APPLICATION = 'causehive_monolith.wsgi.application'
 
 # Database configuration with connection strings
 DATABASES = {
-    'default': {},
-    'user_service': dj_database_url.parse(
+    # Default -> user service
+    'default': dj_database_url.parse(
         env('USER_SERVICE_DATABASE_URL', default='postgresql://user:pass@localhost:5432/user_db'),
         conn_max_age=600,
         conn_health_checks=True,
     ),
-    'cause_service': dj_database_url.parse(
+    # Causes
+    'causes_db': dj_database_url.parse(
         env('CAUSE_SERVICE_DATABASE_URL', default='postgresql://user:pass@localhost:5432/cause_db'),
         conn_max_age=600,
         conn_health_checks=True,
     ),
-    'donation_service': dj_database_url.parse(
+    # Donations
+    'donations_db': dj_database_url.parse(
         env('DONATION_SERVICE_DATABASE_URL', default='postgresql://user:pass@localhost:5432/donation_db'),
         conn_max_age=600,
         conn_health_checks=True,
     ),
-    'admin_service': dj_database_url.parse(
+    # Admin
+    'admin_db': dj_database_url.parse(
         env('ADMIN_SERVICE_DATABASE_URL', default='postgresql://user:pass@localhost:5432/admin_db'),
         conn_max_age=600,
         conn_health_checks=True,
@@ -259,10 +263,18 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://www.causehive.tech",
+    "https://causehive.tech",
 ]
 
 # CORS settings for Railway deployment
 CORS_ALLOW_CREDENTIALS = True
+
+# CSRF trusted origins (include production domain)
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
+    'https://www.causehive.tech',
+    'https://causehive.tech',
+])
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

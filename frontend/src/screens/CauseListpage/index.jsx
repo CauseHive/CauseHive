@@ -1,142 +1,181 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './styles.module.css';
 import PaulStatamImage from '../../assets/PaulStatamImage.png';
 import Causelist_image1 from '../../assets/Causelist_image1.png';
 import Causelist_image2 from '../../assets/Causelist_image2.png';
+import apiService from '../../services/apiService';
+import SidebarNav from '../../components/SidebarNav';
+import { useToast } from '../../components/Toast/ToastProvider';
 
 const CauseListpage = () => {
-  const [timeFrame, setTimeFrame] = useState('One week');
+  const navigate = useNavigate();
+  const toast = useToast();
   const [cartCount, setCartCount] = useState(2);
+  const [causes, setCauses] = useState([]);
+  const [page, setPage] = useState(1);
+  const [sortBy, setSortBy] = useState('Date created');
+  const [sortOpen, setSortOpen] = useState(false);
+  const [search, setSearch] = useState('');
 
-  const pendingCauses = [
-    { id: 1, image: Causelist_image1, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 2, image: Causelist_image2, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 3, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 4, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 5, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 6, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 7, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
-    { id: 8, title: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await apiService.getCausesList(page);
+        const results = Array.isArray(data) ? data : (data.results || []);
+        if (mounted) setCauses(results || []);
+      } catch (e) {
+        if (mounted) setCauses([]);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [page]);
+
+  const fallbackCauses = [
+    { id: '1', image: Causelist_image1, name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+    { id: '2', image: Causelist_image2, name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+    { id: '3', name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+    { id: '4', name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+    { id: '5', name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+    { id: '6', name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+    { id: '7', name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
+    { id: '8', name: 'Donation for riverside chat in Nuevo', description: 'Seeking to support indigenous locals l...' },
   ];
 
-  const handleIconClick = (item) => {
-    console.log(`${item} clicked`);
+  const itemsRaw = (causes && causes.length ? causes : fallbackCauses);
+
+  const items = useMemo(() => {
+    const arr = [...itemsRaw];
+    // basic text filter by name/description
+    const filtered = search
+      ? arr.filter(c => (c.name || c.title || '').toLowerCase().includes(search.toLowerCase()) || (c.description || '').toLowerCase().includes(search.toLowerCase()))
+      : arr;
+    switch (sortBy) {
+      case 'Category':
+        return filtered.sort((a,b) => String(a.category || '').localeCompare(String(b.category || '')));
+      case 'Popularity':
+        return filtered.sort((a,b) => Number(b.current_amount || 0) - Number(a.current_amount || 0));
+      case 'Amount':
+      case 'Goal amount':
+        return filtered.sort((a,b) => Number(b.target_amount || 0) - Number(a.target_amount || 0));
+      case 'Created by':
+      case 'Created by ': // safety
+        return filtered.sort((a,b) => String(a.organizer_id || '').localeCompare(String(b.organizer_id || '')));
+      case 'Date created':
+      default:
+        return filtered.sort((a,b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+    }
+  }, [itemsRaw, sortBy, search]);
+
+ 
+
+  const handleAddToCart = async (id) => {
+    try {
+      const result = await apiService.addToCart({ cause_id: id, donation_amount: 10, quantity: 1 });
+      if (result && result.item) {
+        setCartCount((c) => c + 1);
+        toast.success('Added to cart');
+      } else {
+        toast.error('Unable to add to cart');
+      }
+    } catch (e) {
+      console.error('Failed to add to cart', e);
+      toast.error('Failed to add to cart');
+    }
   };
 
-  const handleAddToCart = (id) => {
-    console.log(`Added to cart: ${id}`);
-    setCartCount(cartCount + 1);
+  const renderCard = (cause) => {
+    const title = cause.title || cause.name;
+    const desc = cause.description || '';
+    const id = cause.id;
+    const img = cause.image || (cause.cover_image ? `${apiService.baseURL}${cause.cover_image}` : null);
+    return (
+      <div key={id} className={styles.causeCard}>
+        <div className={styles.causeImageWrap}>
+          {img ? (
+            <img src={img} alt={title} className={styles.causeImage} />
+          ) : null}
+        </div>
+        <div className={styles.causeDetails}>
+          <h3 className={styles.causeTitle} title={title}>
+            <Link to={`/causes/${id}`}>{title}</Link>
+          </h3>
+          <p className={styles.causeDescription}>{desc}</p>
+          <div className={styles.cardActions}>
+            <button className={styles.addToCartButton} onClick={() => handleAddToCart(id)}>
+              Add to cart
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
+
+  const left = items.slice(0, Math.ceil(items.length / 2));
+  const right = items.slice(Math.ceil(items.length / 2));
 
   return (
     <div className={styles.container}>
-      <aside className={styles.sidebar}>
-        <a href="#" onClick={() => handleIconClick('Menu')} className={styles.icon}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#666">
-            <rect y="6" width="24" height="2" rx="1" />
-            <rect y="11" width="24" height="2" rx="1" />
-            <rect y="16" width="24" height="2" rx="1" />
-          </svg>
-        </a>
-        <a href="#" onClick={() => handleIconClick('UI Elements')} className={styles.icon}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#666">
-            <path d="M3 13h8v8H3zm0-10h8v8H3zm10 0h8v8h-8zm0 10h8v8h-8z" />
-          </svg>
-        </a>
-        <a href="#" onClick={() => handleIconClick('Favorites')} className={styles.icon}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#666">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-          </svg>
-        </a>
-        <a href="#" onClick={() => handleIconClick('File Manager')} className={styles.icon}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#666">
-            <path d="M6 2c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6H6zm7 7V3.5L18.5 9H13z" />
-          </svg>
-        </a>
-        <a href="#" onClick={() => handleIconClick('Calender')} className={styles.icon}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#666">
-            <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V8h14v12z" />
-          </svg>
-        </a>
-        <a href="#" onClick={() => handleIconClick('Profile')} className={styles.icon}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#666">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-          </svg>
-        </a>
-        <a href="#" onClick={() => handleIconClick('Settings')} className={styles.icon}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#666">
-            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.47-.12-.61l-2.03-1.58zm-5.14 1.06c-1.6 0-2.9-1.3-2.9-2.9s1.3-2.9 2.9-2.9 2.9 1.3 2.9 2.9-1.3 2.9-2.9 2.9z" />
-          </svg>
-        </a>
-        <a href="#" onClick={() => handleIconClick('Logout')} className={styles.icon}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="#666">
-            <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
-          </svg>
-        </a>
-      </aside>
+      <SidebarNav />
       <main className={styles.main}>
         <header className={styles.header}>
           <div className={styles.headerContent}>
             <h1 className={styles.title}>Causes</h1>
-            <div className={styles.filter}>
-              <input type="text" placeholder="Filter by" className={styles.filterInput} />
+            <input
+              type="text"
+              className={styles.searchField}
+              placeholder="Search causes"
+              value={search}
+              onChange={(e)=> setSearch(e.target.value)}
+              aria-label="Search causes"
+            />
+            <div className={styles.filter} role="button" tabIndex={0} onClick={()=> setSortOpen(v=>!v)} onKeyDown={(e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); setSortOpen(v=>!v);} }} aria-haspopup="menu" aria-expanded={sortOpen}>
+              <input
+                type="text"
+                placeholder={"Sort: " + sortBy}
+                className={styles.filterInput}
+                readOnly
+                aria-readonly
+              />
               <svg width="10" height="6" viewBox="0 0 10 6" fill="#666" className={styles.dropdownIcon}>
                 <path d="M0 0l5 6 5-6z" />
               </svg>
-              <div className={styles.dropdown}>
-                <div>Date created</div>
-                <div>Popularity</div>
-                <div>Created by</div>
-                <div>Category</div>
-                <div>Goal amount</div>
-              </div>
+              {sortOpen && (
+                <div className={styles.dropdown} role="menu">
+                  <button className={styles.dropdownItem} onClick={(e)=>{ e.stopPropagation(); setSortBy('Date created'); setSortOpen(false); }}>Date created</button>
+                  <button className={styles.dropdownItem} onClick={(e)=>{ e.stopPropagation(); setSortBy('Popularity'); setSortOpen(false); }}>Popularity</button>
+                  <button className={styles.dropdownItem} onClick={(e)=>{ e.stopPropagation(); setSortBy('Created by'); setSortOpen(false); }}>Created by</button>
+                  <button className={styles.dropdownItem} onClick={(e)=>{ e.stopPropagation(); setSortBy('Category'); setSortOpen(false); }}>Category</button>
+                  <button className={styles.dropdownItem} onClick={(e)=>{ e.stopPropagation(); setSortBy('Goal amount'); setSortOpen(false); }}>Goal amount</button>
+                </div>
+              )}
             </div>
           </div>
           <div className={styles.headerControls}>
-            <div className={styles.cart}>
+            <div className={styles.cart} onClick={()=>navigate('/cartpage')}>
               <svg width="40" height="40" viewBox="0 0 24 24" fill="#666" className={styles.cartIcon}>
                 <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-0.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-0.16 0.28-0.25 0.61-0.25 0.96 0 1.1 0.9 2 2 2h10v-2H7.42c-0.14 0-0.25-0.11-0.25-0.25l0.03-0.12 0.9-1.63h7.45c0.75 0 1.41-0.41 1.75-1.03l3.58-6.49c0.08-0.14 0.12-0.31 0.12-0.48 0-0.41-0.33-0.75-0.75-0.75H5.21l-0.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s0.89 2 1.99 2 2-0.9 2-2-0.9-2-2-2z" />
               </svg>
               <span className={styles.cartCount}>{cartCount}</span>
             </div>
-            <img src={PaulStatamImage} alt="Profile" className={styles.profileIcon} />
+            <img src={PaulStatamImage} alt="Profile" className={styles.profileIcon} onClick={()=>navigate('/profilepage')} />
           </div>
         </header>
         <div className={styles.content}>
           <div className={styles.causeGrid}>
             <div className={styles.leftColumn}>
-              {pendingCauses.slice(0, 4).map((cause) => (
-                <div key={cause.id} className={styles.causeCard}>
-                  {cause.image ? (
-                    <img src={cause.image} alt={cause.title} className={styles.causeImage} />
-                  ) : null}
-                  <button className={styles.addToCartButton} onClick={() => handleAddToCart(cause.id)}>
-                    Add to cart
-                  </button>
-                  <div className={styles.causeDetails}>
-                    <h3 className={styles.causeTitle}>{cause.title}</h3>
-                    <p className={styles.causeDescription}>{cause.description}</p>
-                  </div>
-                </div>
-              ))}
+              {left.map(renderCard)}
             </div>
             <div className={styles.rightColumn}>
-              {pendingCauses.slice(4, 8).map((cause) => (
-                <div key={cause.id} className={styles.causeCard}>
-                  {cause.image ? (
-                    <img src={cause.image} alt={cause.title} className={styles.causeImage} />
-                  ) : null}
-                  <button className={styles.addToCartButton} onClick={() => handleAddToCart(cause.id)}>
-                    Add to cart
-                  </button>
-                  <div className={styles.causeDetails}>
-                    <h3 className={styles.causeTitle}>{cause.title}</h3>
-                    <p className={styles.causeDescription}>{cause.description}</p>
-                  </div>
-                </div>
-              ))}
+              {right.map(renderCard)}
             </div>
           </div>
+        </div>
+        {/* Pagination controls */}
+        <div style={{ display:'flex', justifyContent:'space-between', padding:'12px 0' }}>
+          <button onClick={()=> setPage((p)=> Math.max(1, p-1))} disabled={page<=1} style={{ background:'transparent', border:'none', color:'#1e40af', cursor: page<=1 ? 'default':'pointer' }}>Previous</button>
+          <button onClick={()=> setPage((p)=> p+1)} style={{ background:'transparent', border:'none', color:'#1e40af', cursor:'pointer' }}>Next</button>
         </div>
       </main>
     </div>

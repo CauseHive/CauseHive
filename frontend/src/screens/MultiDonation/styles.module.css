@@ -209,7 +209,7 @@ textarea {
   flex-wrap: wrap;
 }
 
-.donateButton {
+.donateBtn {
   width: 150px;
   height: 50px;
   background-color: #2f3e46;
@@ -223,7 +223,7 @@ textarea {
   margin-top: 20px;
 }
 
-.donateButton:hover {
+.donateBtn:hover {
   background-color: #1f2a2f;
 }
 

@@ -4,6 +4,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework import status
 
 from .models import Causes
 from .permissions import IsAdminService
@@ -21,6 +22,12 @@ class CauseListView(generics.ListAPIView):
 
     def get_queryset(self):
         return Causes.objects.exclude(status__in=['under_review', 'rejected'])
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        if not queryset.exists():
+            return Response({"message": "There are no active causes to display.", "results": []}, status=status.HTTP_200_OK)
+        return super().list(request, *args, **kwargs)
 
 class CauseDetailView(generics.RetrieveAPIView):
     queryset = Causes.objects.all()

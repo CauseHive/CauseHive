@@ -8,32 +8,18 @@ const CartIcon = () => (
 );
 
 const MultiDonation = () => {
-  const [donationIndex, setDonationIndex] = useState(0);
+  const donationIndex = 0; // Removed unused setDonationIndex
   const donationLabels = ['Donation 1', 'Donation 2', 'Donation 3'];
 
-  const handleUp = () => {
-    setDonationIndex((prev) => (prev > 0 ? prev - 1 : donationLabels.length - 1));
-  };
-
-  const handleDown = () => {
-    setDonationIndex((prev) => (prev < donationLabels.length - 1 ? prev + 1 : 0));
-  };
-
-  const countryCodeMap = {
-    GHANA: '+233',
-    NIGERIA: '+234',
-    'SOUTH AFRICA': '+27',
-    UK: '+44',
-    USA: '+1',
-  };
+  // Removed unused countryCodeMap
 
   const [selectedCountry, setSelectedCountry] = useState('GHANA');
-  const [phoneCode, setPhoneCode] = useState(countryCodeMap[selectedCountry]);
+  // Removed unused phoneCode state
 
   const handleCountryChange = (e) => {
     const country = e.target.value;
     setSelectedCountry(country);
-    setPhoneCode(countryCodeMap[country] || '');
+    // Removed setPhoneCode (was unused)
   };
 
   return (
@@ -50,7 +36,7 @@ const MultiDonation = () => {
       {/* Main content */}
       <main className={styles.mainContent}>
         <div className={styles.linksRow}>
-          <a href="#" className={styles.backText}>&larr; Back</a>
+            <button type="button" className={styles.backText} onClick={() => window.history.back()}>&larr; Back</button>
         </div>
 
         <h2 className={styles.donateNowText}>Donate Now</h2>
@@ -130,7 +116,7 @@ const MultiDonation = () => {
             <label htmlFor="donateAnonymously">Donate anonymously</label>
           </div>
 
-          <button type="submit" className={styles.donateButton}>Donate</button>
+          <button type="submit" className={styles.donateBtn}>Donate</button>
         </form>
       </main>
     </div>

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import ErrorBoundary from '../../components/ErrorBoundary';
 import styles from './styles.module.css';
 import apiService from '../../services/apiService';
 
-const Section7 = () => {
+const Section7Content = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [testimonials, setTestimonials] = useState([]);
   const [stats, setStats] = useState([]);
@@ -159,4 +160,9 @@ const Section7 = () => {
   );
 };
 
+const Section7 = () => (
+  <ErrorBoundary>
+    <Section7Content />
+  </ErrorBoundary>
+);
 export default Section7;

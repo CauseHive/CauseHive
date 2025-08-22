@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import ErrorBoundary from '../../components/ErrorBoundary';
 import styles from './styles.module.css';
 import apiService from '../../services/apiService';
 
-const Section4 = () => {
+const Section4Content = () => {
   const [donationData, setDonationData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -116,7 +117,7 @@ const Section4 = () => {
                 </div>
                 <div className={styles.helpCardActions}>
                   <button 
-                    className={styles.donateButton}
+                    className={styles.donateBtn}
                     onClick={() => handleDonateClick(donation.id)}
                   >
                     DONATE <span className={styles.heartIcon}>♥</span>
@@ -133,4 +134,9 @@ const Section4 = () => {
   );
 };
 
+const Section4 = () => (
+  <ErrorBoundary>
+    <Section4Content />
+  </ErrorBoundary>
+);
 export default Section4;

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import ErrorBoundary from '../../components/ErrorBoundary';
 import styles from './styles.module.css';
 import BlogImage from './assets/section8_image.png';
 import apiService from '../../services/apiService';
 
-const Section8 = () => {
+const Section8Content = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -121,4 +122,9 @@ const Section8 = () => {
   );
 };
 
+const Section8 = () => (
+  <ErrorBoundary>
+    <Section8Content />
+  </ErrorBoundary>
+);
 export default Section8;

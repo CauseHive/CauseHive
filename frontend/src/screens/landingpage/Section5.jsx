@@ -6,6 +6,7 @@ import Section5Image3 from './assets/Section5_image3.png';
 import Section5Image4 from './assets/Section5_image4.png';
 import Section5Image5 from './assets/Section5_image5.png';
 import apiService from '../../services/apiService';
+import { useToast } from '../../components/Toast/ToastProvider';
 
 /* 
 // Mock success stories data (removed for API integration)
@@ -75,19 +76,22 @@ const mockNewsletterData = {
 const Section5 = () => {
   const [subscriptionEmail, setSubscriptionEmail] = useState('');
   const [subscriptionStatus, setSubscriptionStatus] = useState('');
+  const toast = useToast();
 
   const handleNewsletterSubscription = async (e) => {
     e.preventDefault();
-    if (!subscriptionEmail) return;
+    if (!subscriptionEmail) { toast.warning('Please enter your email'); return; }
 
     try {
       setSubscriptionStatus('loading');
       await apiService.subscribeToNewsletter(subscriptionEmail);
       setSubscriptionStatus('success');
       setSubscriptionEmail('');
+      toast.success('Subscribed to newsletter');
     } catch (error) {
       console.error('Newsletter subscription failed:', error);
       setSubscriptionStatus('error');
+      toast.error('Subscription failed');
     }
   };
 

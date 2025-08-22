@@ -14,16 +14,8 @@ const OrganizerSignUpPage = () => {
           aria-label="Search for events"
         />
         <div className={styles.authButtons}>
-          <a href="/signin" className={styles.signIn}>Sign In</a>
-          <div className={styles.signUpButton}>
-            <>
-              Sign Up
-              <div className={styles.dropdown}>
-                <a href="/signup/attendee" className={styles.dropdownItem}>Attendee</a>
-                <a href="/signup/organiser" className={styles.dropdownItemActive}>Organizer</a>
-              </div>
-            </>
-          </div>
+          <a href="/sign-in" className={styles.signIn}>Sign In</a>
+          <a href="/signup" className={styles.signUpButton}>Sign Up</a>
         </div>
       </header>
 

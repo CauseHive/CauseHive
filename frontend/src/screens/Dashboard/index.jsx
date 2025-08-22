@@ -1,5 +1,7 @@
 import React from "react"; 
 import styles from "./styles.module.css";
+import apiService from "../../services/apiService";
+import { useToast } from "../../components/Toast/ToastProvider";
 import {
   Bell,
   ShoppingCart,
@@ -14,6 +16,61 @@ import {
 } from "lucide-react";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const toast = useToast();
+  const [myCauses, setMyCauses] = useState([]);
+  const [recentDonations, setRecentDonations] = useState([]);
+  const [popularCauses, setPopularCauses] = useState([]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const userId = apiService.getStoredUserId && apiService.getStoredUserId();
+        // Fetch causes and filter to user's own
+        const causesResp = await apiService.getCausesList();
+        const causes = Array.isArray(causesResp) ? causesResp : (causesResp.results || []);
+        const mine = userId ? causes.filter(c => String(c.organizer_id) === String(userId)) : [];
+        if (mounted) setMyCauses(mine.slice(0, 3));
+
+        // Fetch recent donations (3) and enrich with cause titles
+        const donationsResp = await apiService.getDonations();
+        const donationsArr = Array.isArray(donationsResp) ? donationsResp : (donationsResp.results || []);
+        // sort by donated_at desc if available
+        donationsArr.sort((a, b) => new Date(b.donated_at || 0) - new Date(a.donated_at || 0));
+        const topThree = donationsArr.slice(0, 3);
+        const withTitles = await Promise.all(topThree.map(async (d) => {
+          try {
+            const cd = d.cause_id ? await apiService.getCauseDetails(d.cause_id) : null;
+            return { ...d, cause_title: cd?.name || cd?.title || String(d.cause_id).slice(0,8) };
+          } catch (_) {
+            return { ...d, cause_title: String(d.cause_id).slice(0,8) };
+          }
+        }));
+        if (mounted) setRecentDonations(withTitles);
+
+        // Popular causes by amount raised (current_amount desc)
+        const popular = [...causes].sort((a, b) => Number(b.current_amount || 0) - Number(a.current_amount || 0));
+        if (mounted) setPopularCauses(popular.slice(0, 6));
+      } catch (_) {
+        // keep defaults
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  const go = (path) => () => navigate(path);
+  const logout = () => {
+    try {
+      window.localStorage.removeItem('accessToken');
+      window.localStorage.removeItem('refreshToken');
+      window.localStorage.removeItem('user_id');
+      window.localStorage.removeItem('cart_id');
+    } catch (_) {}
+    toast.info('Logged out');
+    navigate('/');
+  };
+
   return (
     <div className={styles.container}>
       {/* Sidebar */}
@@ -22,16 +79,16 @@ const Dashboard = () => {
           <button className={styles.menuBtn} aria-label="Menu">☰</button>
         </div>
         <nav className={styles.nav} aria-label="Main">
-          <button className={styles.navItem} aria-label="Dashboard"><Grid /></button>
-          <button className={styles.navItem} aria-label="Favorites"><Heart /></button>
-          <button className={styles.navItem} aria-label="Messages"><MessageSquare /></button>
-          <button className={styles.navItem} aria-label="Layers"><Layers /></button>
-          <button className={styles.navItem} aria-label="Calendar"><Calendar /></button>
+          <button className={styles.navItem} aria-label="Dashboard" onClick={go('/dashboard')}><Grid /></button>
+          <button className={styles.navItem} aria-label="Favorites" onClick={go('/desktoppage')}><Heart /></button>
+          <button className={styles.navItem} aria-label="Notifications" onClick={go('/notificationspage')}><MessageSquare /></button>
+          <button className={styles.navItem} aria-label="Causes" onClick={go('/causelistpage')}><Layers /></button>
+          <button className={styles.navItem} aria-label="Create Cause" onClick={go('/causes/create')}><Calendar /></button>
         </nav>
         <div className={styles.sidebarBottom}>
-          <button className={styles.navItem} aria-label="Profile"><User /></button>
-          <button className={styles.navItem} aria-label="Settings"><Settings /></button>
-          <button className={styles.navItem} aria-label="Logout"><LogOut /></button>
+          <button className={styles.navItem} aria-label="Profile" onClick={go('/profilepage')}><User /></button>
+          <button className={styles.navItem} aria-label="Settings" onClick={go('/profilesettings')}><Settings /></button>
+          <button className={styles.navItem} aria-label="Logout" onClick={logout}><LogOut /></button>
         </div>
       </aside>
 
@@ -60,6 +117,7 @@ const Dashboard = () => {
                 src="https://i.pravatar.cc/40"
                 alt="Moni Roy"
                 className={styles.avatar}
+                onClick={()=>navigate('/profilepage')}
               />
               <div className={styles.profileInfo}>
                 <p className={styles.profileName}>Moni Roy</p>
@@ -74,7 +132,7 @@ const Dashboard = () => {
           <h2 className={styles.title}>
             Dashboard <User className={styles.userIcon} />
           </h2>
-          <div className={styles.iconWrapper} aria-label="Cart">
+          <div className={styles.iconWrapper} aria-label="Cart" onClick={go('/cartpage')} style={{ cursor:'pointer' }}>
             <ShoppingCart />
             <span className={styles.badge}>2</span>
           </div>
@@ -86,9 +144,15 @@ const Dashboard = () => {
           <div className={styles.causesBox}>
             <h4>Your Causes</h4>
             <div className={styles.causesCards}>
-              <div className={styles.causeCard}></div>
-              <div className={styles.causeCard}></div>
-              <div className={styles.causeCard}></div>
+              {myCauses.length > 0 ? (
+                myCauses.map((c) => (
+                  <div key={c.id} className={styles.causeCard}>
+                    <span className={styles.causeText} title={c.name || c.title}>{c.name || c.title}</span>
+                  </div>
+                ))
+              ) : (
+                [0,1,2].map((i) => <div key={i} className={styles.causeCard}></div>)
+              )}
             </div>
           </div>
         </section>
@@ -96,9 +160,16 @@ const Dashboard = () => {
         <section className={styles.recentDonations}>
           <h3>Your recent donations</h3>
           <div className={styles.donationsRow}>
-            <div className={styles.donationCard}></div>
-            <div className={styles.donationCard}></div>
-            <div className={styles.donationCard}></div>
+            {recentDonations.length > 0 ? (
+              recentDonations.map((d) => (
+                <div key={d.id} className={styles.donationCard}>
+                  <div className={styles.donationText} title={d.cause_title}>{d.cause_title}</div>
+                  <div className={styles.donationAmt}>GHS {d.amount}</div>
+                </div>
+              ))
+            ) : (
+              [0,1,2].map((i) => <div key={i} className={styles.donationCard}></div>)
+            )}
           </div>
         </section>
 
@@ -121,18 +192,25 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className={styles.tableCause}>
-                  <span className={styles.causeIcon}>⌂</span>
-                  Apple Watch
-                </td>
-                <td>6096 Marjolaine Landing</td>
-                <td>12.09.2019 - 12.53 PM</td>
-                <td>Healthcare</td>
-                <td>$34,295</td>
-                <td><span className={styles.status}>Ongoing</span></td>
-              </tr>
-              {/* add more rows as needed */}
+              {popularCauses.length > 0 ? (
+                popularCauses.map((c) => (
+                  <tr key={c.id}>
+                    <td className={styles.tableCause}>
+                      <span className={styles.causeIcon}>⌂</span>
+                      {c.name || c.title}
+                    </td>
+                    <td>{c.location || '—'}</td>
+                    <td>{c.created_at ? new Date(c.created_at).toLocaleString() : '—'}</td>
+                    <td>{(c.category && c.category.name) ? c.category.name : (c.category || '—')}</td>
+                    <td>GHS {c.current_amount || 0}</td>
+                    <td><span className={styles.status}>{c.status || '—'}</span></td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} style={{ color: '#6b7280' }}>No popular causes available</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </section>

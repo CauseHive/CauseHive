@@ -127,9 +127,10 @@
   padding: 0 18px;
   outline: none;
 }
-
 .cart {
   position: relative;
+}
+.avatar, .avatarImg { border-radius: 50%; 
   justify-self: end;
   color: #111827;
   cursor: pointer;

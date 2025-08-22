@@ -64,18 +64,11 @@
 }
 
 .banner {
-  display: flex;
-  gap: 10px;
+  width: 100%;
+  height: 240px; /* taller cover photo */
   background: #fff;
-  padding: 10px;
-  margin-bottom: 40px;
-  flex-wrap: wrap;
-}
-
-.bannerItem img {
-  width: 100px;
-  height: 50px;
-  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 60px; /* closer to fields below with avatar overlap */
 }
 
 .profilePicWrapper {
