@@ -15,6 +15,7 @@ const CauseListpage = () => {
   const [causes, setCauses] = useState([]);
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState('Date created');
+  const [sortOpen, setSortOpen] = useState(false);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -131,23 +132,26 @@ const CauseListpage = () => {
               onChange={(e)=> setSearch(e.target.value)}
               aria-label="Search causes"
             />
-            <div className={styles.filter}>
+            <div className={styles.filter} role="button" tabIndex={0} onClick={()=> setSortOpen(v=>!v)} onKeyDown={(e)=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); setSortOpen(v=>!v);} }} aria-haspopup="menu" aria-expanded={sortOpen}>
               <input
                 type="text"
                 placeholder={"Sort: " + sortBy}
                 className={styles.filterInput}
                 readOnly
+                aria-readonly
               />
               <svg width="10" height="6" viewBox="0 0 10 6" fill="#666" className={styles.dropdownIcon}>
                 <path d="M0 0l5 6 5-6z" />
               </svg>
-              <div className={styles.dropdown}>
-                <div onClick={()=>setSortBy('Date created')}>Date created</div>
-                <div onClick={()=>setSortBy('Popularity')}>Popularity</div>
-                <div onClick={()=>setSortBy('Created by')}>Created by</div>
-                <div onClick={()=>setSortBy('Category')}>Category</div>
-                <div onClick={()=>setSortBy('Goal amount')}>Goal amount</div>
-              </div>
+              {sortOpen && (
+                <div className={styles.dropdown} role="menu">
+                  <button className={styles.dropdownItem} onClick={(e)=>{ e.stopPropagation(); setSortBy('Date created'); setSortOpen(false); }}>Date created</button>
+                  <button className={styles.dropdownItem} onClick={(e)=>{ e.stopPropagation(); setSortBy('Popularity'); setSortOpen(false); }}>Popularity</button>
+                  <button className={styles.dropdownItem} onClick={(e)=>{ e.stopPropagation(); setSortBy('Created by'); setSortOpen(false); }}>Created by</button>
+                  <button className={styles.dropdownItem} onClick={(e)=>{ e.stopPropagation(); setSortBy('Category'); setSortOpen(false); }}>Category</button>
+                  <button className={styles.dropdownItem} onClick={(e)=>{ e.stopPropagation(); setSortBy('Goal amount'); setSortOpen(false); }}>Goal amount</button>
+                </div>
+              )}
             </div>
           </div>
           <div className={styles.headerControls}>

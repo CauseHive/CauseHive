@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ShoppingCart, ChevronDown, RotateCcw, ChevronUp } from "lucide-react";
 import apiService from "../../services/apiService";
 import { useToast } from "../../components/Toast/ToastProvider";
+import AppTopBar from "../../components/AppTopBar";
 
 const DonationHistory = () => {
   const navigate = useNavigate();
@@ -85,7 +86,12 @@ const DonationHistory = () => {
 
       {/* MAIN AREA */}
       <main className={styles.main}>
-        {/* TOP ROW: centered global search + cart at right + profile */}
+        <AppTopBar
+          onBack={()=> navigate(-1)}
+          onCart={()=> navigate('/cartpage')}
+          onAvatar={()=> navigate('/profilepage')}
+          avatarUrl={profile && profile.profile_picture ? `${apiService.baseURL}${profile.profile_picture}` : undefined}
+        />
         <div className={styles.topRow}>
           <div style={{ justifySelf:'center', display:'flex' }}>
             <input
@@ -97,19 +103,6 @@ const DonationHistory = () => {
               onChange={(e)=> setSearch(e.target.value)}
             />
             <button onClick={()=>{}} style={{ marginLeft:10, height:44, padding:'0 16px', borderRadius:999, border:'1px solid #e6e8ef', background:'#fff', cursor:'pointer' }}>Search</button>
-          </div>
-          <div style={{ display:'flex', alignItems:'center', gap:10, justifySelf:'end' }}>
-            <div className={styles.cart} aria-label="Cart" onClick={()=> navigate('/cartpage')} style={{ cursor:'pointer' }}>
-              <ShoppingCart size={24} />
-              <span className={styles.cartBadge}>2</span>
-            </div>
-            <div className={styles.avatar} onClick={()=> navigate('/profilepage')}>
-              {profile && profile.profile_picture ? (
-                <img src={`${apiService.baseURL}${profile.profile_picture}`} alt="User" className={styles.avatarImg} style={{ width:36, height:36 }} />
-              ) : (
-                <img src="https://i.pravatar.cc/36" alt="User" className={styles.avatarImg} style={{ width:36, height:36 }} />
-              )}
-            </div>
           </div>
         </div>
 

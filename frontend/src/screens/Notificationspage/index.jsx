@@ -4,6 +4,7 @@ import SidebarNav from '../../components/SidebarNav';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../../services/apiService';
 import { useToast } from '../../components/Toast/ToastProvider';
+import AppTopBar from '../../components/AppTopBar';
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
@@ -40,6 +41,12 @@ const NotificationsPage = () => {
     <div className={styles.container}>
       <SidebarNav />
       <main className={styles.mainContent}>
+        <AppTopBar
+          onBack={()=> navigate(-1)}
+          onCart={()=> navigate('/cartpage')}
+          onAvatar={()=> navigate('/profilepage')}
+          avatarUrl={profile && profile.profile_picture ? `${apiService.baseURL}${profile.profile_picture}` : undefined}
+        />
         <header className={styles.header}>
           <h1 className={styles.title}>Your notifications</h1>
           <div className={styles.searchContainer}>
@@ -51,17 +58,8 @@ const NotificationsPage = () => {
               className={styles.searchInput}
             />
             <button onClick={()=>{}} style={{ marginLeft:8, height:36, padding:'0 12px', borderRadius:8, border:'1px solid #e6e8ef', background:'#fff', cursor:'pointer' }}>Search</button>
-            <div className={styles.cartIcon} onClick={()=> navigate('/cartpage')} style={{ cursor:'pointer' }}>🛒<span className={styles.cartCount}>2</span></div>
-            <div className={styles.avatar} onClick={()=> navigate('/profilepage')} style={{ cursor:'pointer' }}>
-              {profile && profile.profile_picture ? (
-                <img src={`${apiService.baseURL}${profile.profile_picture}`} alt="User" style={{ width:28, height:28, borderRadius:999 }} />
-              ) : '🖤'}
-            </div>
           </div>
         </header>
-        <div style={{ display:'flex', justifyContent:'flex-end', padding:'0 16px 8px' }}>
-          <button onClick={()=> navigate(-1)} style={{ background:'transparent', border:'1px solid #e5e7eb', borderRadius:8, padding:'6px 10px', cursor:'pointer' }}>Back</button>
-        </div>
         <section className={styles.notificationsSection}>
           {filtered.length ? filtered.map((notification) => (
             <div key={notification.id} className={styles.notificationItem}>

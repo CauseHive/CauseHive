@@ -1,10 +1,12 @@
-// API Configuration
-let API_BASE_URL = process.env.REACT_APP_API_URL;
+// API Configuration (Vite + fallback)
+let API_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE)
+  || process.env.REACT_APP_API_BASE
+  || process.env.REACT_APP_API_URL;
 if (!API_BASE_URL) {
   try {
     if (typeof window !== 'undefined' && window.location && window.location.hostname) {
       API_BASE_URL = window.location.hostname.includes('causehive.tech')
-        ? 'https://www.causehive.tech'
+        ? 'https://causehive.tech'
         : 'http://localhost:8000';
     } else {
       API_BASE_URL = 'http://localhost:8000';
