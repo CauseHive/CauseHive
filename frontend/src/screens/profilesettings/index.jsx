@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import styles from './styles.module.css';
 import apiService from '../../services/apiService';
+import { useToast } from '../../components/Toast/ToastProvider';
 
 const Profilesettings = () => {
   const [bio, setBio] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [picture, setPicture] = useState(null);
+  const [cover, setCover] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState('');
+  const toast = useToast();
 
   useEffect(() => {
     (async () => {
@@ -24,12 +26,11 @@ const Profilesettings = () => {
   const onSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setMessage('');
     try {
-      await apiService.updateProfile({ bio, phone_number: phone, address, profile_picture: picture });
-      setMessage('Profile updated');
+      await apiService.updateProfile({ bio, phone_number: phone, address, profile_picture: picture, cover_photo: cover });
+      toast.success('Profile updated');
     } catch (e) {
-      setMessage('Failed to update profile');
+      toast.error('Failed to update profile');
     } finally {
       setSaving(false);
     }
@@ -74,8 +75,12 @@ const Profilesettings = () => {
                 <label>Profile picture</label>
                 <input type="file" accept="image/*" onChange={(e) => setPicture(e.target.files?.[0] ?? null)} />
               </div>
+              <div style={{ marginBottom: 12 }}>
+                <label>Cover photo</label>
+                <input type="file" accept="image/*" onChange={(e) => setCover(e.target.files?.[0] ?? null)} />
+                <div style={{ fontSize:12, color:'#6b7280' }}>If empty, a white placeholder will be shown.</div>
+              </div>
               <button type="submit" disabled={saving}>{saving ? 'Saving...' : 'Save changes'}</button>
-              {message ? <div style={{ marginTop: 8 }}>{message}</div> : null}
             </form>
           </div>
           <div className={styles.settingsItem}>Notification Settings</div>

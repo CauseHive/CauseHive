@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styles from './styles.module.css';
 import apiService from '../../services/apiService';
+import { useToast } from '../../components/Toast/ToastProvider';
 
 const CausedetailPage = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
+    const toast = useToast();
     const [cause, setCause] = useState(null);
+    const [amount, setAmount] = useState('10');
 
     useEffect(() => {
         let mounted = true;
@@ -59,8 +63,9 @@ const CausedetailPage = () => {
                 </div>
             </div>
             <div className={styles.buttons}>
-                <button className={styles.donateBtn} onClick={() => window.location.href='/donation'}>Donate</button>
-                <button className={styles.cartBtn}>Add to Cart</button>
+                <input type="number" min="1" step="0.01" value={amount} onChange={(e)=>setAmount(e.target.value)} style={{ marginRight: 8 }} />
+                <button className={styles.donateBtn} onClick={() => navigate(`/donation?causeId=${id}&amount=${encodeURIComponent(amount)}`)}>Donate</button>
+                <button className={styles.cartBtn} onClick={async ()=>{ try { await apiService.addToCart({ cause_id: id, donation_amount: Number(amount) || 0, quantity: 1 }); toast.success('Added to cart'); } catch(e){ toast.error('Failed to add to cart'); } }}>Add to Cart</button>
             </div>
         </div>
     );

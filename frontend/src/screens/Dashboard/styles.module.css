@@ -130,7 +130,10 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
 }
+.avatar:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
 .profileInfo {
   display: flex;
   flex-direction: column;
@@ -195,6 +198,17 @@
   height: 80px;
   background: #fff;
   border-radius: 12px;
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  overflow: hidden;
+}
+.causeText {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Donations */
@@ -206,9 +220,22 @@
 }
 .donationCard {
   flex: 1;
-  height: 100px;
+  min-height: 80px;
   background: #fff;
   border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.donationText {
+  max-width: 70%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.donationAmt {
+  font-weight: 700;
 }
 
 /* Popular Causes */
@@ -245,6 +272,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  max-width: 320px;
 }
 .causeIcon {
   background: #fef3c7;

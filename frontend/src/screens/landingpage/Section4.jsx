@@ -116,7 +116,7 @@ const Section4 = () => {
                 </div>
                 <div className={styles.helpCardActions}>
                   <button 
-                    className={styles.donateButton}
+                    className={styles.donateBtn}
                     onClick={() => handleDonateClick(donation.id)}
                   >
                     DONATE <span className={styles.heartIcon}>♥</span>

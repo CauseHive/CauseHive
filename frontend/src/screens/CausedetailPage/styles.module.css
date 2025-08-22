@@ -68,11 +68,12 @@
 
 .donateBtn {
     padding: 10px 20px;
-    background-color: #6c757d;
+    background-color: #1a1a2e; /* Align with Signup.signInButton */
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px; /* Align with Signup.signInButton radius */
     cursor: pointer;
+    font-weight: 700;
 }
 
 .cartBtn {
@@ -82,4 +83,5 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    font-weight: 600;
 }

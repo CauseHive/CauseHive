@@ -21,38 +21,43 @@ import RedirectingModal from "./screens/RedirectingModal";
 import OrganizerSignUpPage from "./screens/OrganizerSignUpPage";
 import CausedetailPage from './screens/CausedetailPage'; // Importing CausedetailPage
 import CauseCreate from './screens/CauseCreate';
+import PaymentStatus from './screens/PaymentStatus';
+import { ToastProvider } from './components/Toast/ToastProvider';
 
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/landingpage" element={<LandingPage />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/sign-in" element={<SignIn />} />
-        <Route path="/donation" element={<Donation />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/donationhistory" element={<DonationHistory />} />
-        <Route path="/profilepage" element={<Profilepage />} />
-        <Route path="/profilesettings" element={<Profilesettings />} />
-        <Route path="/cartpage" element={<CartPage />} />
-        <Route path="/multidonation" element={<MultiDonation />} />
-        <Route path="/notificationspage" element={<Notificationspage />} />
-        <Route path="/desktoppage" element={<Desktoppage />} />
-        <Route path="/admindashboard" element={<AdminDashboard />} />
-        <Route path="/causedetailpage" element={<CausedetailPage />} />
-        <Route path="/causes/:id" element={<CausedetailPage />} />
-        <Route path="/causes/create" element={<CauseCreate />} />
-        <Route path="/causereviewpage" element={<CauseReviewPage />} />
-        <Route path="/organizerprofilepage" element={<OrganizerProfilePage />} />
-        <Route path="/organizersignuppage" element={<OrganizerSignUpPage />} />
-        <Route path="/redirectingmodal" element={<RedirectingModal />} />
-        <Route path="/organizerprofilesettings" element={<OrganizerProfileSettings />} />
-        <Route path="/causelistpage" element={<CauseListpage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+    <ToastProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/landingpage" element={<LandingPage />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/donation" element={<Donation />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/donationhistory" element={<DonationHistory />} />
+          <Route path="/profilepage" element={<Profilepage />} />
+          <Route path="/profilesettings" element={<Profilesettings />} />
+          <Route path="/cartpage" element={<CartPage />} />
+          <Route path="/multidonation" element={<MultiDonation />} />
+          <Route path="/notificationspage" element={<Notificationspage />} />
+          <Route path="/desktoppage" element={<Desktoppage />} />
+          <Route path="/admindashboard" element={<AdminDashboard />} />
+          <Route path="/causedetailpage" element={<CausedetailPage />} />
+          <Route path="/causes/:id" element={<CausedetailPage />} />
+          <Route path="/causes/create" element={<CauseCreate />} />
+          <Route path="/causereviewpage" element={<CauseReviewPage />} />
+          <Route path="/payment-status" element={<PaymentStatus />} />
+          <Route path="/organizerprofilepage" element={<OrganizerProfilePage />} />
+          <Route path="/organizersignuppage" element={<OrganizerSignUpPage />} />
+          <Route path="/redirectingmodal" element={<RedirectingModal />} />
+          <Route path="/organizerprofilesettings" element={<OrganizerProfileSettings />} />
+          <Route path="/causelistpage" element={<CauseListpage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </ToastProvider>
   );
 }
 

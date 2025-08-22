@@ -1,0 +1,17 @@
+/* Sidebar styles aligned with Dashboard */
+.sidebar {
+  width: 70px;
+  background: #fff;
+  border-right: 1px solid #eaeaea;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+.sidebarTop { display: flex; flex-direction: column; align-items: center; }
+.menuBtn { background: none; border: none; font-size: 20px; margin-bottom: 10px; cursor: pointer; }
+.nav { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: 20px; }
+.navItem { background: none; border: none; cursor: pointer; color: #555; }
+.navItem:hover { color: #000; }
+.sidebarBottom { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+

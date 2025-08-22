@@ -130,7 +130,7 @@ const MultiDonation = () => {
             <label htmlFor="donateAnonymously">Donate anonymously</label>
           </div>
 
-          <button type="submit" className={styles.donateButton}>Donate</button>
+          <button type="submit" className={styles.donateBtn}>Donate</button>
         </form>
       </main>
     </div>

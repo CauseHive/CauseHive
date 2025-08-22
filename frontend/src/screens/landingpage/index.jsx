@@ -31,7 +31,7 @@ const LandingPage = () => {
           </Link>
           <Link to="#" className={styles.navLink}>Contact us</Link>
           <Link to="/sign-in" className={styles.loginLink}>Log in</Link>
-          <Link to="/causelistpage" className={styles.donateButton}>Donate</Link>
+          <Link to="/causelistpage" className={styles.donateBtn}>Donate</Link>
         </div>
       </nav>
 

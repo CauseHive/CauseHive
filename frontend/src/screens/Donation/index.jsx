@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import styles from './styles.module.css';
+import apiService from '../../services/apiService';
+import { useToast } from '../../components/Toast/ToastProvider';
 
 const countryCodes = [
   { code: 'GH', dialCode: '+233' },
@@ -12,6 +15,19 @@ const countryCodes = [
 
 const Donation = () => {
   const [selectedCountry, setSelectedCountry] = useState(countryCodes[0]);
+  const toast = useToast();
+  const [searchParams] = useSearchParams();
+  const prefill = useMemo(() => ({
+    causeId: searchParams.get('causeId') || '',
+    amount: searchParams.get('amount') || '',
+  }), [searchParams]);
+
+  useEffect(() => {
+    // If navigated with query params, prefill donation amount
+    const amt = (prefill.amount && !Number.isNaN(Number(prefill.amount))) ? prefill.amount : '';
+    const amountInput = document.getElementById('donationAmount');
+    if (amountInput && amt) amountInput.value = amt;
+  }, [prefill]);
 
   const handleCountryChange = (e) => {
     const country = countryCodes.find(c => c.code === e.target.value);
@@ -63,7 +79,32 @@ const Donation = () => {
           SpringLife Donation campaign: Seeking to restore humanity.
         </h1>
 
-        <form className={styles.form}>
+        <form className={styles.form} onSubmit={async (e)=>{
+          e.preventDefault();
+          const email = document.getElementById('email')?.value || '';
+          const amountStr = document.getElementById('donationAmount')?.value || '';
+          const amount = Number(amountStr);
+          if (!amount || amount <= 0) {
+            toast.warning('Please enter a valid donation amount');
+            return;
+          }
+          try {
+            if (!prefill.causeId) {
+              toast.error('Missing cause reference');
+              return;
+            }
+            const res = await apiService.donate({ email, cause_id: prefill.causeId, donation_amount: amount, quantity: 1 });
+            if (res && res.authorization_url) {
+              try { if (res.reference) window.localStorage.setItem('last_payment_reference', res.reference); } catch (_) {}
+              window.location.href = res.authorization_url;
+            } else {
+              toast.error('Unable to start payment');
+            }
+          } catch (err) {
+            console.error(err);
+            toast.error('Failed to initiate donation');
+          }
+        }}>
           <div className={styles.row}>
             <div className={styles.inputGroup}>
               <label htmlFor="firstName">First name</label>
@@ -121,7 +162,7 @@ const Donation = () => {
 
           <div className={styles.inputGroup}>
             <label htmlFor="donationAmount">Donation amount</label>
-            <input type="text" id="donationAmount" placeholder="¢" />
+            <input type="text" id="donationAmount" placeholder="¢" defaultValue={prefill.amount || ''} />
           </div>
 
           <div className={styles.inputGroup}>
@@ -134,7 +175,7 @@ const Donation = () => {
             <label htmlFor="donateAnonymously">Donate anonymously</label>
           </div>
 
-          <button type="submit" className={styles.donateButton}>
+          <button type="submit" className={styles.donateBtn}>
             Donate
           </button>
         </form>

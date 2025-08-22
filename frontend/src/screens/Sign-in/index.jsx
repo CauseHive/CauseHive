@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import styles from '../Signup/styles.module.css';
 import { FaUser, FaLock } from 'react-icons/fa';
 import apiService from '../../services/apiService';
+import { useToast } from '../../components/Toast/ToastProvider';
 
 const SignIn = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -18,12 +20,14 @@ const SignIn = () => {
     try {
       const data = await apiService.loginUser({ email, password });
       if (data && data.access) {
+        toast.success('Signed in successfully');
         navigate('/dashboard');
       } else {
         navigate('/');
       }
     } catch (err) {
       setError('Sign-in failed');
+      toast.error('Sign-in failed');
     } finally {
       setSubmitting(false);
     }
@@ -41,15 +45,7 @@ const SignIn = () => {
         />
         <div className={styles.authButtons}>
           <a href="/sign-in" className={styles.signIn}>Sign In</a>
-          <div className={styles.signUpButton}>
-            <>
-              Sign Up
-              <div className={styles.dropdown}>
-                <a href="/signup/attendee" className={styles.dropdownItem}>Attendee</a>
-                <a href="/signup/organiser" className={styles.dropdownItemActive}>Organizer</a>
-              </div>
-            </>
-          </div>
+          <a href="/signup" className={styles.signUpButton}>Sign Up</a>
         </div>
       </header>
 

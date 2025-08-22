@@ -5,6 +5,7 @@ import googleLogo from '../../assets/google-logo.svg';
 import facebookLogo from '../../assets/facebook-logo.svg';
 import { Link, useNavigate } from 'react-router-dom';
 import apiService from '../../services/apiService';
+import { useToast } from '../../components/Toast/ToastProvider';
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +18,7 @@ const Signup = () => {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
+  const toast = useToast();
 
   const toggleShowPassword = () => setShowPassword(!showPassword);
   const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
@@ -27,9 +29,11 @@ const Signup = () => {
     setSubmitting(true);
     try {
       await apiService.registerUser({ first_name: firstName, last_name: lastName, email, password, password2 });
+      toast.success('Account created');
       navigate('/sign-in');
     } catch (err) {
       setError('Sign up failed');
+      toast.error('Sign up failed');
     } finally {
       setSubmitting(false);
     }

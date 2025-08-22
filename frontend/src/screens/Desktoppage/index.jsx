@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from './styles.module.css';
+import SidebarNav from '../../components/SidebarNav';
 
 const Desktoppage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,16 +19,7 @@ const Desktoppage = () => {
 
   return (
     <div className={styles.container}>
-      <aside className={styles.sidebar}>
-        <div className={styles.menuIcon}>☰</div>
-        <div className={styles.icon}>💙</div>
-        <div className={styles.icon}>💬</div>
-        <div className={styles.icon}>⏳</div>
-        <div className={styles.icon}>📅</div>
-        <div className={styles.icon}>👤</div>
-        <div className={styles.icon}>⚙️</div>
-        <div className={styles.icon}>⏻</div>
-      </aside>
+      <SidebarNav />
       <main className={styles.mainContent}>
         <header className={styles.header}>
           <h1 className={styles.title}>Your Favorites</h1>

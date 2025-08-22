@@ -1,5 +1,18 @@
 // API Configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+let API_BASE_URL = process.env.REACT_APP_API_URL;
+if (!API_BASE_URL) {
+  try {
+    if (typeof window !== 'undefined' && window.location && window.location.hostname) {
+      API_BASE_URL = window.location.hostname.includes('causehive.tech')
+        ? 'https://www.causehive.tech'
+        : 'http://localhost:8000';
+    } else {
+      API_BASE_URL = 'http://localhost:8000';
+    }
+  } catch (_) {
+    API_BASE_URL = 'http://localhost:8000';
+  }
+}
 
 // API Service Class
 class ApiService {
@@ -28,6 +41,13 @@ class ApiService {
       try {
         if (access) window.localStorage.setItem('accessToken', access);
         if (refresh) window.localStorage.setItem('refreshToken', refresh);
+        if (access) {
+          const payload = this.parseJwt(access);
+          const uid = payload && (payload.user_id || payload.user || payload.sub);
+          if (uid) {
+            window.localStorage.setItem('user_id', String(uid));
+          }
+        }
       } catch (_) {}
     }
     if (access) this.setAuthToken(access);
@@ -57,6 +77,14 @@ class ApiService {
     return this.request(endpoint, { method: 'GET' });
   }
 
+  getStoredUserId() {
+    try {
+      return typeof window !== 'undefined' ? window.localStorage.getItem('user_id') : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
   async post(endpoint, data) {
     return this.request(endpoint, {
       method: 'POST',
@@ -69,6 +97,23 @@ class ApiService {
       method: 'PUT',
       body: JSON.stringify(data),
     });
+  }
+
+  // Decode a JWT access token (browser-safe)
+  parseJwt(token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        (typeof atob !== 'undefined' ? atob(base64) : Buffer.from(base64, 'base64').toString('binary'))
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (_) {
+      return null;
+    }
   }
 
   async postForm(endpoint, formData) {
@@ -123,13 +168,14 @@ class ApiService {
     return this.get('/api/user/profile/');
   }
 
-  async updateProfile({ bio, phone_number, address, withdrawal_address, profile_picture }) {
+  async updateProfile({ bio, phone_number, address, withdrawal_address, profile_picture, cover_photo }) {
     const form = new FormData();
     if (bio != null) form.append('bio', bio);
     if (phone_number != null) form.append('phone_number', phone_number);
     if (address != null) form.append('address', address);
     if (withdrawal_address != null) form.append('withdrawal_address', typeof withdrawal_address === 'string' ? withdrawal_address : JSON.stringify(withdrawal_address));
     if (profile_picture) form.append('profile_picture', profile_picture);
+    if (cover_photo) form.append('cover_photo', cover_photo);
     return this.putForm('/api/user/profile/', form);
   }
 
@@ -138,7 +184,7 @@ class ApiService {
   async validateBankAccount({ bank_code, account_number }) { return this.post('/api/user/validate-bank-account/', { bank_code, account_number }); }
 
   // Causes
-  async getCauses(page = 1) { return this.get(`/api/causes/?page=${page}`); }
+  async getCauses(page = 1) { return this.get(`/api/causes/list/?page=${page}`); }
   async getCausesList(page = 1) { return this.get(`/api/causes/list/?page=${page}`); }
   async getCauseDetails(id) { return this.get(`/api/causes/details/${id}/`); }
   async createCause({ name, description, target_amount, organizer_id, category, category_data, cover_image }) {
@@ -159,10 +205,28 @@ class ApiService {
 
   // Cart (for later wiring in UI)
   async getCart(params = '') { return this.get(`/api/cart/${params}`); }
-  async addToCart({ cart_id, cause_id, donation_amount, quantity = 1 }) { return this.post('/api/cart/add/', { cart_id, cause_id, donation_amount, quantity }); }
-  async updateCartItem(item_id, { cart_id, quantity }) { return this.request(`/api/cart/update/${item_id}/`, { method: 'PATCH', body: JSON.stringify({ cart_id, quantity }) }); }
-  async removeFromCart(item_id, { cart_id }) { return this.request(`/api/cart/remove/${item_id}/`, { method: 'DELETE', body: JSON.stringify({ cart_id }) }); }
-  async checkout({ email, cart_id }) { return this.post('/api/cart/checkout/', { email, cart_id }); }
+  getStoredCartId() {
+    try {
+      return typeof window !== 'undefined' ? window.localStorage.getItem('cart_id') : null;
+    } catch (_) { return null; }
+  }
+  setStoredCartId(id) {
+    try {
+      if (typeof window !== 'undefined') window.localStorage.setItem('cart_id', id);
+    } catch (_) {}
+  }
+  async addToCart({ cart_id, cause_id, donation_amount, quantity = 1 }) {
+    const payload = { cart_id: cart_id || this.getStoredCartId(), cause_id, donation_amount, quantity };
+    const res = await this.post('/api/cart/add/', payload);
+    if (res && res.cart_id) this.setStoredCartId(res.cart_id);
+    return res;
+  }
+  async updateCartItem(item_id, { cart_id, quantity }) { return this.request(`/api/cart/update/${item_id}/`, { method: 'PATCH', body: JSON.stringify({ cart_id: cart_id || this.getStoredCartId(), quantity }) }); }
+  async removeFromCart(item_id, { cart_id }) { return this.request(`/api/cart/remove/${item_id}/`, { method: 'DELETE', body: JSON.stringify({ cart_id: cart_id || this.getStoredCartId() }) }); }
+  async checkout({ email, cart_id }) { return this.post('/api/cart/checkout/', { email, cart_id: cart_id || this.getStoredCartId() }); }
+  async donate({ email, cause_id, donation_amount, quantity = 1, cart_id }) {
+    return this.post('/api/cart/donate/', { email, cause_id, donation_amount, quantity, cart_id: cart_id || this.getStoredCartId() });
+  }
 
   // Landing/demo placeholder APIs (safe fallbacks)
   async getDonationStatistics() { return this.get('/api/donations/statistics/'); }
@@ -176,6 +240,9 @@ class ApiService {
   async getTestimonials() { return this.get('/api/testimonials/'); }
   async getStatistics() { return this.get('/api/statistics/'); }
   async subscribeToNewsletter(email) { return this.post('/api/newsletter/subscribe/', { email }); }
+
+  // Notifications
+  async getNotifications(page = 1) { return this.get(`/api/notifications/?page=${page}`); }
 }
 
 const apiService = new ApiService();
