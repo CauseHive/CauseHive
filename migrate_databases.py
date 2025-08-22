@@ -62,8 +62,32 @@ def migrate_database_safely(db_alias, app_labels=None):
         print(f"❌ Unexpected error migrating {db_alias}: {e}")
         return False
 
+def ensure_schemas():
+    """Ensure required schemas exist across configured databases.
+    Works with schema-based multi-db on a single Postgres instance.
+    """
+    from django.db import connections
+    schema_map = {
+        'default': 'causehive_users',
+        'causes_db': 'causehive_causes',
+        'donations_db': 'causehive_donations',
+        'admin_db': 'causehive_admin',
+    }
+    for alias, schema in schema_map.items():
+        try:
+            conn = connections[alias]
+            with conn.cursor() as cur:
+                cur.execute(f"CREATE SCHEMA IF NOT EXISTS {schema};")
+            print(f"✅ Ensured schema '{schema}' exists on '{alias}'")
+        except Exception as e:
+            print(f"⚠️  Could not ensure schema '{schema}' on '{alias}': {e}")
+
+
 def migrate_all_databases():
     """Run migrations on all configured databases with proper app routing"""
+    # Create schemas before migrating
+    ensure_schemas()
+
     database_apps = {
         'default': ['users_n_auth', 'admin', 'auth', 'contenttypes', 'sessions', 'sites', 'account', 'socialaccount', 'token_blacklist'],
         'causes_db': ['causes', 'categories'],
