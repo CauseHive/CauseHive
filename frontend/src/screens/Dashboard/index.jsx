@@ -134,7 +134,7 @@ const Dashboard = () => {
           <h2 className={styles.title}>
             Dashboard <User className={styles.userIcon} />
           </h2>
-          <div className={styles.iconWrapper} aria-label="Cart" onClick={go('/cartpage')}>
+          <div className={styles.iconWrapper} aria-label="Cart" onClick={go('/cartpage')} style={{ cursor:'pointer' }}>
             <ShoppingCart />
             <span className={styles.badge}>2</span>
           </div>

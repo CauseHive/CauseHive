@@ -63,12 +63,12 @@ const Donation = () => {
           <span className={styles.donateNowText}>Donate Now</span>
           <span
             className={styles.backText}
-            onClick={() => window.location.href = '/causelistpage'}
+            onClick={() => window.history.back()}
             role="link"
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
-                window.location.href = '/causelistpage';
+                window.history.back();
               }
             }}
           >
