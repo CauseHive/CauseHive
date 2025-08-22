@@ -13,6 +13,7 @@
   justify-content: space-between;
   border-right: 1px solid #eee;
   padding: 10px 0;
+  flex-shrink: 0; /* prevent collapsing on small screens */
 }
 
 .menuIcon {
@@ -40,6 +41,7 @@
   flex: 1;
   padding: 20px;
   position: relative;
+  min-width: 0; /* prevents overflow on small screens */
 }
 
 .topBar {
@@ -48,6 +50,7 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .username {
@@ -66,6 +69,7 @@
   background: #fff;
   padding: 10px;
   margin-bottom: 40px;
+  flex-wrap: wrap;
 }
 
 .bannerItem img {
@@ -102,6 +106,7 @@
   display: flex;
   gap: 20px;
   margin-top: 120px;
+  flex-wrap: wrap; /* allow stacking on smaller screens */
 }
 
 .profileBox {
@@ -111,6 +116,7 @@
   border: 1px solid #eee;
   border-radius: 10px;
   font-size: 14px;
+  min-width: 250px; /* ensures readable box width */
 }
 
 .boxHeader {
@@ -129,4 +135,55 @@
   text-align: center;
   font-size: 12px;
   margin-top: 40px;
+}
+
+/* ✅ Responsive adjustments */
+@media (max-width: 1024px) {
+  .bannerItem img {
+    width: 80px;
+    height: 40px;
+  }
+  .profilePic {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+@media (max-width: 768px) {
+  .topBar {
+    justify-content: center;
+  }
+
+  .banner {
+    justify-content: center;
+  }
+
+  .profileSection {
+    flex-direction: column;
+    margin-top: 100px;
+  }
+
+  .profileBox {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 60px;
+  }
+
+  .profilePic {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profileBox {
+    font-size: 12px;
+    padding: 15px;
+  }
+
+  .footer {
+    font-size: 10px;
+  }
 }

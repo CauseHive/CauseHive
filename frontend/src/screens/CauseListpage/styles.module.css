@@ -5,6 +5,7 @@
   padding: 20px;
 }
 
+/* Sidebar stays vertical */
 .sidebar {
   width: 60px;
   background-color: #fff;
@@ -39,12 +40,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  flex-wrap: wrap; /* makes it wrap on smaller screens */
 }
 
 .headerContent {
   display: flex;
   align-items: center;
   gap: 20px;
+  flex-wrap: wrap;
 }
 
 .title {
@@ -105,6 +108,7 @@
   display: flex;
   align-items: center;
   gap: 15px;
+  flex-wrap: wrap;
 }
 
 .cart {
@@ -144,12 +148,15 @@
   overflow-y: auto;
 }
 
+/* Two-column grid for desktop */
 .causeGrid {
   display: flex;
   justify-content: space-between;
+  gap: 20px;
 }
 
-.leftColumn, .rightColumn {
+.leftColumn,
+.rightColumn {
   width: 48%;
   display: flex;
   flex-direction: column;
@@ -206,4 +213,79 @@
 .causeDescription {
   font-size: 14px;
   color: #666;
+}
+
+/* 📱 Mobile Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .sidebar {
+    width: 50px;
+    margin-right: 10px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .headerContent {
+    gap: 10px;
+  }
+
+  .headerControls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .causeGrid {
+    flex-direction: column; /* Stack columns */
+  }
+
+  .leftColumn,
+  .rightColumn {
+    width: 100%;
+  }
+
+  .causeImage,
+  .causePlaceholder {
+    height: 120px;
+  }
+
+  .causeTitle {
+    font-size: 14px;
+  }
+
+  .causeDescription {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 18px;
+  }
+
+  .addToCartButton {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .cartIcon,
+  .profileIcon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .causeImage,
+  .causePlaceholder {
+    height: 100px;
+  }
 }

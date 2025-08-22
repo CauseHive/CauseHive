@@ -3,8 +3,10 @@
   height: 100vh;
   background-color: #f5f7fa;
   padding: 20px;
+  gap: 20px; /* add spacing between sidebar & main */
 }
 
+/* Sidebar (always vertical on left) */
 .sidebar {
   width: 60px;
   background-color: #fff;
@@ -13,18 +15,10 @@
   flex-direction: column;
   align-items: center;
   padding: 15px 0;
-  margin-right: 20px;
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
-.menuIcon {
-  width: 24px;
-  height: 24px;
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
+.menuIcon,
 .icon {
   width: 24px;
   height: 24px;
@@ -34,11 +28,13 @@
   justify-content: center;
 }
 
+/* Main Content */
 .main {
   flex: 1;
   background-color: #fff;
   border-radius: 10px;
   padding: 20px;
+  overflow-y: auto;
 }
 
 .sectionTitle {
@@ -68,13 +64,16 @@
   border-radius: 25px;
 }
 
+/* Stats Layout */
 .statsContainer {
   display: flex;
   justify-content: space-between;
+  gap: 20px;
 }
 
-.statsLeft, .statsRight {
-  width: 48%;
+.statsLeft,
+.statsRight {
+  flex: 1;
   padding: 20px;
   background-color: #fff;
   border-radius: 10px;
@@ -105,4 +104,69 @@
   position: absolute;
   top: 20px;
   right: 20px;
+}
+
+/* ---------------- RESPONSIVENESS ---------------- */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .statsContainer {
+    flex-direction: column;
+  }
+
+  .statsLeft,
+  .statsRight {
+    width: 100%;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: row; /* keep sidebar on left, main on right */
+    padding: 10px;
+  }
+
+  .sidebar {
+    width: 50px; /* slightly smaller */
+    padding: 10px 0;
+  }
+
+  .menuIcon,
+  .icon {
+    margin-bottom: 10px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .main {
+    padding: 15px;
+  }
+
+  .sectionTitle {
+    font-size: 16px;
+  }
+
+  .subSectionTitle {
+    font-size: 14px;
+  }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 480px) {
+  .container {
+    gap: 10px;
+  }
+
+  .sidebar {
+    width: 45px;
+  }
+
+  .main {
+    padding: 10px;
+  }
+
+  .causePlaceholder {
+    height: 40px;
+  }
 }

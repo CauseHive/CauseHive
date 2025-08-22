@@ -6,7 +6,7 @@
   background: #f8f9fc;
 }
 
-/* Sidebar */
+/* Sidebar (always vertical + sticky + scrollable if needed) */
 .sidebar {
   width: 70px;
   background: #fff;
@@ -15,7 +15,20 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 12px 0;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
+
+/* Slim scrollbars for sidebar */
+.sidebar::-webkit-scrollbar { width: 6px; }
+.sidebar::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 999px; }
+.sidebar { scrollbar-width: thin; scrollbar-color: #e5e7eb transparent; }
+
 .sidebarTop {
   display: flex;
   flex-direction: column;
@@ -54,9 +67,10 @@
   flex: 1;
   padding: 20px;
   overflow-y: auto;
+  min-width: 0;
 }
 
-/* HEADER (Top row): Search + Bell + Profile */
+/* HEADER */
 .header {
   display: flex;
   justify-content: space-between;
@@ -67,7 +81,6 @@
   box-shadow: 0 2px 8px rgba(16, 24, 40, 0.06);
 }
 
-/* Single search bar (only here) */
 .searchContainer {
   flex: 1;
   max-width: 360px;
@@ -195,6 +208,9 @@
   height: 80px;
   background: #fff;
   border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Donations */
@@ -209,6 +225,9 @@
   height: 100px;
   background: #fff;
   border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Popular Causes */
@@ -217,6 +236,7 @@
   background: #fff;
   padding: 20px;
   border-radius: 12px;
+  overflow-x: auto;
 }
 .tableHeader {
   display: flex;
@@ -233,6 +253,7 @@
 .table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 560px;
 }
 .table th, .table td {
   text-align: left;
@@ -257,4 +278,44 @@
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 12px;
+}
+
+/* 📱 Responsive Styles */
+
+/* Tablet (≤1024px) */
+@media (max-width: 1024px) {
+  .sidebar { width: 60px; }
+  .title { font-size: 22px; }
+  .topSection, .donationsRow { gap: 16px; }
+  .causesCards { gap: 12px; flex-wrap: wrap; }
+  .causeCard { flex: 1 1 220px; }
+  .searchContainer { max-width: 100%; }
+}
+
+/* Mobile (≤768px) */
+@media (max-width: 768px) {
+  .container { flex-direction: row; height: auto; }
+  .sidebar { width: 56px; }
+  .main { padding: 15px; }
+
+  .header { flex-direction: column; align-items: stretch; gap: 12px; }
+  .searchContainer { width: 100%; max-width: 100%; }
+  .headerRight { width: 100%; justify-content: flex-start; gap: 12px; flex-wrap: wrap; }
+  .profileInfo { display: none; }
+
+  .topBar { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .title { font-size: 20px; }
+
+  .topSection { flex-direction: column; gap: 14px; }
+  .donationsRow { flex-direction: column; gap: 14px; }
+  .tableHeader { flex-direction: column; align-items: flex-start; gap: 10px; }
+}
+
+/* Extra Small Mobile (≤480px) */
+@media (max-width: 480px) {
+  .sidebar { width: 50px; }
+  .avatar { width: 32px; height: 32px; }
+  .main { padding: 10px; }
+  .title { font-size: 18px; }
+  .welcomeBox, .popularCauses { padding: 15px; }
 }

@@ -1,3 +1,4 @@
+/* ====== Signup Page Base ====== */
 .signupPage {
   background: #f0f0f5;
   min-height: 100vh;
@@ -13,6 +14,7 @@
   hyphens: auto;
 }
 
+/* ====== Header ====== */
 .header {
   display: flex;
   align-items: center;
@@ -23,6 +25,35 @@
   min-width: 320px;
 }
 
+.logo {
+  font-weight: 900;
+  font-size: 1.8rem;
+  color: #1a1a2e;
+  text-align: center;
+  flex: 1;
+}
+
+.searchBar {
+  flex-grow: 2;
+  margin: 0 20px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background-color: #d9d4d4;
+  font-size: 1rem;
+  color: #555;
+  min-width: 160px;
+}
+
+.authButtons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+  z-index: 10;
+}
+
+/* ====== Navigation ====== */
 .navLinks {
   display: flex;
   justify-content: center;
@@ -41,33 +72,7 @@
   cursor: pointer;
 }
 
-.logo {
-  font-weight: 900;
-  font-size: 1.8rem;
-  color: #1a1a2e;
-  text-align: center;
-  width: 100%;
-}
-
-.searchBar {
-  flex-grow: 1;
-  margin: 0 20px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: none;
-  background-color: #d9d4d4;
-  font-size: 1rem;
-  color: #555;
-}
-
-.authButtons {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  position: relative;
-  z-index: 10;
-}
-
+/* ====== Buttons & Dropdown ====== */
 .signIn {
   color: #000;
   text-decoration: none;
@@ -122,6 +127,7 @@
   color: white;
 }
 
+/* ====== Main Content ====== */
 .mainContent {
   max-width: 400px;
   margin: 0 auto;
@@ -155,6 +161,7 @@
   font-weight: 700;
 }
 
+/* ====== Input Groups ====== */
 .inputGroup {
   display: flex;
   align-items: center;
@@ -180,6 +187,7 @@
   outline: none;
 }
 
+/* ====== Remember & Divider ====== */
 .rememberMe {
   display: flex;
   align-items: center;
@@ -204,11 +212,13 @@
   border-top: 1px solid #aaa;
 }
 
+/* ====== Social Buttons ====== */
 .socialButtons {
   display: flex;
   justify-content: center;
   gap: 30px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .socialLink {
@@ -233,6 +243,7 @@
   box-sizing: content-box;
 }
 
+/* ====== Buttons ====== */
 .signInButton {
   background-color: #1a1a2e;
   color: white;
@@ -260,10 +271,7 @@
   cursor: pointer;
 }
 
-.alreadyAccountLink a,
-.alreadyAccountLink a:hover,
-.alreadyAccountLink a:focus,
-.alreadyAccountLink a:active {
+.alreadyAccountLink a {
   text-decoration: underline !important;
 }
 
@@ -273,6 +281,7 @@
   cursor: pointer;
 }
 
+/* ====== Chat Bubble & Icon ====== */
 .chatBubble {
   position: fixed;
   bottom: 20px;
@@ -297,31 +306,31 @@
   cursor: pointer;
 }
 
-.backgroundCircle1 {
+/* ====== Background Circles ====== */
+.backgroundCircle1,
+.backgroundCircle2 {
   position: fixed;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.backgroundCircle1 {
   top: 100px;
   right: 60px;
   width: 80px;
   height: 80px;
-  background-color: #3a3aff;
   background: linear-gradient(180deg, #3a3aff 0%, #1e40ff 100%);
-  border-radius: 50%;
-  z-index: 0;
 }
 
 .backgroundCircle2 {
-  position: fixed;
   bottom: 180px;
   left: 20px;
   width: 50px;
   height: 50px;
-  background-color: #3a3aff;
   background: linear-gradient(180deg, #3a3aff 0%, #1e40ff 100%);
-  border-radius: 50%;
-  z-index: 0;
 }
 
-/* Responsive styles */
+/* ====== Responsive: Names Row ====== */
 .nameRow {
   display: flex;
   gap: 20px;
@@ -332,30 +341,7 @@
 .nameRow > .inputGroup {
   max-width: none;
   width: 100%;
-}
-
-.nameRow > .inputGroup:first-child {
   flex-grow: 1;
-}
-
-.nameRow > .inputGroup:last-child {
-  flex-grow: 1;
-}
-
-.inputGroup {
-  display: flex;
-  align-items: center;
-  background-color: #d9d4d4;
-  border-radius: 8px;
-  padding: 8px 12px;
-  width: 100%;
-  max-width: 400px;
-}
-
-@media (max-width: 768px) {
-  .nameRow {
-    flex-direction: column;
-  }
 }
 
 .alignedInput {
@@ -363,8 +349,109 @@
   width: 100%;
 }
 
+/* ====== Responsive Breakpoints ====== */
+
+/* Tablets */
+@media (max-width: 992px) {
+  .header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .searchBar {
+    flex-grow: 1;
+    margin: 10px 0;
+    width: 100%;
+  }
+
+  .navLinks {
+    gap: 20px;
+    font-size: 0.95rem;
+  }
+
+  .logo {
+    font-size: 1.6rem;
+  }
+}
+
+/* Mobile */
 @media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .navLinks {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 15px;
+  }
+
+  .nameRow {
+    flex-direction: column;
+  }
+
   .alignedInput {
     max-width: 100%;
+  }
+
+  .socialButtons {
+    gap: 15px;
+  }
+
+  .welcome {
+    font-size: 1.6rem;
+  }
+
+  .chatBubble {
+    max-width: 140px;
+    font-size: 0.8rem;
+    padding: 10px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.4rem;
+    text-align: left;
+  }
+
+  .navLinks {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .welcome {
+    font-size: 1.4rem;
+  }
+
+  .subtext {
+    font-size: 0.9rem;
+  }
+
+  .signUpButton,
+  .signInButton {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+
+  .chatBubble {
+    bottom: 70px;
+    right: 15px;
+    max-width: 120px;
+  }
+
+  .chatIcon {
+    bottom: 15px;
+    right: 15px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .backgroundCircle1,
+  .backgroundCircle2 {
+    display: none; /* hide background effects on very small screens */
   }
 }

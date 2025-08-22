@@ -10,6 +10,8 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .searchInput {
@@ -22,6 +24,7 @@
   font-size: 16px;
   outline: none;
   text-align: left;
+  min-width: 200px;
 }
 
 .cartIconWrapper {
@@ -50,6 +53,7 @@
   display: flex;
   justify-content: flex-end;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .backText {
@@ -81,20 +85,21 @@
 .row {
   display: flex;
   gap: 20px;
+  flex-wrap: wrap;
 }
 
 .inputGroup {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  min-width: 200px;
 }
 
 .inputGroupPhone {
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-width: 0;
+  min-width: 150px;
   max-width: 200px;
 }
 
@@ -109,6 +114,7 @@ textarea {
   padding: 0 15px;
   font-size: 14px;
   box-sizing: border-box;
+  width: 100%;
 }
 
 .phoneNumberInput {
@@ -122,6 +128,7 @@ textarea {
   gap: 10px;
   margin-top: 5px;
   min-width: 0;
+  flex-wrap: wrap;
 }
 
 .countryCodeInput {
@@ -144,12 +151,14 @@ textarea {
   gap: 20px;
   align-items: flex-end;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .donationGroup {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-width: 150px;
 }
 
 .donationGroup label {
@@ -197,6 +206,7 @@ textarea {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .donateButton {
@@ -215,4 +225,54 @@ textarea {
 
 .donateButton:hover {
   background-color: #1f2a2f;
+}
+
+/* 📱 Mobile (≤768px) */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cartIconWrapper {
+    align-self: flex-end;
+    margin-left: 0;
+  }
+
+  .row,
+  .donationRow {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .donateButton {
+    width: 100%;
+    align-self: center;
+  }
+}
+
+/* 📱 Small screens (≤480px) */
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
+  }
+
+  .searchInput {
+    height: 45px;
+    font-size: 14px;
+  }
+
+  .itemsOnCart {
+    font-size: 18px;
+  }
+
+  .donationGroup input {
+    height: 45px;
+    font-size: 13px;
+  }
+
+  .donateButton {
+    font-size: 14px;
+    height: 45px;
+  }
 }

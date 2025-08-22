@@ -13,6 +13,11 @@
   hyphens: auto;
 }
 
+/* Added: keep layout stable & sizing predictable */
+.signupPage * {
+  box-sizing: border-box;
+}
+
 .header {
   display: flex;
   align-items: center;
@@ -74,6 +79,7 @@
   font-weight: 700;
 }
 
+/* (duplicate kept intentionally, as in your original) */
 .navLinks {
   display: flex;
   justify-content: center;
@@ -300,12 +306,31 @@
   z-index: 20;
 }
 
+/* ------- Anti-overlap & anti-shift additions ------- */
+/* Keep decorative circles behind everything and non-interactive */
+.backgroundCircle1,
+.backgroundCircle2 {
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Keep key blocks centered even when wrapping occurs */
+.header,
+.navLinks,
+.mainContent,
+.signInButton,
+.inputGroup {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
   .header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
+    width: 100%;
   }
 
   .searchBar {
@@ -323,6 +348,7 @@
     gap: 10px;
     margin: 10px 0;
     font-size: 0.9rem;
+    width: 100%;
   }
 
   .mainContent {

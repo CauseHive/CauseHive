@@ -1,17 +1,21 @@
 .container {
   display: flex;
+  flex-direction: row; /* Always keep sidebar to the left */
   height: 100vh;
   background-color: #f5f7fa;
+  overflow: hidden;
 }
 
 .sidebar {
   width: 60px;
+  min-width: 60px; /* Prevent collapsing */
   background-color: #fff;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-top: 20px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0; /* Never let sidebar shrink */
 }
 
 .menuIcon {
@@ -36,6 +40,7 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .header {
@@ -93,4 +98,29 @@
 
 .settingsItem:last-child {
   border-bottom: none;
+}
+
+/* ✅ Responsive Fix */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: row; /* Sidebar always stays left */
+  }
+
+  .sidebar {
+    width: 50px;
+    min-width: 50px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .userName {
+    font-size: 14px;
+  }
+
+  .settingsItem {
+    font-size: 14px;
+    padding: 12px;
+  }
 }

@@ -24,12 +24,10 @@ const Section7 = () => {
         setTestimonials(fetchedTestimonials.length > 0 ? fetchedTestimonials : [
           {
             id: 1,
-            text: "contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC",
             author: "Syed",
           },
           {
             id: 2,
-            text: "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
             author: "Alex",
           },
           {
@@ -44,25 +42,21 @@ const Section7 = () => {
             id: 1,
             value: "0%",
             title: "Platform charge",
-            description: "contrary to popular belief, Lorem Ipsum is not simply random text.",
           },
           {
             id: 2,
             value: "12k+ GHC",
             title: "Donations given",
-            description: "contrary to popular belief, Lorem Ipsum is not simply random text.",
           },
           {
             id: 3,
             value: "16k+ ",
             title: "Active Donors",
-            description: "contrary to popular belief, Lorem Ipsum is not simply random text.",
           },
           {
             id: 4,
             value: "20K+",
             title: "Success stories",
-            description: "contrary to popular belief, Lorem Ipsum is not simply random text.",
           },
         ]);
       } catch (error) {
@@ -71,17 +65,14 @@ const Section7 = () => {
         setTestimonials([
           {
             id: 1,
-            text: "contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC",
             author: "Syed",
           },
           {
             id: 2,
-            text: "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
             author: "Alex",
           },
           {
             id: 3,
-            text: "It has survived not only five centuries, but also the leap into electronic typesetting.",
             author: "Maria",
           },
         ]);
@@ -91,25 +82,21 @@ const Section7 = () => {
             id: 1,
             value: "0%",
             title: "Platform charge",
-            description: "contrary to popular belief, Lorem Ipsum is not simply random text.",
           },
           {
             id: 2,
             value: "12k+ GHC",
             title: "Donations given",
-            description: "contrary to popular belief, Lorem Ipsum is not simply random text.",
           },
           {
             id: 3,
             value: "16k+ ",
             title: "Active Donors",
-            description: "contrary to popular belief, Lorem Ipsum is not simply random text.",
           },
           {
             id: 4,
             value: "20K+",
             title: "Success stories",
-            description: "contrary to popular belief, Lorem Ipsum is not simply random text.",
           },
         ]);
       } finally {

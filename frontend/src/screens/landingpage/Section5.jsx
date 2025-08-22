@@ -96,9 +96,7 @@ const Section5 = () => {
       <div className={styles.section5TextBlock}>
         <button className={styles.successStoriesLabel}>SUCCESS STORIES</button>
         <h2 className={styles.section5MainHeading}>By you It's happened</h2>
-        <p className={styles.section5Description}>
-          Lorem Ipsum is simply dummy text of the printing typesetting dummy text ever when an unknown printer took a galley of type and scrambled a type specimen book.
-        </p>
+       
       </div>
       <div className={styles.section5Grid}>
         <div className={styles.section5LargeImageContainer}>

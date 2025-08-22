@@ -163,3 +163,61 @@
 
 .tooltipBox{ fill:#4a90e2; }
 .tooltipText{ fill:#fff; font-size:12px; }
+
+
+/* ---------- 📱 Responsive Styles ---------- */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .search { max-width: 80vw; }
+  .welcomeSection,
+  .pendingRow { flex-wrap: wrap; }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .layoutContainer { flex-direction: row; }
+
+  .sidebar {
+    width:60px; padding:8px 0;
+  }
+
+  .headerBar {
+    grid-template-columns:1fr auto;
+    gap:12px;
+    padding:12px 16px;
+  }
+
+  .search {
+    width:100%; max-width:100%; font-size:13px; height:38px;
+  }
+
+  .headerRight { gap:10px; }
+  .userInfo .name{ font-size:13px; }
+  .userInfo .role{ font-size:11px; }
+
+  .pageTitle { font-size:22px; }
+  .welcomeSection,
+  .pendingRow { flex-direction:column; }
+  .welcomeCard, .highlightCard,
+  .pendingCard { height:auto; min-height:70px; }
+
+  .metricsSection { padding:16px; }
+  .metricsTitle{ font-size:18px; }
+  .chartSVG{ height:200px; }
+}
+
+/* Small Phones */
+@media (max-width: 480px) {
+  .sidebar { width:50px; }
+  .sideIcon{ width:36px; height:36px; }
+
+  .headerBar { padding:10px 12px; }
+  .search { font-size:12px; padding:0 12px; }
+
+  .pageTitle { font-size:18px; }
+  .sectionTitle { font-size:16px; }
+
+  .metricsTitle{ font-size:16px; }
+  .chartSVG{ height:160px; }
+}

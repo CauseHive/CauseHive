@@ -1172,3 +1172,180 @@
   color: #8bc53f;
   font-size: 18px;
 }
+
+/* ================== RESPONSIVE ADDITIONS (APPENDED) ================== */
+
+/* Large tablets / small desktops */
+@media (max-width: 1024px) {
+  .heroSection {
+    flex-direction: column;
+    text-align: center;
+    gap: 24px;
+  }
+  .heroTextContainer {
+    max-width: 100%;
+  }
+  .curvedImageContainer {
+    max-width: 100%;
+  }
+
+  .servicesCards,
+  .helpCards,
+  .section8BlogCards,
+  .contributorsContainer {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .section7Stats {
+    gap: 20px;
+  }
+  .statItem {
+    flex: 1 1 45%;
+    text-align: center;
+  }
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+  /* Navbar stacks */
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 20px;
+  }
+  .navbarRight {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .heroHeading {
+    font-size: 28px;
+  }
+  .changeLivesHeading {
+    font-size: 20px;
+  }
+
+  /* Cards widen to container */
+  .serviceCard,
+  .helpCard,
+  .blogCard,
+  .contributorCard {
+    width: 100%;
+    max-width: 520px;
+  }
+
+  /* Section 5 grid stacks */
+  .section5Grid {
+    flex-direction: column;
+  }
+  .section5LargeImage {
+    height: 240px;
+  }
+
+  /* Footer stacks */
+  .footerNav {
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+    align-items: center;
+  }
+  .section10Container {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+}
+
+/* Large phones */
+@media (max-width: 600px) {
+  .heroSection {
+    padding: 40px 20px;
+    margin-bottom: 60px;
+  }
+
+  .servicesSection,
+  .helpNeededSection,
+  .section5Container,
+  .section6Container,
+  .section7Container,
+  .section8Container,
+  .section9Container,
+  .section10Container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .servicesCards,
+  .helpCards,
+  .section8BlogCards,
+  .contributorsContainer {
+    gap: 16px;
+  }
+
+  .helpCardImage,
+  .blogImage {
+    height: 120px;
+  }
+
+  .section5SmallImagesContainer {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+
+  .donateSupportHeading,
+  .section6Heading,
+  .section7MainHeading,
+  .section8MainHeading,
+  .section5MainHeading {
+    font-size: 22px;
+  }
+
+  .statItem {
+    flex: 1 1 100%;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .navbarLeft {
+    font-size: 20px;
+  }
+
+  .navLink,
+  .loginLink {
+    font-size: 14px;
+  }
+
+  .heroButtons {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .requestDonationButton,
+  .donateAndHelpButton,
+  .donateButton,
+  .registerButton,
+  .subscriptionButton {
+    font-size: 12px;
+    padding: 10px 18px;
+  }
+
+  .subscriptionContainer,
+  .subscriptionInputGroup {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .section5LargeImage {
+    height: 200px;
+  }
+
+  .navArrow,
+  .forwardButton {
+    width: 32px;
+    height: 32px;
+  }
+}

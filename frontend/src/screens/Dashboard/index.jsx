@@ -1,4 +1,4 @@
-import React from "react";
+import React from "react"; 
 import styles from "./styles.module.css";
 import {
   Bell,
@@ -11,12 +11,11 @@ import {
   Calendar,
   Settings,
   LogOut,
-  Search,
 } from "lucide-react";
 
 const Dashboard = () => {
   return (
-     <div className={styles.container}>
+    <div className={styles.container}>
       {/* Sidebar */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarTop}>
@@ -41,7 +40,7 @@ const Dashboard = () => {
         {/* HEADER (Top row): Search + Bell + Profile */}
         <header className={styles.header}>
           <div className={styles.searchContainer}>
-            <Search className={styles.searchIcon} />
+            {/* Removed the search icon */}
             <input
               type="text"
               placeholder="Search"

@@ -19,7 +19,6 @@ const Section8 = () => {
             id: 1,
             title: "How Azar become doctor",
             category: "Education",
-            description: "contrary to popular belief, Lorem Ipsum is not simply random text.",
             image: BlogImage,
             slug: "how-azar-become-doctor"
           },
@@ -27,7 +26,6 @@ const Section8 = () => {
             id: 2,
             title: "Azar is fine now",
             category: "Education", 
-            description: "contrary to popular belief, Lorem Ipsum is not simply random text.",
             image: BlogImage,
             slug: "azar-is-fine-now"
           },
@@ -35,7 +33,6 @@ const Section8 = () => {
             id: 3,
             title: "Donate Azar",
             category: "Education",
-            description: "contrary to popular belief, Lorem Ipsum is not simply random text.",
             image: BlogImage,
             slug: "donate-azar"
           },
@@ -48,7 +45,6 @@ const Section8 = () => {
             id: 1,
             title: "How Azar become doctor",
             category: "Education",
-            description: "contrary to popular belief, Lorem Ipsum is not simply random text.",
             image: BlogImage,
             slug: "how-azar-become-doctor"
           },
@@ -56,7 +52,6 @@ const Section8 = () => {
             id: 2,
             title: "Azar is fine now",
             category: "Education",
-            description: "contrary to popular belief, Lorem Ipsum is not simply random text.",
             image: BlogImage,
             slug: "azar-is-fine-now"
           },
@@ -64,7 +59,6 @@ const Section8 = () => {
             id: 3,
             title: "Donate Azar",
             category: "Education",
-            description: "contrary to popular belief, Lorem Ipsum is not simply random text.",
             image: BlogImage,
             slug: "donate-azar"
           },

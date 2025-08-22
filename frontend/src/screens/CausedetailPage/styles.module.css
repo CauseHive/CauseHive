@@ -1,85 +1,282 @@
-.container {
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    max-width: 600px;
-    margin: auto;
-    background-color: #f9f9f9;
-    border-radius: 15px;
+/* Layout Wrapper */
+.wrapper {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f9f9f9;
 }
 
+/* Sidebar */
+.sidebar {
+  width: 200px;
+  background-color: #fff;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 1rem;
+  flex-shrink: 0; /* prevent shrinking */
+  overflow-y: auto; /* allow scrolling if content overflows */
+}
+
+.sidebarItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: #555;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.sidebarItem:hover {
+  color: #1c2b3a;
+}
+
+.sidebarItem svg {
+  font-size: 1.1rem;
+}
+
+/* Main Container */
+.container {
+  flex: 1;
+  padding: 2rem;
+  color: #333;
+  overflow-x: hidden;
+}
+
+/* Header */
 .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .searchInput {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    flex-grow: 1;
-    margin: 0 10px;
+  padding: 0.6rem 1rem;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  width: 400px;
+  max-width: 90%;
+  font-size: 1rem;
 }
 
-.cart {
-    font-size: 24px;
+.cartIcon {
+  position: relative;
+  font-size: 1.5rem;
+  cursor: pointer;
 }
 
-.details {
-    margin-top: 20px;
+.cartBadge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background-color: red;
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 50%;
 }
 
-.content {
-    display: flex;
-    flex-direction: column;
-    margin-top: 20px;
+/* Main Content */
+.main {
+  margin-top: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.campaignTitle {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+}
+
+/* Placeholder Boxes */
+.placeholders {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
 }
 
 .box {
-    height: 100px;
-    background-color: #e0e0e0;
-    margin-bottom: 10px;
-    border-radius: 5px;
+  flex: 1 1 30%;
+  min-width: 100px;
+  height: 100px;
+  background-color: #e0e0e0;
+  border-radius: 8px;
 }
 
-.metadata {
-    margin-top: 20px;
+/* Info Section */
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
+.infoBlock h4 {
+  margin-bottom: 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.infoBlock p {
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* Progress Bar */
 .progressContainer {
-    display: flex;
-    align-items: center;
-    margin-top: 10px;
+  margin-bottom: 2rem;
+}
+
+.progressContainer label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
 }
 
 .progressBar {
-    height: 10px;
-    background-color: #4caf50;
-    border-radius: 5px;
-    margin-right: 10px;
+  width: 100%;
+  height: 10px;
+  background-color: #ddd;
+  border-radius: 5px;
+  overflow: hidden;
 }
 
-.buttons {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
+.progressFill {
+  width: 70%;
+  height: 100%;
+  background-color: #00aaff;
+}
+
+/* Buttons */
+.buttonGroup {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.donateBtn,
+.cartBtn {
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  cursor: pointer;
 }
 
 .donateBtn {
-    padding: 10px 20px;
-    background-color: #6c757d;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  background-color: #1c2b3a;
+  color: white;
 }
 
 .cartBtn {
-    padding: 10px 20px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  background-color: #b4d900;
+  color: #1c2b3a;
+}
+
+/* 📱 Responsive Styles */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 160px; /* narrower sidebar */
+  }
+
+  .container {
+    padding: 1.2rem;
+  }
+
+  .searchWrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .searchInput {
+    width: 95%;
+  }
+
+  .placeholders {
+    flex-direction: column;
+  }
+
+  .box {
+    width: 100%;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .buttonGroup {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .donateBtn,
+  .cartBtn {
+    width: 90%;
+    margin-bottom: 1rem;
+  }
+}
+
+/* 📱 Extra Small Devices (Phones ≤480px) */
+@media (max-width: 480px) {
+  .sidebar {
+    width: 140px; /* even narrower */
+    padding: 0.5rem;
+  }
+
+  .logo {
+    font-size: 1.2rem;
+  }
+
+  .searchInput {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.8rem;
+  }
+
+  .sidebarItem {
+    font-size: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .sectionTitle {
+    font-size: 1rem;
+  }
+
+  .campaignTitle {
+    font-size: 0.9rem;
+  }
+
+  .donateBtn,
+  .cartBtn {
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+    width: 100%;
+  }
+
+  .infoBlock p {
+    font-size: 0.8rem;
+  }
 }
