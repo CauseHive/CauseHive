@@ -97,5 +97,5 @@ const Profilesettings = () => {
   );
 };
 
-export default profilesettings;
+export default Profilesettings;
 

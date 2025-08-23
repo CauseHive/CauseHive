@@ -106,8 +106,6 @@
   gap:10px;
   justify-self:end;
 }
-<<<<<<< HEAD
-=======
 .avatar{
   width:44px;
   height:44px;
@@ -125,7 +123,6 @@
 .avatarBadge{ display:none; }
 .avatarDropdown{ display:none; }
 .caret{ display:none; }
->>>>>>> 298f07dda05016d1ade9a68e946d2d30ceb1c795
 
 /* Filters */
 .filtersRow{
@@ -138,10 +135,7 @@
   flex:1;
   min-width:200px;
   height:42px;
-<<<<<<< HEAD
-=======
   min-width:220px;
->>>>>>> 298f07dda05016d1ade9a68e946d2d30ceb1c795
   background:#fff;
   border-radius:9999px;
   display:flex;
@@ -159,8 +153,6 @@
   background:transparent;
   cursor:pointer;
 }
-<<<<<<< HEAD
-=======
 .pillCaret{
   margin-left:10px;
   color:#8f96a1;
@@ -175,7 +167,6 @@
   box-shadow: 0 2px 4px rgba(16,24,40,0.06);
   cursor:pointer;
 }
->>>>>>> 298f07dda05016d1ade9a68e946d2d30ceb1c795
 
 /* Title */
 .title{
@@ -209,8 +200,6 @@
   box-shadow:-4px -4px 10px var(--shadow-hi), 4px  4px 10px var(--shadow-lo);
   border:1px solid #eef1f5;
 }
-<<<<<<< HEAD
-=======
 .cardMeta{
   flex:1;
   display:flex;
@@ -268,16 +257,11 @@
 .amountCaret{
   color:#8b929c;
 }
->>>>>>> 298f07dda05016d1ade9a68e946d2d30ceb1c795
 
 /* Bottom checkout bar */
 .checkoutBar{
   position:fixed;
-<<<<<<< HEAD
-  left:72px;
-=======
   left:70px; /* align with content minus sidebar width */
->>>>>>> 298f07dda05016d1ade9a68e946d2d30ceb1c795
   right:0;
   bottom:24px;
   display:flex;

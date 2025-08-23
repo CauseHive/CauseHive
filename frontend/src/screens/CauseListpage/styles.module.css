@@ -246,84 +246,6 @@
 .causeDescription {
   font-size: 14px;
   color: #666;
-<<<<<<< HEAD
-}
-
-/* 📱 Mobile Responsive */
-@media (max-width: 768px) {
-  .container {
-    padding: 10px;
-  }
-
-  .sidebar {
-    width: 50px;
-    margin-right: 10px;
-  }
-
-  .title {
-    font-size: 20px;
-  }
-
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .headerContent {
-    gap: 10px;
-  }
-
-  .headerControls {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .causeGrid {
-    flex-direction: column; /* Stack columns */
-  }
-
-  .leftColumn,
-  .rightColumn {
-    width: 100%;
-  }
-
-  .causeImage,
-  .causePlaceholder {
-    height: 120px;
-  }
-
-  .causeTitle {
-    font-size: 14px;
-  }
-
-  .causeDescription {
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .title {
-    font-size: 18px;
-  }
-
-  .addToCartButton {
-    font-size: 12px;
-    padding: 8px;
-  }
-
-  .cartIcon,
-  .profileIcon {
-    width: 32px;
-    height: 32px;
-  }
-
-  .causeImage,
-  .causePlaceholder {
-    height: 100px;
-  }
-}
-=======
   display: -webkit-box;
   -webkit-line-clamp: 3; /* allow a longer description to the right */
   -webkit-box-orient: vertical;
@@ -331,4 +253,3 @@
 }
 
 .cardActions { margin-top: 6px; }
->>>>>>> 298f07dda05016d1ade9a68e946d2d30ceb1c795
