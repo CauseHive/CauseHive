@@ -1,14 +1,14 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Signup from './screens/Signup';
-import Dashboard from './screens/Dashboard'; // Importing the new Dashboard
+import Dashboard from './screens/dashboard'; // Importing the new Dashboard
 import DonationHistory from './screens/DonationHistory'
 import SignIn from './screens/Sign-in';
 import LandingPage from './screens/landingpage';
 import CauseListpage from './screens/CauseListpage';
 import Donation from './screens/Donation';
 import Profilepage from './screens/Profilepage';
-import Profilesettings from './screens/profilesettings';
+import ProfileSettings from './screens/profilesettings';
 import CartPage from './screens/CartPage';
 import MultiDonation from './screens/MultiDonation';
 import Notificationspage from './screens/Notificationspage';
@@ -38,7 +38,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/donationhistory" element={<DonationHistory />} />
           <Route path="/profilepage" element={<Profilepage />} />
-          <Route path="/profilesettings" element={<Profilesettings />} />
+          <Route path="/profilesettings" element={<ProfileSettings />} />
           <Route path="/cartpage" element={<CartPage />} />
           <Route path="/multidonation" element={<MultiDonation />} />
           <Route path="/notificationspage" element={<Notificationspage />} />
