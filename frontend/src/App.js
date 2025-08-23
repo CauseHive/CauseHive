@@ -1,8 +1,8 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Signup from './screens/Signup';
-import Dashboard from './screens/Dashboard'; // Importing the new Dashboard
-import DonationHistory from './screens/DonationHistory'
+import Dashboard from './screens/Dashboard/index'; // Importing the Dashboard index explicitly to avoid casing/file resolution issues
+import DonationHistory from './screens/DonationHistory';
 import SignIn from './screens/Sign-in';
 import LandingPage from './screens/landingpage';
 import CauseListpage from './screens/CauseListpage';
