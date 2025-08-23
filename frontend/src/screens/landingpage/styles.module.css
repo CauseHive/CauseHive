@@ -1,7 +1,6 @@
 /* Section 1 - Navigation Bar */
 .navbar {
   display: flex;
-  flex-direction: ;
   justify-content: space-between;
   align-items: center;
   padding: 20px 40px;
