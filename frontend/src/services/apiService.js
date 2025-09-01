@@ -1,9 +1,17 @@
 // API Configuration (Vite + fallback)
-const API_BASE_URL = process.env.REACT_APP_API_URL ||
+let API_BASE_URL = process.env.REACT_APP_API_URL ||
   (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
   (window && window.location && window.location.hostname.includes('causehive.tech')
     ? 'https://causehive.tech/api'
     : 'http://localhost:8000/api');
+
+// Normalize base URL: remove trailing slashes and strip a trailing '/api' segment
+if (typeof API_BASE_URL === 'string') {
+  API_BASE_URL = API_BASE_URL.replace(/\/+$|\s+$/g, '');
+  if (API_BASE_URL.toLowerCase().endsWith('/api')) {
+    API_BASE_URL = API_BASE_URL.slice(0, -4);
+  }
+}
 
 // API Service Class
 class ApiService {
