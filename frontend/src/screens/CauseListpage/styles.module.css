@@ -247,19 +247,13 @@
   font-size: 14px;
   color: #666;
   display: -webkit-box;
-<<<<<<< HEAD
-  -webkit-line-clamp: 3; /* allow a longer description to the right */
-=======
   -webkit-line-clamp: 3;
   line-clamp: 3;
->>>>>>> 28f40068db345c6784a79d827b6e72fdc6e3f0df
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
 .cardActions { margin-top: 6px; }
-<<<<<<< HEAD
-=======
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
@@ -335,4 +329,3 @@
     height: 100px;
   }
 }
->>>>>>> 28f40068db345c6784a79d827b6e72fdc6e3f0df
