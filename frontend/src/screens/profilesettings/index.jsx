@@ -3,7 +3,7 @@ import styles from './styles.module.css';
 import apiService from '../../services/apiService';
 import { useToast } from '../../components/Toast/ToastProvider';
 
-const Profilesettings = () => {
+const ProfileSettings = () => {
   const [bio, setBio] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
@@ -30,7 +30,7 @@ const Profilesettings = () => {
       await apiService.updateProfile({ bio, phone_number: phone, address, profile_picture: picture, cover_photo: cover });
       toast.success('Profile updated');
     } catch (e) {
-      toast.error('Failed to update profile');
+      toast.error(`Failed to update profile: ${e.message}`);
     } finally {
       setSaving(false);
     }
@@ -79,7 +79,7 @@ const Profilesettings = () => {
               </div>
               <div style={{ marginBottom: 12 }}>
                 <label>Profile picture</label>
-                <input type="file" accept="image/*" onChange={(e) => setPicture(e.target.files?.[0] ?? null)} />
+                <input type="file" accept="image/*" onChange={(e) => setPicture(e.target.files?.[0] ?? null) || toast.error('No file selected')} />
               </div>
               <div style={{ marginBottom: 12 }}>
                 <label>Cover photo</label>
@@ -97,5 +97,9 @@ const Profilesettings = () => {
   );
 };
 
+<<<<<<< HEAD
 export default Profilesettings;
+=======
+export default ProfileSettings;
+>>>>>>> 28f40068db345c6784a79d827b6e72fdc6e3f0df
 
