@@ -119,8 +119,8 @@ Use the Railway dashboard to set all required environment variables listed above
 ## Monitoring and Logs
 
 ### Health Check Endpoints
-- **Health Check:** `https://your-app.railway.app/api/health/`
-- **Readiness Check:** `https://your-app.railway.app/api/ready/`
+- **Health Check:** `https://causehive-monolithic-production.up.railway.app/api/health/`
+- **Readiness Check:** `https://causehive-monolithic-production.up.railway.app/api/ready/`
 
 ### Log Monitoring
 ```bash

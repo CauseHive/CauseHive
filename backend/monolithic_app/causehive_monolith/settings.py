@@ -15,6 +15,10 @@ from pathlib import Path
 from datetime import timedelta
 import environ
 import dj_database_url
+try:
+    from corsheaders.defaults import default_headers  # type: ignore
+except Exception:
+    default_headers = None
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,6 +40,7 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost', '*.
 
 # Frontend and external URLs
 FRONTEND_URL = env('FRONTEND_URL', default='https://causehive.tech')
+RAILWAY_BACKEND_HOST = env('RAILWAY_BACKEND_HOST', default='https://causehive-monolithic-production.up.railway.app')
 
 # User and authentication settings
 AUTH_USER_MODEL = 'users_n_auth.User'
@@ -267,8 +272,26 @@ CORS_ALLOWED_ORIGINS = [
     "https://causehive.tech",
 ]
 
+# Add Railway backend host and ensure FRONTEND_URL is allowed
+if FRONTEND_URL and FRONTEND_URL not in CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
+if RAILWAY_BACKEND_HOST and RAILWAY_BACKEND_HOST not in CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS.append(RAILWAY_BACKEND_HOST)
+
 # CORS settings for Railway deployment
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = list(default_headers) if default_headers is not None else [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # CSRF trusted origins (include production domain)
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
