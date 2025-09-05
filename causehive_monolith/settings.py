@@ -39,6 +39,7 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
     '*.railway.app',
     'causehive.tech',
     'www.causehive.tech',
+    'causehive-monolithic-production.up.railway.app',
 ])
 
 # Frontend and external URLs
