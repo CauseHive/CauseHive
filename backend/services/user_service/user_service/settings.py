@@ -33,10 +33,10 @@ ADMIN_SERVICE_API_KEY = env('ADMIN_SERVICE_API_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=False)
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost',]
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'causehive-monolithic-production.up.railway.app', 'causehive.tech', 'www.causehive.tech']
 
-FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:5173')
-BACKEND_URL = env('BACKEND_URL', default='https://localhost:8000')
+FRONTEND_URL = env('FRONTEND_URL', default='http://www.causehive.tech')
+BACKEND_URL = env('BACKEND_URL', default='https://causehive-monolithic-production.up.railway.app')
 
 
 # User and authentication settings

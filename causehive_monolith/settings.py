@@ -47,8 +47,8 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
 ])
 
 # Frontend and external URLs
-FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:5173')
-BACKEND_URL = env('BACKEND_URL', default='http://localhost:8000')
+FRONTEND_URL = env('FRONTEND_URL', default='http://www.causehive.tech')
+BACKEND_URL = env('BACKEND_URL', default='http://causehive-monolithic-production.up.railway.app')
 
 # Service URLs for microservice communication
 CAUSE_SERVICE_URL = env('CAUSE_SERVICE_URL', default='http://localhost:8001')
@@ -350,6 +350,7 @@ if RAILWAY_BACKEND_HOST not in CORS_ALLOWED_ORIGINS:
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
     'https://causehive.tech',
     'https://www.causehive.tech',
+    'causehive-monolithic-production.up.railway.app',
     'https://*.railway.app',
 ])
 
