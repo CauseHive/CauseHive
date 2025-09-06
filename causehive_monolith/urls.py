@@ -35,6 +35,10 @@ try:
 except ImportError:
     pass
 
+
+def home(request):
+    return JsonResponse({"Greetings": "Welcome to CauseHive!"})
+
 # Create API router for RESTful endpoints
 router = DefaultRouter()
 
@@ -45,9 +49,6 @@ if PaymentTransactionViewSet:
     router.register(r'payments', PaymentTransactionViewSet, basename='paymenttransaction')
 if WithdrawalRequestViewSet:
     router.register(r'withdrawals', WithdrawalRequestViewSet, basename='withdrawalrequest')
-
-def home(request):
-    return JsonResponse({"Greetings": "Welcome to CauseHive!"})
 
 urlpatterns = [
     #Home Endpoint
