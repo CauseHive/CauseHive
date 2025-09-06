@@ -1,5 +1,5 @@
 """
-Django settings for causehive project.
+Django settings for causehive_monolith project.
 
 This monolithic application combines all CauseHive microservices:
 - User Service
@@ -30,11 +30,11 @@ env_file = BASE_DIR / ".env"
 environ.Env.read_env(str(env_file))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
-# ADMIN_SERVICE_API_KEY = env('ADMIN_SERVICE_API_KEY')
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-build-time-key-replace-in-production')
+ADMIN_SERVICE_API_KEY = env('ADMIN_SERVICE_API_KEY', default='admin-api-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool('DEBUG', default=True)
+DEBUG = env.bool('DEBUG', default=False)
 
 # Railway deployment settings
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
@@ -50,32 +50,12 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
 FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:5173')
 BACKEND_URL = env('BACKEND_URL', default='http://localhost:8000')
 
-REDIS_HOST = env('REDIS_HOST', default='localhost')
-REDIS_PORT = env('REDIS_PORT', default=6379)
-
-# Cache configuration
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': f'redis://{REDIS_HOST}:{REDIS_PORT}/2',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
-        'KEY_PREFIX': 'causehive',
-        'TIMEOUT': 300,  # 5 minutes default
-    }
-}
-
-# Session storage in Redis
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'default'
-
-# # Service URLs for microservice communication
-# CAUSE_SERVICE_URL = env('CAUSE_SERVICE_URL', default='http://localhost:8001')
+# Service URLs for microservice communication
+CAUSE_SERVICE_URL = env('CAUSE_SERVICE_URL', default='http://localhost:8001')
 
 # Payment service configuration
 PAYSTACK_BASE_URL = env('PAYSTACK_BASE_URL', default='https://api.paystack.co')
-PAYSTACK_SECRET_KEY = env('PAYSTACK_SECRET_KEY')
+PAYSTACK_SECRET_KEY = env('PAYSTACK_SECRET_KEY', default='sk_test_your_secret_key_here')
 
 # User and authentication settings
 AUTH_USER_MODEL = 'users_n_auth.User'
@@ -86,22 +66,23 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 EMAIL_VERIFICATION = 'optional'
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
 ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
 ACCOUNT_SESSION_REMEMBER = True
 
 # Rate limiting settings
 ACCOUNT_RATE_LIMITS = {
-    'login': '5/h',
+    'login': '5/m',
     'login_failed': '5/m',
     'signup': '3/h',
     'password_reset': '2/h',
 }
 
 # Application definition - Combined from all services
-
-INSTALLED_APPS = [
-
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -109,52 +90,62 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    'django.contrib.humanize',
+]
 
+THIRD_PARTY_APPS = [
     'django_extensions',
     'django_filters',
-
+    
     # CORS headers
     'corsheaders',
-
+    
     # Authentication apps
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-
+    
     # REST Framework
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-
+    
     # Registration
     'dj_rest_auth.registration',
-
+    
     # Background tasks
     'celery',
-
+    
     # Static files
     'whitenoise',
+]
 
+# Local apps from all services
+LOCAL_APPS = [
+    # User service apps
     'users_n_auth',
-
+    
+    # Cause service apps
     'causes',
     'categories',
-
+    
+    # Donation processing service apps
     'donations',
     'cart',
     'payments',
     'withdrawal_transfer',
+    
+    # Admin reporting service apps
+    'admin_auth',
+    'dashboard',
+    'auditlog',
     'notifications',
-
-    'channels',
-
+    'management',
 ]
 
-
-ASGI_APPLICATION = 'causehive.asgi.application'
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS + ['channels',]
+ASGI_APPLICATION = 'causehive_monolith.asgi.application'
 # Django sites framework
 SITE_ID = 1
 
@@ -172,7 +163,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
 ]
 
-ROOT_URLCONF = 'causehive.urls'
+ROOT_URLCONF = 'causehive_monolith.urls'
 
 TEMPLATES = [
     {
@@ -190,25 +181,73 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'causehive.wsgi.application'
+WSGI_APPLICATION = 'causehive_monolith.wsgi.application'
 
+# Database configuration with a single Supabase URL and schema-based aliases
+# Do NOT hardcode credentials; require SUPABASE_DATABASE_URL in production.
+SUPABASE_DATABASE_URL = env('SUPABASE_DATABASE_URL', default=None)
+
+if not SUPABASE_DATABASE_URL:
+    if DEBUG:
+        # Local/dev fallback only
+        SUPABASE_DATABASE_URL = env('USER_SERVICE_DATABASE_URL', default='postgresql://user:pass@localhost:5432/postgres')
+    else:
+        raise ImproperlyConfigured(
+            "SUPABASE_DATABASE_URL is not set. Configure it in your environment."
+        )
 
 DATABASES = {
+    # Default: user service schema
     'default': {
-        **dj_database_url.parse(env('DATABASE_URL')),
-        'ENGINE': 'django.db.backends.postgresql',
-        'CONN_MAX_AGE': 300,  # Keep connections alive for 5 minutes (Supabase optimized)
+        **dj_database_url.parse(
+            SUPABASE_DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        ),
         'OPTIONS': {
-            'connect_timeout': 30,  # Longer timeout for Supabase
-            'options': '-c default_transaction_isolation=read_committed -c statement_timeout=30000 -c idle_in_transaction_session_timeout=300000'
+            'options': '-c search_path=causehive_users,public'
         }
-    }
+    },
+
+    # Cause service
+    'causes_db': {
+        **dj_database_url.parse(
+            SUPABASE_DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        ),
+        'OPTIONS': {
+            'options': '-c search_path=causehive_causes,public'
+        }
+    },
+
+    # Donation processing service
+    'donations_db': {
+        **dj_database_url.parse(
+            SUPABASE_DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        ),
+        'OPTIONS': {
+            'options': '-c search_path=causehive_donations,public'
+        }
+    },
+
+    # Admin reporting service
+    'admin_db': {
+        **dj_database_url.parse(
+            SUPABASE_DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        ),
+        'OPTIONS': {
+            'options': '-c search_path=causehive_admin,public'
+        }
+    },
 }
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 # Database routing configuration
-# DATABASE_ROUTERS = ['causehive.db_router.DatabaseRouter']
+DATABASE_ROUTERS = ['causehive_monolith.db_router.DatabaseRouter']
 
 # REST Framework configuration
 REST_FRAMEWORK = {
@@ -246,54 +285,35 @@ SIMPLE_JWT = {
     "AUTH_TOKEN_CLASSES": ('rest_framework_simplejwt.tokens.AccessToken',),
 }
 
-# Google OAuth credentials
-GOOGLE_OAUTH2_CLIENT_ID = env('GOOGLE_OAUTH2_CLIENT_ID', default='set_the_client_id_dumbo')
-GOOGLE_OAUTH2_SECRET = env('GOOGLE_OAUTH2_SECRET', default='set_the_secrett_dumbo')
-
 # Social Account Settings
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': ['email', 'profile'],
         'AUTH_PARAMS': {'access_type': 'offline'},
         'OAUTH_PKCE_ENABLED': True,
-        'APP': {
-            'client_id': GOOGLE_OAUTH2_CLIENT_ID,
-            'secret': GOOGLE_OAUTH2_SECRET,
-        }
     }
 }
-
-LOGIN_URL = '/api/user/login/'
-LOGOUT_URL = '/api/user/logout/'
-LOGIN_REDIRECT_URL = '/api/user/profile/'
-ACCOUNT_LOGOUT_REDIRECT_URL = '/api/user/logout/'
-
-
-# Email Backend Settings
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.zoho.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = env("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
-DEFAULT_FROM_EMAIL = f"CauseHive <{EMAIL_HOST_USER}>"
-SUPPORT_EMAIL = env("SUPPORT_EMAIL")
-
 
 # Celery Configuration for background tasks
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default='redis://localhost:6379/1')
 
-# Celery beat schedule
+# Celery beat schedule (from admin service)
 CELERY_BEAT_SCHEDULE = {
-    'verify-pending-withdrawals': {
-        'task': 'withdrawal_transfer.tasks.verify_pending_withdrawals',
-        'schedule': 60.0,  # Run every 60 seconds
+    'aggregate-reports-every-hour': {
+        'task': 'dashboard.tasks.generate_fresh_report',
+        'schedule': 3600  # every hour
     },
+    'poll-new-pending-causes-every-3-mins': {
+        'task': 'dashboard.tasks.poll_new_pending_causes',
+        'schedule': 180  # every 3 minutes
+    }
 }
 
 # Paystack Configuration (for donations)
 PAYSTACK_PUBLIC_KEY = env('PAYSTACK_PUBLIC_KEY', default='')
+PAYSTACK_SECRET_KEY = env('PAYSTACK_SECRET_KEY', default='')
+PAYSTACK_BASE_URL = "https://api.paystack.co"
 
 # CORS settings for frontend
 CORS_ALLOWED_ORIGINS = [
@@ -301,10 +321,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
+    "https://www.causehive.tech",
     "https://causehive.tech",
-    "https://causehive.app"
 ]
 
 # Include production frontend/backend origins if provided
@@ -318,8 +336,6 @@ if BACKEND_URL and BACKEND_URL not in CORS_ALLOWED_ORIGINS and BACKEND_URL.start
 PROD_FRONTEND_HOSTS = [
     'https://causehive.tech',
     'https://www.causehive.tech',
-    'https://causehive.app',
-    'https://www.causehive.app',
 ]
 for origin in PROD_FRONTEND_HOSTS:
     if origin not in CORS_ALLOWED_ORIGINS:
@@ -334,15 +350,13 @@ if RAILWAY_BACKEND_HOST not in CORS_ALLOWED_ORIGINS:
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
     'https://causehive.tech',
     'https://www.causehive.tech',
-    'https://causehive.app',
-    'https://www.causehive.app',
-    'https://causehive-monolithic-production.up.railway.app',
+    'https://*.railway.app',
 ])
 
 # CORS settings for Railway deployment
 CORS_ALLOW_CREDENTIALS = True
 
-# Allow common headers for cross-origin requests
+# Allow common headers for cross origin requests
 CORS_ALLOW_HEADERS = list(default_headers) if default_headers is not None else [
     'accept',
     'accept-encoding',
@@ -371,10 +385,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTHENTICATION_BACKENDS = [
-    'allauth.account.auth_backends.AuthenticationBackend',
-]
-
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -397,25 +407,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Database performance optimizations
-DATABASE_ROUTERS = []
-DATABASE_APPS_MAPPING = {}
-
-# Supabase-specific optimizations
-DATABASES['default']['CONN_MAX_AGE'] = 600  # 10 minutes for Supabase (keep connections longer)
-DATABASES['default']['CONN_HEALTH_CHECKS'] = True  # Enable connection health checks
-
-# Force connection reuse
-DATABASES['default']['ATOMIC_REQUESTS'] = False  # Disable atomic requests for better performance
-
-# Additional Supabase optimizations
-DATABASES['default']['OPTIONS'].update({
-    'sslmode': 'require',  # Ensure SSL for Supabase
-    'application_name': 'causehive_backend',  # Help with connection tracking
-    'connect_timeout': 30,
-    'options': '-c default_transaction_isolation=read_committed -c statement_timeout=30000 -c idle_in_transaction_session_timeout=300000 -c tcp_keepalives_idle=600 -c tcp_keepalives_interval=30 -c tcp_keepalives_count=3'
-})
 
 # Logging configuration for Railway
 LOGGING = {
@@ -446,35 +437,18 @@ LOGGING = {
     },
 }
 
-# # Disable database query logging in production for performance
-# if not DEBUG:
-#     LOGGING['loggers']['django.db.backends'] = {
-#         'handlers': ['console'],
-#         'level': 'WARNING',
-#         'propagate': False,
-#     }
-
 # Security settings for production
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_SECONDS = 31536000  # 1 year
-    SECURE_HSTS_PRELOAD = True
+    SECURE_HSTS_SECONDS = 31536000
     SECURE_REDIRECT_EXEMPT = []
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-else:
-    # Development mode - disable HTTPS redirects and HSTS
-    SECURE_SSL_REDIRECT = False
-    SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_SECURE = False
-    SECURE_HSTS_SECONDS = 0  # Disable HSTS in development
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
-    SECURE_HSTS_PRELOAD = False
-    SECURE_PROXY_SSL_HEADER = None
 
 # Ensure per-alias search_path is applied on each DB connection
 # This registers a signal handler to SET search_path at runtime
+from . import db_search_path  # noqa: F401
