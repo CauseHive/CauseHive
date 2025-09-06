@@ -8,6 +8,7 @@ This combines URLs from all microservices:
 - Admin Reporting Service: /api/admin/
 """
 from django.contrib import admin
+from django.http import JsonResponse
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
@@ -45,7 +46,13 @@ if PaymentTransactionViewSet:
 if WithdrawalRequestViewSet:
     router.register(r'withdrawals', WithdrawalRequestViewSet, basename='withdrawalrequest')
 
+def home(request):
+    return JsonResponse({"Greetings": "Welcome to CauseHive!"})
+
 urlpatterns = [
+    #Home Endpoint
+    path('', home, name='home'),
+
     # Health check endpoints for Railway
     path('api/health/', health_check, name='health_check'),
     path('api/ready/', readiness_check, name='readiness_check'),
