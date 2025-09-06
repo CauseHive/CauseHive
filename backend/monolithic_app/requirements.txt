@@ -14,5 +14,8 @@ paystack==1.5.0
 gunicorn==22.0.0
 dj-database-url==2.1.0
 
+# CORS support for cross-origin requests from frontend
+django-cors-headers==4.0.0
+
 # Development dependencies (optional)
 django-debug-toolbar>=4.0.0

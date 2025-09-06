@@ -16,6 +16,10 @@ from datetime import timedelta
 import environ
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
+try:
+    from corsheaders.defaults import default_headers  # type: ignore
+except Exception:
+    default_headers = None
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -326,6 +330,20 @@ if BACKEND_URL and BACKEND_URL not in CORS_ALLOWED_ORIGINS and BACKEND_URL.start
     # Allow same-origin API calls from the backend host if needed (e.g., admin tools)
     CORS_ALLOWED_ORIGINS.append(BACKEND_URL)
 
+# Production frontend hosts (Netlify / custom domain)
+PROD_FRONTEND_HOSTS = [
+    'https://causehive.tech',
+    'https://www.causehive.tech',
+]
+for origin in PROD_FRONTEND_HOSTS:
+    if origin not in CORS_ALLOWED_ORIGINS:
+        CORS_ALLOWED_ORIGINS.append(origin)
+
+# Railway backend host placeholder - replace with your actual Railway app host in Railway env
+RAILWAY_BACKEND_HOST = env('RAILWAY_BACKEND_HOST', default='https://causehive-monolithic-production.up.railway.app')
+if RAILWAY_BACKEND_HOST not in CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS.append(RAILWAY_BACKEND_HOST)
+
 # Common production domains (scheme required by Django for CSRF)
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
     'https://causehive.tech',
@@ -336,6 +354,19 @@ CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
 
 # CORS settings for Railway deployment
 CORS_ALLOW_CREDENTIALS = True
+
+# Allow common headers for cross origin requests
+CORS_ALLOW_HEADERS = list(default_headers) if default_headers is not None else [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

@@ -87,10 +87,10 @@ Railway will automatically:
 ## ✅ Verification
 
 After deployment, your API will be available at:
-- `https://your-app.railway.app/api/user/` (User service endpoints)
-- `https://your-app.railway.app/api/causes/` (Cause service endpoints)
-- `https://your-app.railway.app/api/donations/` (Donation service endpoints)
-- `https://your-app.railway.app/api/admin/` (Admin service endpoints)
+- `https://causehive-monolithic-production.up.railway.app/api/user/` (User service endpoints)
+- `https://causehive-monolithic-production.up.railway.app/api/causes/` (Cause service endpoints)
+- `https://causehive-monolithic-production.up.railway.app/api/donations/` (Donation service endpoints)
+- `https://causehive-monolithic-production.up.railway.app/api/admin/` (Admin service endpoints)
 
 ## 🔧 Prerequisites
 
