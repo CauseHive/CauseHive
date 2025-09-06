@@ -330,6 +330,7 @@ if BACKEND_URL and BACKEND_URL not in CORS_ALLOWED_ORIGINS and BACKEND_URL.start
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
     'https://causehive.tech',
     'https://www.causehive.tech',
+    'causehive-monolithic-production.up.railway.app',
     'https://*.railway.app',
 ])
 
