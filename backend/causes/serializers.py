@@ -18,6 +18,10 @@ class CausesSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate_organizer_id(self, value):
+        # Skip validation for read-only operations (like list views)
+        if self.context.get('request') and self.context['request'].method == 'GET':
+            return value
+        
         try:
             validate_organizer_id_with_service(value)
             return value

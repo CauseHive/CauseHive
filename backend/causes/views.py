@@ -38,10 +38,25 @@ class CauseListView(generics.ListAPIView):
             .only('id', 'name', 'description', 'category', 'organizer_id', 'status', 'created_at')
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        if not queryset.exists():
-            return Response({"message": "There are no active causes to display.", "results": []}, status=status.HTTP_200_OK)
-        return super().list(request, *args, **kwargs)
+        try:
+            queryset = self.get_queryset()
+            if not queryset.exists():
+                return Response({"message": "There are no active causes to display.", "results": []}, status=status.HTTP_200_OK)
+            return super().list(request, *args, **kwargs)
+        except Exception as e:
+            # Log the error and return a fallback response
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error in CauseListView: {str(e)}")
+            
+            # Return empty results with error message
+            return Response({
+                "message": "Unable to load causes at this time.", 
+                "results": [],
+                "count": 0,
+                "next": None,
+                "previous": None
+            }, status=status.HTTP_200_OK)
 
 class CauseDetailView(generics.RetrieveAPIView):
     queryset = Causes.objects.select_related('organizer_id').only('id', 'title', 'description', 'category', 'organizer_id', 'status', 'created_at')
