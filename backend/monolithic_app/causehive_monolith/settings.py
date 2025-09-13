@@ -218,6 +218,8 @@ REST_FRAMEWORK = {
         'admin_action': '20/minute',
         'password_reset': '3/hour',
     },
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
     'USER_ID_FIELD': 'id',
 }
 
