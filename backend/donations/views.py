@@ -1,4 +1,6 @@
 from django.db.models import Sum, Count
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from rest_framework.response import Response
 from rest_framework import viewsets, permissions, generics
 from rest_framework.decorators import action
@@ -19,9 +21,8 @@ class DonationPagination(PageNumberPagination):
 
 # Create your views here.
 class DonationViewSet(viewsets.ModelViewSet):
-    queryset = Donation.objects.all()
+    queryset = Donation.objects.select_related('user', 'cause').only('id', 'user_id', 'cause_id', 'amount', 'status', 'donated_at')
     serializer_class = DonationSerializer
-    pagination_class = DonationPagination
     # Allow any user to view donations
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
@@ -38,20 +39,14 @@ class DonationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user and hasattr(user, 'id') and user.is_authenticated:
-            # For authenticated users, return their donations
-            return Donation.objects.filter(user_id=user.id)
-        else:
-            # For anonymous users, return recent public donations (limited for privacy)
-            return Donation.objects.filter(status='completed').order_by('-donated_at')[:50]
+            return Donation.objects.select_related('user', 'cause').only('id', 'user_id', 'cause_id', 'amount', 'status', 'donated_at').filter(user_id=user.id)
+        # Anonymous users have no history
+        return Donation.objects.none()
 
     @action(detail=False, methods=['get'])
+    @method_decorator(cache_page(60))  # Cache statistics for 1 minute
     def statistics(self, request):
-        user = self.request.user
-        if user and hasattr(user, 'id') and user.is_authenticated:
-            queryset = Donation.objects.filter(user_id=user.id)
-        else:
-            queryset = Donation.objects.filter(status='completed')
-        
+        queryset = self.get_queryset()
         total_donations = queryset.count()
         total_amount = queryset.aggregate(Sum('amount'))['amount__sum'] or 0
         return Response({
@@ -60,12 +55,12 @@ class DonationViewSet(viewsets.ModelViewSet):
         })
 
 class AdminDonationListView(generics.ListAPIView):
-    queryset = Donation.objects.all()
+    queryset = Donation.objects.select_related('user', 'cause').only('id', 'user_id', 'cause_id', 'amount', 'status', 'donated_at')
     serializer_class = DonationSerializer
     permission_classes = [IsAdminService]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['user_id', 'cause_id', 'status', 'donated_at']
-    search_fields = ['user_id', 'cause__title', 'user__email', 'cause_id']
+    search_fields = ['user_id', 'cause__name', 'user__email', 'cause_id']
     ordering_fields = ['donated_at', 'amount']
 
 class AdminDonationStatisticsView(APIView):
@@ -83,4 +78,3 @@ class AdminDonationStatisticsView(APIView):
             'total_users': total_users,
             'total_causes': total_causes,
         })
-

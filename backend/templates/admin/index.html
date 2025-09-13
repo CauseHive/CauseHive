@@ -18,43 +18,31 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .stat-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: var(--shadow);
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     text-align: center;
-    text-decoration: none;
-    color: var(--text-color);
-    transition: var(--transition);
-    display: block;
-}
-
-.stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
-    text-decoration: none;
-    color: var(--text-color);
 }
 
 .stat-card h3 {
     margin: 0 0 10px 0;
-    color: var(--text-muted);
+    color: #333;
     font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    font-weight: 500;
 }
 
 .stat-card .number {
     font-size: 2.5em;
     font-weight: bold;
-    color: var(--text-color);
+    color: #2c3e50;
     margin: 10px 0;
 }
 
 .stat-card .subtitle {
-    color: var(--text-muted);
+    color: #666;
     font-size: 12px;
 }
 
@@ -66,27 +54,23 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .activity-section {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: var(--shadow);
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .activity-section h3 {
-    margin: 0 0 20px 0;
-    color: var(--text-color);
-    font-weight: 600;
-    border-bottom: 2px solid var(--primary-color);
-    padding-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    margin: 0 0 15px 0;
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
 }
 
 .activity-item {
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border-color);
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
 }
 
 .activity-item:last-child {
@@ -94,12 +78,12 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .activity-item .title {
-    font-weight: 600;
-    color: var(--text-color);
+    font-weight: bold;
+    color: #333;
 }
 
 .activity-item .meta {
-    color: var(--text-muted);
+    color: #666;
     font-size: 12px;
     margin-top: 5px;
 }
@@ -201,68 +185,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <div class="dashboard-stats">
     <a href="{% url 'admin:users_n_auth_user_changelist' %}" class="stat-card">
-        <div class="stat-icon">
-            <i data-lucide="user"></i>
-        </div>
         <h3>Total Users</h3>
         <div class="number">{{ total_users }}</div>
         <div class="subtitle">{{ active_users }} active</div>
     </a>
     
     <a href="{% url 'admin:users_n_auth_user_changelist' %}?date_joined__gte={{ today|date:'Y-m-d' }}" class="stat-card">
-        <div class="stat-icon">
-            <i data-lucide="users"></i>
-        </div>
         <h3>New Users Today</h3>
         <div class="number">{{ new_users_today }}</div>
         <div class="subtitle">{{ new_users_this_week }} this week</div>
     </a>
     
     <a href="{% url 'admin:causes_causes_changelist' %}" class="stat-card">
-        <div class="stat-icon">
-            <i data-lucide="target"></i>
-        </div>
         <h3>Total Causes</h3>
         <div class="number">{{ total_causes }}</div>
         <div class="subtitle">{{ active_causes }} active</div>
     </a>
     
     <a href="{% url 'admin:causes_causes_changelist' %}?status=under_review" class="stat-card">
-        <div class="stat-icon">
-            <i data-lucide="clock"></i>
-        </div>
         <h3>Pending Causes</h3>
         <div class="number">{{ pending_causes }}</div>
         <div class="subtitle">{{ approved_causes }} approved</div>
     </a>
     
     <a href="{% url 'admin:donations_donation_changelist' %}" class="stat-card">
-        <div class="stat-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
-                <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
-                <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
-                <text x="12" y="16" text-anchor="middle" font-size="8" font-weight="bold" fill="white">₵</text>
-            </svg>
-        </div>
         <h3>Total Donations</h3>
         <div class="number">{{ completed_donations }}</div>
-        <div class="subtitle">GH₵{{ total_donated_amount|floatformat:0 }} raised</div>
+        <div class="subtitle">GHS {{ total_donated_amount|floatformat:0 }} raised</div>
     </a>
     
     <a href="{% url 'admin:cart_cart_changelist' %}" class="stat-card">
-        <div class="stat-icon">
-            <i data-lucide="shopping-cart"></i>
-        </div>
         <h3>Active Carts</h3>
         <div class="number">{{ active_carts }}</div>
         <div class="subtitle">{{ completed_carts }} completed</div>
     </a>
     
     <a href="{% url 'admin:payments_paymenttransaction_changelist' %}" class="stat-card">
-        <div class="stat-icon">
-            <i data-lucide="credit-card"></i>
-        </div>
         <h3>Payments</h3>
         <div class="number">{{ completed_payments }}</div>
         <div class="subtitle">{{ pending_payments }} pending</div>
@@ -276,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="activity-item">
             <div class="title">
                 {{ donation.user_id.email|default:"Anonymous" }} donated 
-                <span class="amount">GH₵{{ donation.amount }}</span>
+                <span class="amount">GHS {{ donation.amount }}</span>
             </div>
             <div class="meta">
                 to {{ donation.cause_id.name }} • {{ donation.donated_at|timesince }} ago

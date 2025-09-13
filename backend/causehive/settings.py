@@ -3,7 +3,7 @@ Django settings for causehive_monolith project.
 
 This monolithic application combines all CauseHive microservices:
 - User Service
-- Cause Service  
+- Cause Service
 - Donation Processing Service
 - Admin Reporting Service
 
@@ -41,15 +41,14 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
     '127.0.0.1',
     'localhost',
     '*.railway.app',
-    'causehive.netlify.app',
     'causehive.tech',
     'www.causehive.tech',
     'causehive-monolithic-production.up.railway.app',
 ])
 
 # Frontend and external URLs
-FRONTEND_URL = env('FRONTEND_URL', default='http://www.causehive.tech')
-BACKEND_URL = env('BACKEND_URL', default='http://causehive-monolithic-production.up.railway.app')
+FRONTEND_URL = env('FRONTEND_URL', default='http://localhost:5173')
+BACKEND_URL = env('BACKEND_URL', default='http://localhost:8000')
 
 # Service URLs for microservice communication
 CAUSE_SERVICE_URL = env('CAUSE_SERVICE_URL', default='http://localhost:8001')
@@ -96,28 +95,28 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     'django_extensions',
     'django_filters',
-    
+
     # CORS headers
     'corsheaders',
-    
+
     # Authentication apps
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-    
+
     # REST Framework
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    
+
     # Registration
     'dj_rest_auth.registration',
-    
+
     # Background tasks
     'celery',
-    
+
     # Static files
     'whitenoise',
 ]
@@ -126,18 +125,17 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     # User service apps
     'users_n_auth',
-    
+
     # Cause service apps
     'causes',
     'categories',
-    'testimonials',
-    
+
     # Donation processing service apps
     'donations',
     'cart',
     'payments',
     'withdrawal_transfer',
-    
+
     # Admin reporting service apps
     'admin_auth',
     'dashboard',
@@ -206,11 +204,9 @@ DATABASES = {
             conn_max_age=600,
             conn_health_checks=True,
         ),
-        **(
-            {'OPTIONS': {'options': '-c search_path=causehive_users,public'}}
-            if not SUPABASE_DATABASE_URL.startswith('sqlite')
-            else {}
-        )
+        'OPTIONS': {
+            'options': '-c search_path=causehive_users,public'
+        }
     },
 
     # Cause service
@@ -220,11 +216,9 @@ DATABASES = {
             conn_max_age=600,
             conn_health_checks=True,
         ),
-        **(
-            {'OPTIONS': {'options': '-c search_path=causehive_causes,public'}}
-            if not SUPABASE_DATABASE_URL.startswith('sqlite')
-            else {}
-        )
+        'OPTIONS': {
+            'options': '-c search_path=causehive_causes,public'
+        }
     },
 
     # Donation processing service
@@ -234,11 +228,9 @@ DATABASES = {
             conn_max_age=600,
             conn_health_checks=True,
         ),
-        **(
-            {'OPTIONS': {'options': '-c search_path=causehive_donations,public'}}
-            if not SUPABASE_DATABASE_URL.startswith('sqlite')
-            else {}
-        )
+        'OPTIONS': {
+            'options': '-c search_path=causehive_donations,public'
+        }
     },
 
     # Admin reporting service
@@ -248,11 +240,9 @@ DATABASES = {
             conn_max_age=600,
             conn_health_checks=True,
         ),
-        **(
-            {'OPTIONS': {'options': '-c search_path=causehive_admin,public'}}
-            if not SUPABASE_DATABASE_URL.startswith('sqlite')
-            else {}
-        )
+        'OPTIONS': {
+            'options': '-c search_path=causehive_admin,public'
+        }
     },
 }
 
@@ -327,16 +317,10 @@ PAYSTACK_BASE_URL = "https://api.paystack.co"
 
 # CORS settings for frontend
 CORS_ALLOWED_ORIGINS = [
-    'https://causehive.netlify.app',
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://localhost:3001",
-    "http://127.0.0.1:3001",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://www.causehive.tech",
-    "https://causehive.tech",
-    "https://causehive-monolithic-production.up.railway.app",
 ]
 
 # Include production frontend/backend origins if provided
@@ -348,7 +332,6 @@ if BACKEND_URL and BACKEND_URL not in CORS_ALLOWED_ORIGINS and BACKEND_URL.start
 
 # Production frontend hosts (Netlify / custom domain)
 PROD_FRONTEND_HOSTS = [
-    'https://causehive.netlify.app',
     'https://causehive.tech',
     'https://www.causehive.tech',
 ]
@@ -363,10 +346,9 @@ if RAILWAY_BACKEND_HOST not in CORS_ALLOWED_ORIGINS:
 
 # Common production domains (scheme required by Django for CSRF)
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
-    'https://causehive.netlify.app',
     'https://causehive.tech',
     'https://www.causehive.tech',
-    'https://causehive-monolithic-production.up.railway.app',
+    'causehive-monolithic-production.up.railway.app',
     'https://*.railway.app',
 ])
 

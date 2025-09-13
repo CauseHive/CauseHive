@@ -1,4 +1,3 @@
-from .email_utils import send_withdrawal_processed_email
 from .models import WithdrawalRequest
 from .paystack_transfer import PaystackTransfer
 from causehive.celery import app
@@ -17,14 +16,6 @@ def process_withdrawal_transfer(withdrawal_id):
             withdrawal_request.transaction_id = transfer_result['data']['reference']
             withdrawal_request.save()
 
-            # Send email notif
-            send_withdrawal_processed_email(
-                to_email=withdrawal_request.user_id.email,
-                first_name=withdrawal_request.user_id.first_name,
-                amount=withdrawal_request.amount,
-                currency=withdrawal_request.currency,
-            )
-
             # Schedule verification task
             verify_transfer_status.delay(withdrawal_request.transaction_id)
         else:
@@ -39,7 +30,7 @@ def process_withdrawal_transfer(withdrawal_id):
 def verify_transfer_status(transaction_id):
     """Verify the transfer status with Paystack."""
     try:
-        withdrawal_request = WithdrawalRequest.objects.select_related('user_id').get(id=transaction_id)
+        withdrawal_request = WithdrawalRequest.objects.get(transaction_id=transaction_id)
 
         # Verify with Paystack
         verification_result = PaystackTransfer.verify_transfer(transaction_id)
