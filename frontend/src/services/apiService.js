@@ -233,17 +233,122 @@ class ApiService {
   }
 
   // Landing/demo placeholder APIs (safe fallbacks)
-  async getDonationStatistics() { return this.get('/api/donations/statistics/'); }
-  async createDonation(donationData) { return this.post('/api/donations/', donationData); }
-  async getDonations(page = 1) { return this.get(`/api/donations/?page=${page}`); }
+  async getDonationStatistics() { 
+    try {
+      return await this.get('/api/donations/statistics/');
+    } catch (error) {
+      console.warn('Donation statistics endpoint error, using fallback data');
+      return {
+        total_amount: 0,
+        total_donations: 0,
+        recent_donations: []
+      };
+    }
+  }
 
-  // Optional CMS-style placeholders
-  async getSuccessStories() { return this.get('/api/success-stories/'); }
-  async getBlogPosts() { return this.get('/api/blog-posts/'); }
-  async getContributors() { return this.get('/api/contributors/'); }
-  async getTestimonials() { return this.get('/api/testimonials/'); }
-  async getStatistics() { return this.get('/api/statistics/'); }
-  async subscribeToNewsletter(email) { return this.post('/api/newsletter/subscribe/', { email }); }
+  async createDonation(donationData) { 
+    return this.post('/api/donations/', donationData); 
+  }
+
+  async getDonations(page = 1) { 
+    try {
+      return await this.get(`/api/donations/?page=${page}`);
+    } catch (error) {
+      console.warn('Donations endpoint error, using fallback data', error);
+      return {
+        results: [],
+        count: 0,
+        next: null,
+        previous: null
+      };
+    }
+  }
+
+  // Optional CMS-style placeholders with fallbacks
+  async getSuccessStories() { 
+    try {
+      return await this.get('/api/success-stories/');
+    } catch (error) {
+      console.warn('Success stories endpoint not available, using fallback data');
+      return { results: [], count: 0 };
+    }
+  }
+
+  async getBlogPosts() { 
+    try {
+      return await this.get('/api/blog-posts/');
+    } catch (error) {
+      console.warn('Blog posts endpoint not available, using fallback data');
+      return { 
+        results: [
+          {
+            id: 1,
+            title: "Making a Difference Together",
+            excerpt: "Discover how your contributions are creating positive change in communities worldwide.",
+            date: new Date().toISOString(),
+            slug: "making-difference-together"
+          }
+        ], 
+        count: 1 
+      };
+    }
+  }
+
+  async getContributors() { 
+    try {
+      return await this.get('/api/contributors/');
+    } catch (error) {
+      console.warn('Contributors endpoint not available, using fallback data');
+      return { 
+        results: [
+          { id: 1, name: "Community", avatar: null, contributions: 0 }
+        ], 
+        count: 1 
+      };
+    }
+  }
+
+  async getTestimonials() { 
+    try {
+      return await this.get('/api/testimonials/');
+    } catch (error) {
+      console.warn('Testimonials endpoint not available, using fallback data');
+      return { 
+        results: [
+          {
+            id: 1,
+            name: "CauseHive Community",
+            text: "Together we're making a difference in communities worldwide.",
+            avatar: null
+          }
+        ], 
+        count: 1 
+      };
+    }
+  }
+
+  async getStatistics() { 
+    try {
+      return await this.get('/api/statistics/');
+    } catch (error) {
+      console.warn('Statistics endpoint not available, using fallback data');
+      return {
+        total_donations: 0,
+        total_causes: 0,
+        total_donors: 0,
+        impact_score: 0
+      };
+    }
+  }
+
+  async subscribeToNewsletter(email) { 
+    try {
+      return await this.post('/api/newsletter/subscribe/', { email });
+    } catch (error) {
+      console.warn('Newsletter endpoint not available');
+      return { message: 'Newsletter subscription temporarily unavailable' };
+    }
+  }
 
   // Notifications
   async getNotifications(page = 1) { return this.get(`/api/notifications/?page=${page}`); }
