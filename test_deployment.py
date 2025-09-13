@@ -14,7 +14,7 @@ from django.db import connections
 from django.test.utils import get_runner
 from django.conf import settings
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'causehive_monolith.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'causehive.settings')
 django.setup()
 
 def test_database_connections():

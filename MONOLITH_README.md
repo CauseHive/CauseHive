@@ -119,10 +119,10 @@ python manage.py runserver
 ### 6. Run Celery (for background tasks)
 ```bash
 # In a separate terminal
-celery -A causehive_monolith worker --loglevel=info
+celery -A causehive worker --loglevel=info
 
 # For scheduled tasks
-celery -A causehive_monolith beat --loglevel=info
+celery -A causehive beat --loglevel=info
 ```
 
 ## 📚 API Endpoints

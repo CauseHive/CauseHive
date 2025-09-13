@@ -17,7 +17,7 @@
 .env.development.local
 .env.test.local
 .env.production.local
-.env
+backend/.env
 __pycache__/
 *.pyc
 

@@ -10,7 +10,7 @@ from pathlib import Path
 
 # Load environment variables
 sys.path.append(str(Path(__file__).parent))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'causehive_monolith.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'causehive.settings')
 
 try:
     import environ

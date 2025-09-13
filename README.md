@@ -173,12 +173,12 @@ python manage.py createsuperuser
 
 6. **Start Celery Worker** (separate terminal):
    ```bash
-   celery -A causehive_monolith worker -l info
+   celery -A causehive worker -l info
    ```
 
 7. **Start Celery Beat** (separate terminal):
    ```bash
-   celery -A causehive_monolith beat -l info
+   celery -A causehive beat -l info
    ```
 
 ## 📡 API Endpoints

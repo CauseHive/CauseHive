@@ -79,7 +79,7 @@ def test_django_check():
     print("🔍 Testing Django configuration...")
     
     # Set minimal environment for Django check
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'causehive_monolith.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'causehive.settings')
     os.environ.setdefault('SECRET_KEY', 'test-secret-key-for-build-check')
     os.environ.setdefault('DEBUG', 'True')
     
@@ -127,7 +127,7 @@ def test_static_files_collection():
     print("📁 Testing static files collection...")
     
     # Set environment for static files test
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'causehive_monolith.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'causehive.settings')
     os.environ.setdefault('SECRET_KEY', 'test-secret-key-for-build-check')
     
     try:
@@ -155,7 +155,7 @@ def test_app_imports():
     """Test that all Django apps can be imported"""
     print("📥 Testing app imports...")
     
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'causehive_monolith.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'causehive.settings')
     os.environ.setdefault('SECRET_KEY', 'test-secret-key')
     
     try:
