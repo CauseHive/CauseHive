@@ -36,7 +36,7 @@ ADMIN_SERVICE_API_KEY = env('ADMIN_SERVICE_API_KEY', default='admin-api-key')
 DEBUG = env.bool('DEBUG', default=False)
 
 # Railway deployment settings
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost', '*.railway.app', 'causehive.tech', 'www.causehive.tech'])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost', '*.railway.app', 'causehive.netlify.app','causehive.tech', 'www.causehive.tech'])
 
 # Frontend and external URLs
 FRONTEND_URL = env('FRONTEND_URL', default='https://causehive.tech')
@@ -268,6 +268,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://causehive.netlify.app",
+    "https://causehive-monolithic-production.up.railway.app",
     "https://www.causehive.tech",
     "https://causehive.tech",
 ]
@@ -296,6 +298,8 @@ CORS_ALLOW_HEADERS = list(default_headers) if default_headers is not None else [
 # CSRF trusted origins (include production domain)
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
     'https://www.causehive.tech',
+    'https://causehive-monolithic-production.up.railway.app',
+    'https://causehive.netlify.app',
     'https://causehive.tech',
 ])
 

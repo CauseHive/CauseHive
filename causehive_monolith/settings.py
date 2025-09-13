@@ -41,6 +41,7 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
     '127.0.0.1',
     'localhost',
     '*.railway.app',
+    'causehive.netlify.app',
     'causehive.tech',
     'www.causehive.tech',
     'causehive-monolithic-production.up.railway.app',
@@ -317,12 +318,14 @@ PAYSTACK_BASE_URL = "https://api.paystack.co"
 
 # CORS settings for frontend
 CORS_ALLOWED_ORIGINS = [
+    'https://causehive.netlify.app',
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://www.causehive.tech",
     "https://causehive.tech",
+    "https://causehive-monolithic-production.up.railway.app",
 ]
 
 # Include production frontend/backend origins if provided
@@ -334,6 +337,7 @@ if BACKEND_URL and BACKEND_URL not in CORS_ALLOWED_ORIGINS and BACKEND_URL.start
 
 # Production frontend hosts (Netlify / custom domain)
 PROD_FRONTEND_HOSTS = [
+    'https://causehive.netlify.app',
     'https://causehive.tech',
     'https://www.causehive.tech',
 ]
@@ -348,9 +352,10 @@ if RAILWAY_BACKEND_HOST not in CORS_ALLOWED_ORIGINS:
 
 # Common production domains (scheme required by Django for CSRF)
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
+    'https://causehive.netlify.app',
     'https://causehive.tech',
     'https://www.causehive.tech',
-    'causehive-monolithic-production.up.railway.app',
+    'https://causehive-monolithic-production.up.railway.app',
     'https://*.railway.app',
 ])
 
