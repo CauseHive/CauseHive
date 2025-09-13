@@ -1,6 +1,4 @@
 from django.db.models import Sum, Count
-from django.views.decorators.cache import cache_page
-from django.utils.decorators import method_decorator
 from rest_framework.response import Response
 from rest_framework import viewsets, permissions, generics
 from rest_framework.decorators import action
@@ -21,49 +19,39 @@ class DonationPagination(PageNumberPagination):
 
 # Create your views here.
 class DonationViewSet(viewsets.ModelViewSet):
-    queryset = Donation.objects.all()  # Base queryset for router
+    queryset = Donation.objects.all()
     serializer_class = DonationSerializer
-    permission_classes = [permissions.IsAuthenticated]
     pagination_class = DonationPagination
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['status', 'cause_id']
-    search_fields = ['cause_id__name']
-    ordering_fields = ['donated_at', 'amount']
-    ordering = ['-donated_at']
-
-    def get_queryset(self):
-        """
-        Return only donations made by the authenticated user
-        """
-        if self.request.user.is_authenticated:
-            return Donation.objects.select_related('user_id', 'cause_id', 'recipient_id').filter(
-                user_id=self.request.user.id
-            )
-        return Donation.objects.none()
+    # Allow any user to view donations
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def create(self, request, *args, **kwargs):
         data = request.data.copy()
-        # Set the user_id to the authenticated user
-        data['user_id'] = request.user.id
-        # Set recipient_id to the cause organizer
-        cause_id = data.get('cause_id')
-        if cause_id:
-            from causes.models import Causes
-            try:
-                cause = Causes.objects.get(id=cause_id)
-                data['recipient_id'] = cause.organizer_id.id
-            except Causes.DoesNotExist:
-                return Response({'error': 'Cause not found'}, status=400)
+        user_id = getattr(request, 'user_id', None)
+        data['user_id'] = user_id # Caters for anonymous donations
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data, status=HTTP_201_CREATED)
 
+    def get_queryset(self):
+        user = self.request.user
+        if user and hasattr(user, 'id') and user.is_authenticated:
+            # For authenticated users, return their donations
+            return Donation.objects.filter(user_id=user.id)
+        else:
+            # For anonymous users, return recent public donations (limited for privacy)
+            return Donation.objects.filter(status='completed').order_by('-donated_at')[:50]
+
     @action(detail=False, methods=['get'])
-    @method_decorator(cache_page(60))  # Cache statistics for 1 minute
     def statistics(self, request):
-        queryset = self.get_queryset()
+        user = self.request.user
+        if user and hasattr(user, 'id') and user.is_authenticated:
+            queryset = Donation.objects.filter(user_id=user.id)
+        else:
+            queryset = Donation.objects.filter(status='completed')
+        
         total_donations = queryset.count()
         total_amount = queryset.aggregate(Sum('amount'))['amount__sum'] or 0
         return Response({
@@ -72,15 +60,13 @@ class DonationViewSet(viewsets.ModelViewSet):
         })
 
 class AdminDonationListView(generics.ListAPIView):
-    queryset = Donation.objects.select_related('user_id', 'cause_id', 'recipient_id').all()
+    queryset = Donation.objects.all()
     serializer_class = DonationSerializer
     permission_classes = [IsAdminService]
-    pagination_class = DonationPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['user_id', 'cause_id', 'status', 'donated_at']
-    search_fields = ['user_id__email', 'cause_id__name', 'transaction_id']
+    search_fields = ['user_id', 'cause__title', 'user__email', 'cause_id']
     ordering_fields = ['donated_at', 'amount']
-    ordering = ['-donated_at']
 
 class AdminDonationStatisticsView(APIView):
     permission_classes = [IsAdminService]
@@ -97,3 +83,4 @@ class AdminDonationStatisticsView(APIView):
             'total_users': total_users,
             'total_causes': total_causes,
         })
+
