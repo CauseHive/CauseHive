@@ -17,7 +17,7 @@ RUN apt-get install -y --no-install-recommends build-essential
 RUN rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
-COPY requirements.txt .
+COPY backend/requirements.txt .
 
 # Install Python dependencies with memory optimization
 RUN pip install --no-cache-dir --upgrade pip

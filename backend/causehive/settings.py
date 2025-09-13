@@ -149,6 +149,7 @@ INSTALLED_APPS = [
     'cart',
     'payments',
     'withdrawal_transfer',
+    'notifications',
 
     'channels',
 
@@ -384,14 +385,6 @@ DATABASES['default']['OPTIONS'].update({
     'options': '-c default_transaction_isolation=read_committed -c statement_timeout=30000 -c idle_in_transaction_session_timeout=300000 -c tcp_keepalives_idle=600 -c tcp_keepalives_interval=30 -c tcp_keepalives_count=3'
 })
 
-# Disable database query logging in production for performance
-if not DEBUG:
-    LOGGING['loggers']['django.db.backends'] = {
-        'handlers': ['console'],
-        'level': 'WARNING',
-        'propagate': False,
-    }
-
 # Logging configuration for Railway
 LOGGING = {
     'version': 1,
@@ -420,6 +413,14 @@ LOGGING = {
         },
     },
 }
+
+# Disable database query logging in production for performance
+if not DEBUG:
+    LOGGING['loggers']['django.db.backends'] = {
+        'handlers': ['console'],
+        'level': 'WARNING',
+        'propagate': False,
+    }
 
 # Security settings for production
 if not DEBUG:

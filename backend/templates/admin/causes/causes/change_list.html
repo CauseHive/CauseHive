@@ -1,0 +1,252 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+.approval-dashboard {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+.approval-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.stat-card {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--primary-color);
+}
+
+.stat-number {
+    font-size: 28px;
+    font-weight: bold;
+    color: #111827; /* Pure black for maximum contrast */
+    margin-bottom: 8px;
+    text-shadow: none; /* Remove text shadow for cleaner look */
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #374151; /* Dark gray for good contrast */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700; /* Bolder for better readability */
+    text-shadow: none; /* Remove text shadow for cleaner look */
+}
+
+.pending-causes {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 2px solid #d97706; /* Darker border for better contrast */
+    box-shadow: 0 2px 4px rgba(217, 119, 6, 0.3); /* Stronger shadow */
+}
+
+.pending-causes .stat-number {
+    color: #92400e; /* Dark brown for high contrast */
+}
+
+.pending-causes .stat-label {
+    color: #78350f; /* Darker brown for better readability */
+}
+
+.approved-causes {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border: 2px solid #059669; /* Darker border for better contrast */
+    box-shadow: 0 2px 4px rgba(5, 150, 105, 0.3); /* Stronger shadow */
+}
+
+.approved-causes .stat-number {
+    color: #065f46; /* Dark green for high contrast */
+}
+
+.approved-causes .stat-label {
+    color: #047857; /* Darker green for better readability */
+}
+
+.rejected-causes {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border: 2px solid #dc2626; /* Darker border for better contrast */
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3); /* Stronger shadow */
+}
+
+.rejected-causes .stat-number {
+    color: #991b1b; /* Dark red for high contrast */
+}
+
+.rejected-causes .stat-label {
+    color: #b91c1c; /* Darker red for better readability */
+}
+
+/* Total causes card styling */
+.stat-card:not(.pending-causes):not(.approved-causes):not(.rejected-causes) {
+    background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+    border: 2px solid #4f46e5; /* Darker border for better contrast */
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3); /* Stronger shadow */
+}
+
+.stat-card:not(.pending-causes):not(.approved-causes):not(.rejected-causes) .stat-number {
+    color: #1e1b4b; /* Darker purple for high contrast */
+}
+
+.stat-card:not(.pending-causes):not(.approved-causes):not(.rejected-causes) .stat-label {
+    color: #312e81; /* Darker purple for better readability */
+}
+
+.quick-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.quick-action-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-pending {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%); /* Darker gradient */
+    color: #ffffff;
+    border: 2px solid #92400e; /* Darker border for better contrast */
+    box-shadow: 0 2px 4px rgba(217, 119, 6, 0.4); /* Stronger shadow */
+    font-weight: 600; /* Bolder text for better readability */
+}
+
+.btn-approved {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%); /* Darker gradient */
+    color: #ffffff;
+    border: 2px solid #065f46; /* Darker border for better contrast */
+    box-shadow: 0 2px 4px rgba(5, 150, 105, 0.4); /* Stronger shadow */
+    font-weight: 600; /* Bolder text for better readability */
+}
+
+.btn-rejected {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); /* Darker gradient */
+    color: #ffffff;
+    border: 2px solid #991b1b; /* Darker border for better contrast */
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.4); /* Stronger shadow */
+    font-weight: 600; /* Bolder text for better readability */
+}
+
+.quick-action-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: var(--shadow-hover);
+    text-decoration: none;
+    color: white;
+}
+
+.notification-banner {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border: 2px solid #1e40af; /* Darker border for better contrast */
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    color: #1e3a8a; /* Darker text for better readability */
+    font-weight: 700; /* Bolder text for better visibility */
+    box-shadow: 0 2px 4px rgba(30, 64, 175, 0.3); /* Stronger shadow */
+}
+
+.notification-banner.warning {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-color: #d97706; /* Darker border for better contrast */
+    color: #92400e; /* Dark brown for high contrast */
+    box-shadow: 0 2px 4px rgba(217, 119, 6, 0.3); /* Stronger shadow */
+}
+
+.notification-banner.success {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    border-color: #059669; /* Darker border for better contrast */
+    color: #065f46; /* Dark green for high contrast */
+    box-shadow: 0 2px 4px rgba(5, 150, 105, 0.3); /* Stronger shadow */
+}
+</style>
+{% endblock %}
+
+{% block content_title %}
+{{ block.super }}
+<div class="approval-dashboard">
+    <h2><i data-lucide="shield-check"></i> Cause Approval Dashboard</h2>
+    
+    <div class="approval-stats">
+        <div class="stat-card pending-causes">
+            <div class="stat-number">{{ pending_causes }}</div>
+            <div class="stat-label">Pending Review</div>
+        </div>
+        <div class="stat-card approved-causes">
+            <div class="stat-number">{{ approved_causes }}</div>
+            <div class="stat-label">Live (Ongoing)</div>
+        </div>
+        <div class="stat-card rejected-causes">
+            <div class="stat-number">{{ rejected_causes }}</div>
+            <div class="stat-label">Rejected</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ total_causes }}</div>
+            <div class="stat-label">Total Causes</div>
+        </div>
+    </div>
+    
+    {% if pending_causes > 0 %}
+    <div class="notification-banner warning">
+        <strong>⚠️ Action Required:</strong> You have {{ pending_causes }} cause{{ pending_causes|pluralize }} waiting for review.
+    </div>
+    {% endif %}
+    
+    <div class="quick-actions">
+        <a href="?status__exact=under_review" class="quick-action-btn btn-pending">
+            <i data-lucide="clock"></i> View Pending ({{ pending_causes }})
+        </a>
+        <a href="?status__exact=ongoing" class="quick-action-btn btn-approved">
+            <i data-lucide="check-circle"></i> View Live ({{ approved_causes }})
+        </a>
+        <a href="?status__exact=rejected" class="quick-action-btn btn-rejected">
+            <i data-lucide="x-circle"></i> View Rejected ({{ rejected_causes }})
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Lucide icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+    
+    // Add click handlers for quick actions
+    document.querySelectorAll('.quick-action-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            // The href will handle the navigation
+        });
+    });
+});
+</script>
+{% endblock %}

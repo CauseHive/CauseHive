@@ -24,7 +24,7 @@ class Causes(models.Model):
     target_amount = models.DecimalField(max_digits=10, decimal_places=2)
     current_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     rejection_reason = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ongoing', db_index=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='under_review', db_index=True)
     cover_image = models.ImageField(upload_to='causes_images/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField(unique=True, blank=True)

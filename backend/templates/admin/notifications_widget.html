@@ -1,0 +1,224 @@
+{% load static %}
+
+<div class="notifications-widget">
+    <div class="notifications-header">
+        <h3><i data-lucide="bell"></i> Recent Notifications</h3>
+        <span class="notification-count">{{ unread_count }}</span>
+    </div>
+    
+    <div class="notifications-list">
+        {% if notifications %}
+            {% for notification in notifications %}
+            <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
+                <div class="notification-icon">
+                    {% if notification.notification_type == 'cause_pending' %}
+                        <i data-lucide="clock" style="color: #ffc107;"></i>
+                    {% elif notification.notification_type == 'cause_approved' %}
+                        <i data-lucide="check-circle" style="color: #28a745;"></i>
+                    {% elif notification.notification_type == 'cause_rejected' %}
+                        <i data-lucide="x-circle" style="color: #dc3545;"></i>
+                    {% elif notification.notification_type == 'new_donation' %}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color: #17a2b8;">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                            <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+                            <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                            <text x="12" y="16" text-anchor="middle" font-size="6" font-weight="bold" fill="white">₵</text>
+                        </svg>
+                    {% elif notification.notification_type == 'withdrawal_request' %}
+                        <i data-lucide="arrow-up-right" style="color: #fd7e14;"></i>
+                    {% elif notification.notification_type == 'user_registration' %}
+                        <i data-lucide="user-plus" style="color: #6f42c1;"></i>
+                    {% else %}
+                        <i data-lucide="info" style="color: #6c757d;"></i>
+                    {% endif %}
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">{{ notification.title }}</div>
+                    <div class="notification-message">{{ notification.message|truncatechars:80 }}</div>
+                    <div class="notification-time">{{ notification.created_at|timesince }} ago</div>
+                </div>
+                <div class="notification-priority priority-{{ notification.priority }}"></div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-notifications">
+                <i data-lucide="bell-off"></i>
+                <p>No notifications</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div class="notifications-footer">
+        <a href="{% url 'admin:notifications_adminnotification_changelist' %}" class="view-all-btn">
+            View All Notifications
+        </a>
+        <a href="{% url 'admin:causes_causes_changelist' %}?status__exact=under_review" class="approve-causes-btn">
+            <i data-lucide="check-circle"></i> Approve Causes
+        </a>
+    </div>
+</div>
+
+<style>
+.notifications-widget {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+.notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.notifications-header h3 {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 16px;
+}
+
+.notification-count {
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.notifications-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    transition: var(--transition);
+    position: relative;
+}
+
+.notification-item:hover {
+    background: var(--hover-bg);
+}
+
+.notification-item.unread {
+    background: rgba(0, 123, 255, 0.1);
+    border-left: 3px solid #007bff;
+}
+
+.notification-icon {
+    margin-right: 12px;
+    margin-top: 2px;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-title {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.notification-message {
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+.notification-time {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.notification-priority {
+    width: 4px;
+    height: 100%;
+    border-radius: 2px;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.priority-low { background: #28a745; }
+.priority-medium { background: #ffc107; }
+.priority-high { background: #fd7e14; }
+.priority-urgent { background: #dc3545; }
+
+.no-notifications {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-muted);
+}
+
+.no-notifications i {
+    font-size: 24px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.notifications-footer {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.view-all-btn {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.view-all-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    text-decoration: none;
+}
+
+.approve-causes-btn {
+    background: #28a745;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.approve-causes-btn:hover {
+    background: #218838;
+    color: white;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+</style>
