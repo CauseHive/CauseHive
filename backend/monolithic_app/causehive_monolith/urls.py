@@ -75,6 +75,10 @@ urlpatterns = [
     path('api/admin/dashboard/', include('dashboard.urls')),
     path('api/admin/management/', include('management.urls')),
     path('api/admin/notifications/', include('notifications.urls')),
+    
+    # Blog/Content endpoints
+    path('api/', include('blog.urls')),
+    path('api/', include('newsletter.urls')),
 ]
 
 # Serve media files in development

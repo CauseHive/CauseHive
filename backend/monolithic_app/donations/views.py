@@ -21,6 +21,7 @@ class DonationPagination(PageNumberPagination):
 class DonationViewSet(viewsets.ModelViewSet):
     queryset = Donation.objects.all()
     serializer_class = DonationSerializer
+    pagination_class = DonationPagination
     # Allow any user to view donations
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
@@ -37,13 +38,20 @@ class DonationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user and hasattr(user, 'id') and user.is_authenticated:
+            # For authenticated users, return their donations
             return Donation.objects.filter(user_id=user.id)
-        # Anonymous users have no history
-        return Donation.objects.none()
+        else:
+            # For anonymous users, return recent public donations (limited for privacy)
+            return Donation.objects.filter(status='completed').order_by('-donated_at')[:50]
 
     @action(detail=False, methods=['get'])
     def statistics(self, request):
-        queryset = self.get_queryset()
+        user = self.request.user
+        if user and hasattr(user, 'id') and user.is_authenticated:
+            queryset = Donation.objects.filter(user_id=user.id)
+        else:
+            queryset = Donation.objects.filter(status='completed')
+        
         total_donations = queryset.count()
         total_amount = queryset.aggregate(Sum('amount'))['amount__sum'] or 0
         return Response({
