@@ -20,11 +20,50 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Lucide icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+    
+    // Theme toggle functionality
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    }
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+});
+</script>
 {% endblock %}
 
 {% block nav-breadcrumbs %}
 <div class="breadcrumbs">
     <a href="{% url 'admin:index' %}">Home</a>
     {% if title %} &rsaquo; {{ title }}{% endif %}
+</div>
+{% endblock %}
+
+{% block userlinks %}
+<div style="display: flex; align-items: center; gap: 12px;">
+    <button id="theme-toggle" style="background: none; border: 1px solid var(--border-color); border-radius: 6px; padding: 6px; cursor: pointer; color: var(--text-color); transition: var(--transition);">
+        <i data-lucide="sun-moon"></i>
+    </button>
+    <div id="user-tools">
+        <a href="/">View site</a>
+        <a href="{% url 'admin:password_change' %}">Change password</a>
+        <a href="{% url 'admin:logout' %}">Log out</a>
+    </div>
 </div>
 {% endblock %}

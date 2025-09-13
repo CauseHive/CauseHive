@@ -1,7 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Q
-from django.utils import timezone
-
 from .models import AdminNotification
 
 User = get_user_model()
@@ -60,28 +58,26 @@ class NotificationService:
     @staticmethod
     def notify_new_donation(donation):
         """Notify when a new donation is made"""
-        donor_name = donation.user_id.get_full_name() if donation.user_id else "Anonymous"
         return NotificationService.create_notification(
             title=f"New Donation: GHS {donation.amount:,.2f}",
-            message=f"New donation of GHS {donation.amount:,.2f} received for '{donation.cause_id.name}' by {donor_name}",
+            message=f"New donation of GHS {donation.amount:,.2f} received for '{donation.cause.name}' by {donation.user.get_full_name()}",
             notification_type='new_donation',
             priority='medium',
-            cause=donation.cause_id,
-            user=donation.user_id,
+            cause=donation.cause,
+            user=donation.user,
             donation=donation
         )
     
     @staticmethod
     def notify_withdrawal_request(withdrawal):
         """Notify when a withdrawal request is made"""
-        user_name = withdrawal.user_id.get_full_name() if withdrawal.user_id else "Unknown User"
         return NotificationService.create_notification(
             title=f"Withdrawal Request: GHS {withdrawal.amount:,.2f}",
-            message=f"Withdrawal request of GHS {withdrawal.amount:,.2f} from '{withdrawal.cause_id.name}' by {user_name}",
+            message=f"Withdrawal request of GHS {withdrawal.amount:,.2f} from '{withdrawal.cause.name}' by {withdrawal.user.get_full_name()}",
             notification_type='withdrawal_request',
             priority='high',
-            cause=withdrawal.cause_id,
-            user=withdrawal.user_id
+            cause=withdrawal.cause,
+            user=withdrawal.user
         )
     
     @staticmethod

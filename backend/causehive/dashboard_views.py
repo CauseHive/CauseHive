@@ -25,6 +25,15 @@ def custom_admin_dashboard(request):
     from payments.models import PaymentTransaction
     from withdrawal_transfer.models import WithdrawalRequest
     
+    # Import notification service
+    try:
+        from notifications.services import NotificationService
+        notifications = NotificationService.get_recent_notifications(5)
+        unread_count = NotificationService.get_unread_count()
+    except ImportError:
+        notifications = []
+        unread_count = 0
+    
     # User statistics
     user_stats = {
         'total_users': User.objects.count(),
@@ -38,7 +47,7 @@ def custom_admin_dashboard(request):
     # Cause statistics
     cause_stats = {
         'total_causes': Causes.objects.count(),
-        'approved': Causes.objects.filter(status='approved').count(),
+        'approved': Causes.objects.filter(status='ongoing').count(),
         'pending': Causes.objects.filter(status='under_review').count(),
         'rejected': Causes.objects.filter(status='rejected').count(),
         'ongoing': Causes.objects.filter(status='ongoing').count(),
@@ -78,6 +87,8 @@ def custom_admin_dashboard(request):
         'recent_activity': recent_activity,
         'top_causes': top_causes,
         'top_donors': top_donors,
+        'notifications': notifications,
+        'unread_count': unread_count,
     }
     
     return render(request, 'admin/dashboard.html', context)

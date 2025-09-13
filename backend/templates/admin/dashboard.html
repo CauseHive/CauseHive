@@ -28,15 +28,20 @@
             </div>
             <div class="title">Total Causes</div>
             <div class="number">{{ cause_stats.total_causes }}</div>
-            <div class="subtitle">{{ cause_stats.approved }} approved</div>
+            <div class="subtitle">{{ cause_stats.approved }} live</div>
         </a>
         
         <a href="{% url 'admin:donations_donation_changelist' %}" class="stat-card">
             <div class="stat-icon">
-                <i data-lucide="dollar-sign"></i>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                    <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+                    <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                    <text x="12" y="16" text-anchor="middle" font-size="8" font-weight="bold" fill="white">₵</text>
+                </svg>
             </div>
             <div class="title">Total Donations</div>
-            <div class="number">GHS {{ donation_stats.total_amount|floatformat:0 }}</div>
+            <div class="number">GH₵{{ donation_stats.total_amount|floatformat:0 }}</div>
             <div class="subtitle">{{ donation_stats.total_count }} transactions</div>
         </a>
         
@@ -45,11 +50,71 @@
                 <i data-lucide="trending-up"></i>
             </div>
             <div class="title">Avg Donation</div>
-            <div class="number">GHS {{ donation_stats.avg_amount|floatformat:0 }}</div>
+            <div class="number">GH₵{{ donation_stats.avg_amount|floatformat:0 }}</div>
             <div class="subtitle">per transaction</div>
         </a>
     </div>
-
+    
+    <!-- Notifications Widget -->
+    <div class="notifications-section">
+        {% include 'admin/notifications_widget.html' %}
+    </div>
+    
+    <!-- Quick Actions Section -->
+    <div class="quick-actions-section">
+        <h3><i data-lucide="zap"></i> Quick Actions</h3>
+        <div class="quick-actions-grid">
+            <a href="{% url 'admin:causes_causes_changelist' %}?status__exact=under_review" class="quick-action-card pending">
+                <div class="action-icon">
+                    <i data-lucide="clock"></i>
+                </div>
+                <div class="action-content">
+                    <h4>Review Pending Causes</h4>
+                    <p>Approve or reject causes waiting for review</p>
+                    <span class="action-count">{{ cause_stats.pending }} pending</span>
+                </div>
+            </a>
+            
+            <a href="{% url 'admin:causes_causes_changelist' %}?status__exact=ongoing" class="quick-action-card approved">
+                <div class="action-icon">
+                    <i data-lucide="check-circle"></i>
+                </div>
+                <div class="action-content">
+                    <h4>View Live Causes</h4>
+                    <p>Manage currently live causes</p>
+                    <span class="action-count">{{ cause_stats.approved }} live</span>
+                </div>
+            </a>
+            
+            <a href="{% url 'admin:notifications_adminnotification_changelist' %}" class="quick-action-card notifications">
+                <div class="action-icon">
+                    <i data-lucide="bell"></i>
+                </div>
+                <div class="action-content">
+                    <h4>View All Notifications</h4>
+                    <p>See all admin notifications and alerts</p>
+                    <span class="action-count">{{ unread_count }} unread</span>
+                </div>
+            </a>
+            
+            <a href="{% url 'admin:donations_donation_changelist' %}" class="quick-action-card donations">
+                <div class="action-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                    <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+                    <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                    <text x="12" y="16" text-anchor="middle" font-size="8" font-weight="bold" fill="white">₵</text>
+                </svg>
+                </div>
+                <div class="action-content">
+                    <h4>Recent Donations</h4>
+                    <p>Monitor recent donation activity</p>
+                    <span class="action-count">{{ donation_stats.total_count }} total</span>
+                </div>
+            </a>
+        </div>
+    </div>
+    
     <!-- Charts Section -->
     <div class="charts-container">
         <!-- Donations Over Time Chart -->
@@ -76,7 +141,7 @@
                 <div class="cause-item">
                     <div class="cause-info">
                         <strong>{{ cause.name|truncatechars:30 }}</strong>
-                        <span class="cause-amount">${{ cause.current_amount|floatformat:0 }} / ${{ cause.target_amount|floatformat:0 }}</span>
+                        <span class="cause-amount">GH₵{{ cause.current_amount|floatformat:0 }} / GH₵{{ cause.target_amount|floatformat:0 }}</span>
                     </div>
                     <div class="progress-container">
                         <div class="progress-bar">
@@ -98,10 +163,15 @@
                 {% for donation in recent_activity.donations|slice:":5" %}
                 <div class="activity-item">
                     <div class="activity-icon">
-                        <i data-lucide="dollar-sign"></i>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                    <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+                    <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                    <text x="12" y="16" text-anchor="middle" font-size="8" font-weight="bold" fill="white">₵</text>
+                </svg>
                     </div>
                     <div class="activity-content">
-                        <strong>GHS {{ donation.amount|floatformat:0 }}</strong> donated to 
+                        <strong>GH₵{{ donation.amount|floatformat:0 }}</strong> donated to 
                         <strong>{{ donation.cause_id.name|truncatechars:20 }}</strong>
                         <div class="activity-time">{{ donation.donated_at|timesince }} ago</div>
                     </div>
@@ -136,7 +206,12 @@
                 Manage Users
             </a>
             <a href="{% url 'admin:donations_donation_changelist' %}" class="action-btn">
-                <i data-lucide="dollar-sign"></i>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                    <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+                    <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                    <text x="12" y="16" text-anchor="middle" font-size="8" font-weight="bold" fill="white">₵</text>
+                </svg>
                 View Donations
             </a>
             <a href="{% url 'admin:payments_paymenttransaction_changelist' %}" class="action-btn">
@@ -200,7 +275,7 @@ new Chart(donationsCtx, {
     data: {
         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
         datasets: [{
-            label: 'Donations ($)',
+            label: 'Donations (GH₵)',
             data: [12000, 19000, 15000, 25000, 22000, 30000],
             borderColor: '#3498db',
             backgroundColor: 'rgba(52, 152, 219, 0.1)',
@@ -221,7 +296,7 @@ new Chart(donationsCtx, {
                 beginAtZero: true,
                 ticks: {
                     callback: function(value) {
-                        return '$' + value.toLocaleString();
+                        return 'GH₵' + value.toLocaleString();
                     }
                 }
             }

@@ -3,14 +3,13 @@ from django.core.management.base import BaseCommand
 import redis
 import json
 from causes.models import Causes
-from django.conf import settings
 from decimal import Decimal
 
 class Command(BaseCommand):
     help = 'Consume donation events and updates current_amount in causes'
 
     def handle(self, *args, **options):
-        r = redis.Redis(host='localhost', port=6379, db=0)
+        r = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
         pubsub = r.pubsub()
         pubsub.subscribe('donation_events')
         print("Listening for donation events...")
