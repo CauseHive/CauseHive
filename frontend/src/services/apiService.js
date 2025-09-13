@@ -2,10 +2,8 @@
 let API_BASE_URL = process.env.REACT_APP_API_URL ||
   (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
   (window && window.location && window.location.hostname.includes('causehive.tech')
-  ? 'https://causehive.tech/'
-  : 'http://localhost:8000/');
-
-// Normalize base URL: remove trailing slashes and strip a trailing '/api' segment
+    ? ''  // Use relative URLs when on causehive.tech domain
+    : 'http://www.causehive.tech');// Normalize base URL: remove trailing slashes and strip a trailing '/api' segment
 if (typeof API_BASE_URL === 'string') {
   API_BASE_URL = API_BASE_URL.replace(/\/+$|\s+$/g, '');
   // Treat a single-root slash as relative base
