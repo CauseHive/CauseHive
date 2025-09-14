@@ -2,7 +2,8 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 from .views import (register_user, LoginView, LogoutView, GoogleLogin, request_password_reset, reset_password_confirm,
-                    UserProfileDetailView, UserAccountDeleteView, UserDetailView, AdminUserListView, BankListAPIView, MobileMoneyListAPIView, ValidateBankAccountAPIView)
+                    UserProfileDetailView, UserAccountDeleteView, UserDetailView, AdminUserListView, BankListAPIView, MobileMoneyListAPIView, ValidateBankAccountAPIView, google_oauth_callback, google_oauth_url)
+# from .google_oauth_views import google_oauth_callback, google_oauth_url  # Deleted file
 
 # JWT Authentication URLs
 jwt_urlpatterns = [
@@ -13,7 +14,8 @@ jwt_urlpatterns = [
 
 # Social Authentication URLs
 social_urlpatterns = [
-    path('google/', GoogleLogin.as_view(), name='google_login'),
+    path('google/url/', google_oauth_url, name='google_oauth_url'),
+    path('google/callback/', google_oauth_callback, name='google_oauth_callback'),
 ]
 
 password_urlpatterns = [

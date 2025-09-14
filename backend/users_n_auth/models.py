@@ -56,7 +56,7 @@ class UserProfile(models.Model):
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
     withdrawal_address = models.JSONField(blank=True, null=True, help_text="Stores complete withdrawal payment info.")
-    withdrawal_wallet = models.CharField(max_length=50, blank=True, null=True)
+    # withdrawal_wallet = models.CharField(max_length=50, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):

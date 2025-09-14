@@ -25,6 +25,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from django.http import HttpResponseRedirect
+import urllib.parse
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import User, UserProfile
@@ -207,7 +211,146 @@ class LogoutView(APIView):
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
-    callback_url = f"{settings.BACKEND_URL}/accounts/google/login/callback/"
+    callback_url = "http://127.0.0.1:9000/api/user/google/callback/"
+    
+    def get_response(self):
+        response = super().get_response()
+        
+        # Check if the user is authenticated (OAuth was successful)
+        if self.request.user.is_authenticated:
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(self.request.user)
+            access_token = refresh.access_token
+            
+            # Redirect to API profile page with access token
+            api_url = f"http://127.0.0.1:9000/api/user/profile/?access_token={access_token}"
+            return HttpResponseRedirect(api_url)
+        
+        return response
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def google_oauth_url(request):
+    """
+    Generate Google OAuth URL for frontend to redirect to
+    """
+    from django.conf import settings
+    
+    # Your Google OAuth credentials
+    GOOGLE_CLIENT_ID = settings.GOOGLE_OAUTH2_CLIENT_ID
+    REDIRECT_URI = request.build_absolute_uri('/api/user/google/callback/')
+    SCOPE = 'openid email profile'
+    
+    # Generate Google OAuth URL with proper scope URLs
+    scopes = [
+        'openid',
+        'https://www.googleapis.com/auth/userinfo.email',
+        'https://www.googleapis.com/auth/userinfo.profile'
+    ]
+    scope_string = '%20'.join(scopes)
+    
+    auth_url = (
+        f"https://accounts.google.com/o/oauth2/v2/auth?"
+        f"client_id={GOOGLE_CLIENT_ID}&"
+        f"redirect_uri={REDIRECT_URI}&"
+        f"response_type=code&"
+        f"scope={scope_string}&"
+        f"access_type=offline&"
+        f"prompt=consent"
+    )
+    
+    return Response({
+        'google_oauth_url': auth_url,
+        'message': 'Use this URL to initiate Google OAuth flow'
+    })
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def google_oauth_callback(request):
+    """
+    Custom Google OAuth callback that redirects to profile with access token
+    """
+    try:
+        # Get the authorization code from the URL parameters
+        auth_code = request.GET.get('code')
+        state = request.GET.get('state')
+        
+        if not auth_code:
+            return Response(
+                {'error': 'Authorization code is required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Exchange code for tokens with Google
+        from google.oauth2.credentials import Credentials
+        from google_auth_oauthlib.flow import Flow
+        from django.conf import settings
+        
+        # Your Google OAuth credentials
+        GOOGLE_CLIENT_ID = settings.GOOGLE_OAUTH2_CLIENT_ID
+        GOOGLE_CLIENT_SECRET = settings.GOOGLE_OAUTH2_SECRET
+        REDIRECT_URI = request.build_absolute_uri('/api/user/google/callback/')
+        
+        # Create flow with Google's actual scope URLs
+        flow = Flow.from_client_config(
+            {
+                "web": {
+                    "client_id": GOOGLE_CLIENT_ID,
+                    "client_secret": GOOGLE_CLIENT_SECRET,
+                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "token_uri": "https://oauth2.googleapis.com/token",
+                    "redirect_uris": [REDIRECT_URI]
+                }
+            },
+            scopes=[
+                'openid',
+                'https://www.googleapis.com/auth/userinfo.email',
+                'https://www.googleapis.com/auth/userinfo.profile'
+            ]
+        )
+        flow.redirect_uri = REDIRECT_URI
+        
+        # Exchange code for tokens
+        flow.fetch_token(code=auth_code)
+        credentials = flow.credentials
+        
+        # Get user info from Google
+        from googleapiclient.discovery import build
+        service = build('oauth2', 'v2', credentials=credentials)
+        user_info = service.userinfo().get().execute()
+        
+        # Handle case where email might not be available
+        if 'email' not in user_info:
+            return Response(
+                {'error': 'Email not available from Google. Please ensure your Google OAuth app has email scope enabled.'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get or create user
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        user, created = User.objects.get_or_create(
+            email=user_info['email'],
+            defaults={
+                'first_name': user_info.get('given_name', ''),
+                'last_name': user_info.get('family_name', ''),
+                'is_active': True,
+            }
+        )
+        
+        # Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
+        
+        # Redirect to API profile page with access token
+        api_url = f"http://127.0.0.1:9000/api/user/profile/?access_token={access_token}"
+        return HttpResponseRedirect(api_url)
+        
+    except Exception as e:
+        return Response(
+            {'error': f'Google OAuth authentication failed: {str(e)}'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 class UserDetailView(RetrieveAPIView):
     queryset = User.objects.only('id', 'email', 'first_name', 'last_name', 'date_joined', 'is_active')
@@ -239,6 +382,67 @@ class UserProfileDetailView(generics.RetrieveUpdateAPIView):
 
     def perform_update(self, serializer):
         serializer.save(user=self.request.user)
+
+    def get_permissions(self):
+        # Allow access without authentication if access_token is provided in URL
+        if self.request.GET.get('access_token'):
+            return []
+        return super().get_permissions()
+
+    def get(self, request, *args, **kwargs):
+        # Handle access token from URL parameter (for OAuth redirects)
+        access_token = request.GET.get('access_token')
+        if access_token:
+            try:
+                from rest_framework_simplejwt.tokens import AccessToken
+                from django.contrib.auth import get_user_model
+                
+                # Validate the access token
+                token = AccessToken(access_token)
+                user_id = token['user_id']
+                User = get_user_model()
+                user = User.objects.get(id=user_id)
+                
+                # Set the user in the request for authentication
+                request.user = user
+                
+                # Return profile data with success message
+                try:
+                    profile = user.profile
+                    serializer = self.get_serializer(profile)
+                    return Response({
+                        'profile': serializer.data,
+                        'user': {
+                            'id': user.id,
+                            'email': user.email,
+                            'first_name': user.first_name,
+                            'last_name': user.last_name,
+                            'is_active': user.is_active,
+                        },
+                        'message': 'Google OAuth login successful!',
+                        'access_token': access_token
+                    })
+                except UserProfile.DoesNotExist:
+                    return Response({
+                        'user': {
+                            'id': user.id,
+                            'email': user.email,
+                            'first_name': user.first_name,
+                            'last_name': user.last_name,
+                            'is_active': user.is_active,
+                        },
+                        'message': 'Google OAuth login successful! Profile not yet created.',
+                        'access_token': access_token
+                    })
+                    
+            except Exception as e:
+                return Response({
+                    'error': 'Invalid access token',
+                    'message': str(e)
+                }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Normal authenticated request
+        return super().get(request, *args, **kwargs)
 
 class UserAccountDeleteView(generics.DestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]

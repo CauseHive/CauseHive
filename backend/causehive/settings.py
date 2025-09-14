@@ -86,9 +86,7 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 EMAIL_VERIFICATION = 'optional'
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+# Removed deprecated settings - using ACCOUNT_SIGNUP_FIELDS instead
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
 ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
 ACCOUNT_SESSION_REMEMBER = True
@@ -248,14 +246,27 @@ SIMPLE_JWT = {
     "AUTH_TOKEN_CLASSES": ('rest_framework_simplejwt.tokens.AccessToken',),
 }
 
+# Google OAuth credentials
+GOOGLE_OAUTH2_CLIENT_ID = env('GOOGLE_OAUTH2_CLIENT_ID', default='set_the_client_id_dumbo')
+GOOGLE_OAUTH2_SECRET = env('GOOGLE_OAUTH2_SECRET', default='set_the_secrett_dumbo')
+
 # Social Account Settings
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': ['email', 'profile'],
         'AUTH_PARAMS': {'access_type': 'offline'},
         'OAUTH_PKCE_ENABLED': True,
+        'APP': {
+            'client_id': GOOGLE_OAUTH2_CLIENT_ID,
+            'secret': GOOGLE_OAUTH2_SECRET,
+        }
     }
 }
+
+LOGIN_URL = '/api/user/login/'
+LOGOUT_URL = '/api/user/logout/'
+LOGIN_REDIRECT_URL = '/api/user/profile/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/api/user/logout/'
 
 # Celery Configuration for background tasks
 CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://localhost:6379/0')
@@ -343,6 +354,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -414,25 +429,35 @@ LOGGING = {
     },
 }
 
-# Disable database query logging in production for performance
-if not DEBUG:
-    LOGGING['loggers']['django.db.backends'] = {
-        'handlers': ['console'],
-        'level': 'WARNING',
-        'propagate': False,
-    }
+# # Disable database query logging in production for performance
+# if not DEBUG:
+#     LOGGING['loggers']['django.db.backends'] = {
+#         'handlers': ['console'],
+#         'level': 'WARNING',
+#         'propagate': False,
+#     }
 
 # Security settings for production
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_PRELOAD = True
     SECURE_REDIRECT_EXEMPT = []
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+else:
+    # Development mode - disable HTTPS redirects and HSTS
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+    SECURE_HSTS_SECONDS = 0  # Disable HSTS in development
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+    SECURE_HSTS_PRELOAD = False
+    SECURE_PROXY_SSL_HEADER = None
 
 # Ensure per-alias search_path is applied on each DB connection
 # This registers a signal handler to SET search_path at runtime
