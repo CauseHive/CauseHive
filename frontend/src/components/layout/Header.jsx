@@ -47,9 +47,7 @@ export function Header({ onMenuClick, showMenuButton = true, className }) {
 
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2 hover-lift">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-primary-600">
-                <Heart className="h-5 w-5 text-white animate-heart-beat" fill="currentColor" />
-              </div>
+              <img src="/favicon.ico" alt="CauseHive Logo" className="h-8 w-8" />
               <span className="heading-card text-xl font-bold text-primary-700">
                 CauseHive
               </span>
