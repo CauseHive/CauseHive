@@ -130,6 +130,7 @@ LOCAL_APPS = [
     # Cause service apps
     'causes',
     'categories',
+    'testimonials',
     
     # Donation processing service apps
     'donations',
