@@ -2,22 +2,15 @@ import React, { useState } from 'react';
 import { cn } from '../../lib/utils';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
-import { Footer } from './Footer';
 import { Breadcrumbs } from './Breadcrumbs';
-import { useAuth } from '../../contexts/AuthContext';
 
 export function AppLayout({ 
   children, 
   showSidebar = true, 
   showBreadcrumbs = true,
-  showFooter = true,
   className 
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { isAuthenticated } = useAuth();
-  
-  // Hide footer when user is authenticated, unless explicitly overridden
-  const shouldShowFooter = showFooter && !isAuthenticated;
 
   return (
     <div className="app-background">
@@ -64,9 +57,6 @@ export function AppLayout({
             {children}
           </div>
         </div>
-
-        {/* Footer - Part of scrollable content, hidden when authenticated */}
-        {shouldShowFooter && <Footer />}
       </main>
       </div>
     </div>

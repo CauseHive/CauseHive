@@ -1,29 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Search, User, Settings, BarChart3, Shield, HelpCircle, Plus, LogOut, Menu } from 'lucide-react';
+import { Search, User, Settings, BarChart3, Shield, HelpCircle, Plus, LogOut, Menu, Heart } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { cn } from '../../lib/utils';
 import { useAuth } from '../../contexts/AuthContext';
 
-// Navigation items for unauthenticated users
-const unauthenticatedNavItems = [
-  {
-    label: 'Home',
-    href: '/',
-    icon: Home,
-    description: 'Discover trending causes'
-  },
-  {
-    label: 'Explore Causes',
-    href: '/causes',
-    icon: Search,
-    description: 'Browse all active campaigns'
-  },
-];
-
-// Navigation items for authenticated users
+// Navigation items for authenticated users only
 const authenticatedMainNavItems = [
   {
     label: 'Dashboard',
@@ -40,7 +24,7 @@ const authenticatedMainNavItems = [
   {
     label: 'Saved Causes',
     href: '/saved',
-    icon: Search,
+    icon: Heart,
     description: 'Causes you\'re following'
   },
   {
@@ -117,7 +101,7 @@ const LogoutConfirmModal = ({ isOpen, onClose, onConfirm }) => {
 export function Sidebar({ isOpen, onClose, onOpen, className }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, logout } = useAuth();
   const isAdmin = user?.role === 'admin' || user?.role === 'moderator';
   
   const [isCollapsed, setIsCollapsed] = useState(true); // Start collapsed
@@ -218,9 +202,9 @@ export function Sidebar({ isOpen, onClose, onOpen, className }) {
     </div>
   );
 
-  // Choose navigation items based on authentication status
-  const mainNavItems = isAuthenticated ? authenticatedMainNavItems : unauthenticatedNavItems;
-  const bottomNavItems = isAuthenticated ? authenticatedBottomNavItems : [];
+  // Choose navigation items - this sidebar is only for authenticated users
+  const mainNavItems = authenticatedMainNavItems;
+  const bottomNavItems = authenticatedBottomNavItems;
 
   return (
     <>
@@ -245,7 +229,7 @@ export function Sidebar({ isOpen, onClose, onOpen, className }) {
         {/* Header */}
         <div className="flex h-16 items-center justify-center border-b border-neutral-200 px-4">
           {!isCollapsed && (
-            <Link to="/" className="flex items-center space-x-2" onClick={onClose}>
+            <Link to="/dashboard" className="flex items-center space-x-2" onClick={onClose}>
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-primary-600">
                 <Menu className="h-5 w-5 text-white" />
               </div>
@@ -254,9 +238,11 @@ export function Sidebar({ isOpen, onClose, onOpen, className }) {
           )}
           
           {isCollapsed && (
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 cursor-pointer">
-              <Menu className="h-5 w-5 text-white" />
-            </div>
+            <Link to="/dashboard">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 cursor-pointer">
+                <Menu className="h-5 w-5 text-white" />
+              </div>
+            </Link>
           )}
         </div>
 
@@ -266,7 +252,7 @@ export function Sidebar({ isOpen, onClose, onOpen, className }) {
             {/* Main Navigation */}
             <NavSection items={mainNavItems} />
 
-            {isAuthenticated && isAdmin && (
+            {isAdmin && (
               <>
                 <Separator />
                 {/* Admin Tools */}
@@ -274,51 +260,49 @@ export function Sidebar({ isOpen, onClose, onOpen, className }) {
               </>
             )}
 
-            {/* Bottom Navigation for authenticated users */}
-            {isAuthenticated && bottomNavItems.length > 0 && (
+            {/* Bottom Navigation */}
+            {bottomNavItems.length > 0 && (
               <>
                 <Separator />
                 <NavSection items={bottomNavItems} />
               </>
             )}
 
-            {/* Logout button for authenticated users */}
-            {isAuthenticated && (
-              <>
-                <Separator />
-                <div className="space-y-1">
-                  <button
-                    onClick={handleLogout}
-                    className={cn(
-                      "group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 w-full",
-                      "hover:bg-red-50 hover:text-red-700 text-neutral-600",
-                      isCollapsed && "justify-center px-2"
-                    )}
-                    title={isCollapsed ? "Sign Out" : undefined}
-                  >
-                    <LogOut className={cn(
-                      "h-4 w-4 transition-colors flex-shrink-0",
-                      "text-neutral-400 group-hover:text-red-600",
-                      !isCollapsed && "mr-3"
-                    )} />
-                    {!isCollapsed && <span className="flex-1 text-left">Sign Out</span>}
-                  </button>
-                </div>
-              </>
-            )}
+            {/* Logout button */}
+            <>
+              <Separator />
+              <div className="space-y-1">
+                <button
+                  onClick={handleLogout}
+                  className={cn(
+                    "group flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 w-full",
+                    "hover:bg-red-50 hover:text-red-700 text-neutral-600",
+                    isCollapsed && "justify-center px-2"
+                  )}
+                  title={isCollapsed ? "Sign Out" : undefined}
+                >
+                  <LogOut className={cn(
+                    "h-4 w-4 transition-colors flex-shrink-0",
+                    "text-neutral-400 group-hover:text-red-600",
+                    !isCollapsed && "mr-3"
+                  )} />
+                  {!isCollapsed && <span className="flex-1 text-left">Sign Out</span>}
+                </button>
+              </div>
+            </>
           </nav>
 
           {/* User Info Card */}
-          {isAuthenticated && user && !isCollapsed && (
+          {user && !isCollapsed && (
             <div className="mt-auto pt-4">
               <div className="card-warm">
                 <div className="flex items-center space-x-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-700 font-medium">
-                    {user.name.charAt(0).toUpperCase()}
+                    {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-neutral-900 truncate">
-                      {user.name}
+                      {user.name || user.email}
                     </p>
                     <p className="text-xs text-neutral-500 truncate">
                       ${user.totalDonated?.toLocaleString() || 0} donated
@@ -337,10 +321,10 @@ export function Sidebar({ isOpen, onClose, onOpen, className }) {
           )}
 
           {/* Collapsed user avatar */}
-          {isAuthenticated && user && isCollapsed && (
+          {user && isCollapsed && (
             <div className="mt-auto pt-4 flex justify-center">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-700 font-medium">
-                {user.name.charAt(0).toUpperCase()}
+                {user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}
               </div>
             </div>
           )}
