@@ -1,0 +1,71 @@
+/* Application Background Styles */
+.app-background {
+  background-image: url('../assets/app-background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+/* Overlay for better content readability */
+.app-background-overlay {
+  background: rgba(255, 255, 255, 0.92);
+  min-height: 100vh;
+}
+
+/* Alternative overlay with subtle gradient */
+.app-background-overlay-gradient {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.90) 50%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+  min-height: 100vh;
+}
+
+/* For pages that need more transparency */
+.app-background-light {
+  background-image: url('../assets/app-background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+.app-background-light-overlay {
+  background: rgba(255, 255, 255, 0.85);
+  min-height: 100vh;
+}
+
+/* Responsive background adjustments */
+@media (max-width: 768px) {
+  .app-background,
+  .app-background-light {
+    background-attachment: scroll;
+    background-size: cover;
+  }
+}
+
+/* For modal overlays to ensure background is visible */
+.modal-background-blur {
+  backdrop-filter: blur(2px);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* Content containers with subtle background */
+.content-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(8px);
+}
+
+/* Card overlays for better visibility */
+.card-with-background {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}

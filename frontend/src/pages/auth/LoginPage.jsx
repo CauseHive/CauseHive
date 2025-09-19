@@ -80,12 +80,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex">
-      {/* Left Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md space-y-8">
-          {/* Header */}
-          <div className="text-center">
+    <div className="app-background">
+      <div className="app-background-overlay min-h-screen flex">
+        {/* Left Side - Login Form */}
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="w-full max-w-md space-y-8 content-container p-8">
+            {/* Header */}
+            <div className="text-center">
             <div className="flex items-center justify-center mb-6">
               <img 
                 src="/favicon.ico" 
@@ -251,6 +252,7 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
