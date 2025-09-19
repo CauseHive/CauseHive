@@ -1,7 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
-from causes.models import Cause
+from causes.models import Causes
 
 
 class Testimonial(models.Model):
@@ -9,13 +9,13 @@ class Testimonial(models.Model):
     
     # Core fields
     cause = models.ForeignKey(
-        Cause, 
-        on_delete=models.CASCADE, 
+        Causes, 
+        on_delete=models.CASCADE,
         related_name='testimonials',
         help_text="The cause this testimonial is for"
     )
     user = models.ForeignKey(
-        User, 
+        settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE, 
         related_name='testimonials',
         help_text="The user who wrote this testimonial"
@@ -96,7 +96,7 @@ class TestimonialLike(models.Model):
         help_text="The testimonial being liked"
     )
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='testimonial_likes',
         help_text="The user who liked this testimonial"
@@ -135,7 +135,7 @@ class TestimonialReport(models.Model):
         help_text="The testimonial being reported"
     )
     reporter = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='testimonial_reports',
         help_text="The user who reported this testimonial"
@@ -162,7 +162,7 @@ class TestimonialReport(models.Model):
         help_text="Notes about how this report was resolved"
     )
     resolved_by = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

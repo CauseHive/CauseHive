@@ -5,7 +5,10 @@ import { AuthProvider } from './contexts/AuthContext';
 import { DonationCartProvider } from './contexts/DonationCartContext';
 import { SavedCausesProvider } from './contexts/SavedCausesContext';
 import { SearchAnalyticsProvider } from './contexts/SearchAnalyticsContext';
+import { ProtectedRoute, PublicRoute } from './components/auth/ProtectedRoute';
 import AppLayout from './components/layout/AppLayout';
+import PublicLayout from './components/layout/PublicLayout';
+import SmartLayout from './components/layout/SmartLayout';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
@@ -30,11 +33,6 @@ import DonationSuccessPage from './pages/DonationSuccessPage';
 import MyTestimonialsPage from './pages/MyTestimonialsPage';
 import SearchAnalyticsPage from './pages/SearchAnalyticsPage';
 
-// Simple test pages to verify layout works
-function HomePage() {
-  return <LandingPage />;
-}
-
 // Create a query client
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,45 +52,170 @@ function App() {
             <DonationCartProvider>
               <Router>
                 <Routes>
-                  {/* Auth routes without AppLayout */}
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<SignupPage />} />
-                  
-                  {/* App routes with AppLayout */}
-                  <Route path="/*" element={
-                  <AppLayout>
-                    <Routes>
-                      <Route path="/" element={<HomePage />} />
-                      <Route path="/causes" element={<CausesListPage />} />
-                      <Route path="/causes/:id" element={<CauseDetailPage />} />
-                      <Route path="/search/analytics" element={<SearchAnalyticsPage />} />
-                      <Route path="/donation/result" element={<DonationResultPage />} />
-                      <Route path="/cart" element={<DonationCartPage />} />
-                      <Route path="/cart/checkout" element={<CheckoutPage />} />
-                      <Route path="/donation/success" element={<DonationSuccessPage />} />
-                      <Route path="/dashboard" element={<DashboardPage />} />
-                      <Route path="/my-testimonials" element={<MyTestimonialsPage />} />
-                      <Route path="/donations" element={<DonationHistoryPage />} />
-                      <Route path="/profile/settings" element={<ProfileSettingsPage />} />
-                      <Route path="/profile" element={<ProfileSettingsPage />} />
-                      <Route path="/saved" element={<SavedCausesPage />} />
-                      <Route path="/my-causes" element={<MyCausesPage />} />
-                      <Route path="/causes/create" element={<CreateCausePage />} />
-                      <Route path="/admin" element={<AdminDashboardPage />} />
-                      <Route path="/settings" element={<ProfileSettingsPage />} />
-                      <Route path="/help" element={<HelpSupportPage />} />
-                      {/* Legal pages */}
-                      <Route path="/terms" element={<TermsConditionsPage />} />
-                      <Route path="/privacy" element={<PrivacyPolicyPage />} />
-                      <Route path="/refund" element={<RefundPolicyPage />} />
-                      <Route path="/cookies" element={<CookiePolicyPage />} />
-                    </Routes>
-                  </AppLayout>
-                } />
-              </Routes>
-            </Router>
-          </DonationCartProvider>
-        </SavedCausesProvider>
+                  {/* Public routes - accessible only to unauthenticated users */}
+                  <Route path="/login" element={
+                    <PublicRoute>
+                      <LoginPage />
+                    </PublicRoute>
+                  } />
+                  <Route path="/register" element={
+                    <PublicRoute>
+                      <SignupPage />
+                    </PublicRoute>
+                  } />
+
+                  {/* Public content routes - accessible to everyone, smart layout based on auth status */}
+                  <Route path="/" element={
+                    <SmartLayout>
+                      <LandingPage />
+                    </SmartLayout>
+                  } />
+                  <Route path="/causes" element={
+                    <SmartLayout>
+                      <CausesListPage />
+                    </SmartLayout>
+                  } />
+                  <Route path="/causes/:id" element={
+                    <SmartLayout>
+                      <CauseDetailPage />
+                    </SmartLayout>
+                  } />
+                  <Route path="/cart" element={
+                    <SmartLayout>
+                      <DonationCartPage />
+                    </SmartLayout>
+                  } />
+                  <Route path="/cart/checkout" element={
+                    <SmartLayout>
+                      <CheckoutPage />
+                    </SmartLayout>
+                  } />
+                  <Route path="/donation/success" element={
+                    <SmartLayout>
+                      <DonationSuccessPage />
+                    </SmartLayout>
+                  } />
+
+                  {/* Legal pages - accessible to everyone with public layout */}
+                  <Route path="/terms" element={
+                    <PublicLayout>
+                      <TermsConditionsPage />
+                    </PublicLayout>
+                  } />
+                  <Route path="/privacy" element={
+                    <PublicLayout>
+                      <PrivacyPolicyPage />
+                    </PublicLayout>
+                  } />
+                  <Route path="/refund" element={
+                    <PublicLayout>
+                      <RefundPolicyPage />
+                    </PublicLayout>
+                  } />
+                  <Route path="/cookies" element={
+                    <PublicLayout>
+                      <CookiePolicyPage />
+                    </PublicLayout>
+                  } />
+
+                  {/* Protected routes - accessible only to authenticated users */}
+                  <Route path="/dashboard" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <DashboardPage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/search/analytics" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <SearchAnalyticsPage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/donation/result" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <DonationResultPage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/my-testimonials" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <MyTestimonialsPage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/donations" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <DonationHistoryPage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/profile/settings" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <ProfileSettingsPage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <ProfileSettingsPage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/saved" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <SavedCausesPage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/my-causes" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <MyCausesPage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/causes/create" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <CreateCausePage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/settings" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <ProfileSettingsPage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/help" element={
+                    <ProtectedRoute>
+                      <AppLayout>
+                        <HelpSupportPage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+
+                  {/* Admin routes - require admin role */}
+                  <Route path="/admin" element={
+                    <ProtectedRoute requireAdmin={true}>
+                      <AppLayout>
+                        <AdminDashboardPage />
+                      </AppLayout>
+                    </ProtectedRoute>
+                  } />
+                </Routes>
+              </Router>
+            </DonationCartProvider>
+          </SavedCausesProvider>
         </SearchAnalyticsProvider>
       </AuthProvider>
     </QueryClientProvider>

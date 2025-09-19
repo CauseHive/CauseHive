@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Count, Avg, Q
 from django.shortcuts import get_object_or_404
-from causes.models import Cause
+from causes.models import Causes
 from .models import Testimonial, TestimonialLike, TestimonialReport
 from .serializers import (
     TestimonialSerializer, TestimonialCreateSerializer, 
@@ -148,7 +148,7 @@ def toggle_testimonial_like(request, testimonial_id):
 def cause_testimonials_stats(request, cause_id):
     """Get statistics for cause testimonials"""
     
-    cause = get_object_or_404(Cause, id=cause_id)
+    cause = get_object_or_404(Causes, id=cause_id)
     
     testimonials = Testimonial.objects.filter(
         cause=cause,
