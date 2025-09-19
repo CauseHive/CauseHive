@@ -51,14 +51,40 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await apiService.loginUser(credentials);
       
-      if (response && response.user) {
-        setUser(response.user);
+      if (response && response.access) {
+        // Build basic user object from login response
+        const userData = {
+          email: response.email,
+          name: `${response.first_name} ${response.last_name}`.trim(),
+          first_name: response.first_name,
+          last_name: response.last_name,
+        };
+        
+        setUser(userData);
         setIsAuthenticated(true);
-        localStorage.setItem('user', JSON.stringify(response.user));
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        // Try to fetch complete profile data in the background
+        try {
+          const profile = await apiService.getProfile();
+          if (profile) {
+            const enhancedUserData = {
+              ...userData,
+              ...profile,
+              name: profile.name || userData.name,
+            };
+            setUser(enhancedUserData);
+            localStorage.setItem('user', JSON.stringify(enhancedUserData));
+          }
+        } catch (profileError) {
+          console.warn('Could not fetch profile data:', profileError);
+          // Continue with basic user data
+        }
+        
         return response;
       }
       
-      throw new Error('Login failed - no user data received');
+      throw new Error('Login failed - no access token received');
     } catch (error) {
       console.error('Login error:', error);
       throw error;

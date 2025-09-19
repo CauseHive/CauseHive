@@ -206,9 +206,11 @@ DATABASES = {
             conn_max_age=600,
             conn_health_checks=True,
         ),
-        'OPTIONS': {
-            'options': '-c search_path=causehive_users,public'
-        }
+        **(
+            {'OPTIONS': {'options': '-c search_path=causehive_users,public'}}
+            if not SUPABASE_DATABASE_URL.startswith('sqlite')
+            else {}
+        )
     },
 
     # Cause service
@@ -218,9 +220,11 @@ DATABASES = {
             conn_max_age=600,
             conn_health_checks=True,
         ),
-        'OPTIONS': {
-            'options': '-c search_path=causehive_causes,public'
-        }
+        **(
+            {'OPTIONS': {'options': '-c search_path=causehive_causes,public'}}
+            if not SUPABASE_DATABASE_URL.startswith('sqlite')
+            else {}
+        )
     },
 
     # Donation processing service
@@ -230,9 +234,11 @@ DATABASES = {
             conn_max_age=600,
             conn_health_checks=True,
         ),
-        'OPTIONS': {
-            'options': '-c search_path=causehive_donations,public'
-        }
+        **(
+            {'OPTIONS': {'options': '-c search_path=causehive_donations,public'}}
+            if not SUPABASE_DATABASE_URL.startswith('sqlite')
+            else {}
+        )
     },
 
     # Admin reporting service
@@ -242,9 +248,11 @@ DATABASES = {
             conn_max_age=600,
             conn_health_checks=True,
         ),
-        'OPTIONS': {
-            'options': '-c search_path=causehive_admin,public'
-        }
+        **(
+            {'OPTIONS': {'options': '-c search_path=causehive_admin,public'}}
+            if not SUPABASE_DATABASE_URL.startswith('sqlite')
+            else {}
+        )
     },
 }
 
@@ -322,6 +330,8 @@ CORS_ALLOWED_ORIGINS = [
     'https://causehive.netlify.app',
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "https://www.causehive.tech",
