@@ -20,16 +20,17 @@ export function AppLayout({
   const shouldShowFooter = showFooter && !isAuthenticated;
 
   return (
-    <div className="min-h-screen bg-neutral-25">
-      {/* Header - Fixed at top with proper positioning */}
-      <Header 
-        onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-        showMenuButton={showSidebar}
-        className={cn(
-          "fixed top-0 right-0 z-30 transition-all duration-300",
-          showSidebar ? "left-16" : "left-0" // Sidebar is now only 16 (4rem) wide when collapsed
-        )}
-      />
+    <div className="app-background">
+      <div className="app-background-overlay">
+        {/* Header - Fixed at top with proper positioning */}
+        <Header 
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+          showMenuButton={showSidebar}
+          className={cn(
+            "fixed top-0 right-0 z-30 transition-all duration-300",
+            showSidebar ? "left-16" : "left-0" // Sidebar is now only 16 (4rem) wide when collapsed
+          )}
+        />
 
       {/* Sidebar - Fixed on left */}
       {showSidebar && (
@@ -67,6 +68,7 @@ export function AppLayout({
         {/* Footer - Part of scrollable content, hidden when authenticated */}
         {shouldShowFooter && <Footer />}
       </main>
+      </div>
     </div>
   );
 }

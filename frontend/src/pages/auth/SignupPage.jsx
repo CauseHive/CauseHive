@@ -154,9 +154,10 @@ export default function SignupPage() {
   const passwordStrength = getPasswordStrength(formData.password);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex">
-      {/* Left Side - Hero Image/Content */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-secondary-600 to-accent-600 items-center justify-center p-8">
+    <div className="app-background">
+      <div className="app-background-overlay min-h-screen flex">
+        {/* Left Side - Hero Image/Content */}
+        <div className="hidden lg:flex flex-1 bg-gradient-to-br from-secondary-600 to-accent-600 items-center justify-center p-8">
         <div className="text-center text-white max-w-md">
           <h3 className="text-3xl font-bold mb-6">Start Your Impact Journey</h3>
           <p className="text-xl text-secondary-100 mb-8 leading-relaxed">
@@ -187,7 +188,7 @@ export default function SignupPage() {
 
       {/* Right Side - Signup Form */}
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md space-y-8">
+        <div className="w-full max-w-md space-y-8 content-container p-8">
           {/* Header */}
           <div className="text-center">
             <div className="flex items-center justify-center mb-6">
@@ -527,6 +528,7 @@ export default function SignupPage() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
