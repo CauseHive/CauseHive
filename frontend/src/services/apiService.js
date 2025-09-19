@@ -191,6 +191,62 @@ class ApiService {
   async getCauses(page = 1) { return this.get(`/api/causes/list/?page=${page}`); }
   async getCausesList(page = 1) { return this.get(`/api/causes/list/?page=${page}`); }
   async getCauseDetails(id) { return this.get(`/api/causes/details/${id}/`); }
+  async getUserCauses(page = 1) { 
+    const userId = this.getStoredUserId();
+    if (!userId) throw new Error('User not authenticated');
+    return this.get(`/api/causes/admin/causes/?organizer_id=${userId}&page=${page}`); 
+  }
+  async updateCause(id, data) { return this.put(`/api/causes/admin/causes/${id}/update/`, data); }
+  async deleteCause(id) { return this.delete(`/api/causes/delete/${id}/`); }
+
+  // Search functionality
+  async searchSuggestions(query) {
+    try {
+      // Search across causes, organizers, and categories
+      const response = await this.get(`/api/causes/search/?q=${encodeURIComponent(query)}&limit=8`);
+      
+      // Format suggestions for the SearchBar component
+      const suggestions = [];
+      
+      if (response.results) {
+        // Add cause suggestions
+        response.results.forEach(cause => {
+          suggestions.push({
+            type: 'cause',
+            title: cause.name || cause.title,
+            description: cause.description ? cause.description.slice(0, 60) + '...' : '',
+            id: cause.id,
+            url: `/causes/${cause.id}`
+          });
+        });
+      }
+      
+      return suggestions;
+    } catch (error) {
+      console.error('Error fetching search suggestions:', error);
+      // Return fallback suggestions based on common searches
+      return this.getFallbackSuggestions(query);
+    }
+  }
+
+  // Fallback suggestions when API is unavailable
+  getFallbackSuggestions(query) {
+    const commonSearches = [
+      'education', 'healthcare', 'environment', 'poverty relief', 'disaster relief',
+      'community development', 'youth development', 'women empowerment', 'agriculture',
+      'water and sanitation', 'technology', 'arts and culture'
+    ];
+    
+    return commonSearches
+      .filter(term => term.toLowerCase().includes(query.toLowerCase()))
+      .slice(0, 5)
+      .map(term => ({
+        type: 'category',
+        title: term.charAt(0).toUpperCase() + term.slice(1),
+        description: `Search for ${term} related causes`,
+        text: term
+      }));
+  }
   async createCause({ name, description, target_amount, organizer_id, category, category_data, cover_image }) {
     const form = new FormData();
     form.append('name', name);
@@ -203,33 +259,16 @@ class ApiService {
     return this.postForm('/api/causes/create/', form);
   }
 
+  // Categories
+  async getCategories() { return this.get('/api/categories/list/'); }
+
   // Donations and payments (subset wired)
   async initiatePayment({ email, amount, user_id, donation_id }) { return this.post('/api/payments/initiate/', { email, amount, user_id, donation_id }); }
   async verifyPayment(reference) { return this.get(`/api/payments/verify/${reference}/`); }
 
-  // Cart (for later wiring in UI)
-  async getCart(params = '') { return this.get(`/api/cart/${params}`); }
-  getStoredCartId() {
-    try {
-      return typeof window !== 'undefined' ? window.localStorage.getItem('cart_id') : null;
-    } catch (_) { return null; }
-  }
-  setStoredCartId(id) {
-    try {
-      if (typeof window !== 'undefined') window.localStorage.setItem('cart_id', id);
-    } catch (_) {}
-  }
-  async addToCart({ cart_id, cause_id, donation_amount, quantity = 1 }) {
-    const payload = { cart_id: cart_id || this.getStoredCartId(), cause_id, donation_amount, quantity };
-    const res = await this.post('/api/cart/add/', payload);
-    if (res && res.cart_id) this.setStoredCartId(res.cart_id);
-    return res;
-  }
-  async updateCartItem(item_id, { cart_id, quantity }) { return this.request(`/api/cart/update/${item_id}/`, { method: 'PATCH', body: JSON.stringify({ cart_id: cart_id || this.getStoredCartId(), quantity }) }); }
-  async removeFromCart(item_id, { cart_id }) { return this.request(`/api/cart/remove/${item_id}/`, { method: 'DELETE', body: JSON.stringify({ cart_id: cart_id || this.getStoredCartId() }) }); }
-  async checkout({ email, cart_id }) { return this.post('/api/cart/checkout/', { email, cart_id: cart_id || this.getStoredCartId() }); }
-  async donate({ email, cause_id, donation_amount, quantity = 1, cart_id }) {
-    return this.post('/api/cart/donate/', { email, cause_id, donation_amount, quantity, cart_id: cart_id || this.getStoredCartId() });
+  // Direct donation (currently used method)
+  async donate({ email, cause_id, donation_amount, quantity = 1 }) {
+    return this.post('/api/donations/create/', { email, cause_id, donation_amount, quantity });
   }
 
   // Landing/demo placeholder APIs (safe fallbacks)
@@ -294,64 +333,57 @@ class ApiService {
     }
   }
 
-  async getContributors() { 
-    try {
-      return await this.get('/api/contributors/');
-    } catch (error) {
-      console.warn('Contributors endpoint not available, using fallback data');
-      return { 
-        results: [
-          { id: 1, name: "Community", avatar: null, contributions: 0 }
-        ], 
-        count: 1 
-      };
-    }
+
+
+  // Admin APIs
+  async getAdminCauses(page = 1, status = '') {
+    const params = new URLSearchParams({ page });
+    if (status) params.append('status', status);
+    return this.get(`/api/causes/admin/causes/?${params}`);
+  }
+  async approveRejectCause(id, status, rejection_reason = '') {
+    return this.put(`/api/causes/admin/causes/${id}/update/`, { status, rejection_reason });
+  }
+  async getAdminUsers(page = 1) { return this.get(`/api/users/admin-see/users/?page=${page}`); }
+  async getAdminWithdrawals(page = 1) { return this.get(`/api/withdrawal/admin/requests/?page=${page}`); }
+  async getAdminStatistics() { return this.get('/api/withdrawal/admin/statistics/'); }
+  async retryWithdrawal(requestId) { return this.post(`/api/withdrawal/admin/requests/${requestId}/retry/`); }
+
+  // Testimonials
+  async getTestimonials(causeId, params = {}) {
+    const queryParams = new URLSearchParams({
+      ...params,
+      ...(params.page && { page: params.page }),
+      ...(params.sort && { sort: params.sort })
+    }).toString();
+    return this.get(`/api/testimonials/cause/${causeId}/${queryParams ? `?${queryParams}` : ''}`);
   }
 
-  async getTestimonials() { 
-    try {
-      return await this.get('/api/testimonials/');
-    } catch (error) {
-      console.warn('Testimonials endpoint not available, using fallback data');
-      return { 
-        results: [
-          {
-            id: 1,
-            name: "CauseHive Community",
-            text: "Together we're making a difference in communities worldwide.",
-            avatar: null
-          }
-        ], 
-        count: 1 
-      };
-    }
+  async createTestimonial(testimonialData) {
+    return this.post('/api/testimonials/create/', testimonialData);
   }
 
-  async getStatistics() { 
-    try {
-      return await this.get('/api/statistics/');
-    } catch (error) {
-      console.warn('Statistics endpoint not available, using fallback data');
-      return {
-        total_donations: 0,
-        total_causes: 0,
-        total_donors: 0,
-        impact_score: 0
-      };
-    }
+  async updateTestimonial(testimonialId, testimonialData) {
+    return this.put(`/api/testimonials/${testimonialId}/update/`, testimonialData);
   }
 
-  async subscribeToNewsletter(email) { 
-    try {
-      return await this.post('/api/newsletter/subscribe/', { email });
-    } catch (error) {
-      console.warn('Newsletter endpoint not available');
-      return { message: 'Newsletter subscription temporarily unavailable' };
-    }
+  async deleteTestimonial(testimonialId) {
+    return this.delete(`/api/testimonials/${testimonialId}/delete/`);
   }
 
-  // Notifications
-  async getNotifications(page = 1) { return this.get(`/api/notifications/?page=${page}`); }
+  async likeTestimonial(testimonialId) {
+    return this.post(`/api/testimonials/${testimonialId}/like/`);
+  }
+
+  async getUserTestimonials(page = 1) {
+    const userId = this.getStoredUserId();
+    if (!userId) throw new Error('User not authenticated');
+    return this.get(`/api/testimonials/user/${userId}/?page=${page}`);
+  }
+
+  async getTestimonialStats(causeId) {
+    return this.get(`/api/testimonials/cause/${causeId}/stats/`);
+  }
 }
 
 const apiService = new ApiService();
