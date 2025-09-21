@@ -1,12 +1,53 @@
 import React, { useState } from 'react';
 import { Search, Mail, MessageCircle, Phone, Book, FileText, AlertCircle, CheckCircle, User, CreditCard, Plus } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Search, AlertCircle } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
+import { supportCategories, faqItems, contactOptions, additionalResources } from '../data/help-support-data';
+
+// --- Sub-components for better structure ---
+
+const ActionCard = ({ icon: Icon, title, description, actionText, actionType, color, onAction }) => (
+  <Card className="p-6 flex flex-col justify-between hover:shadow-lg transition-shadow">
+    <div>
+      <div className="flex items-center mb-4">
+        <div className={`p-3 rounded-lg ${color} mr-4`}>
+          <Icon className="h-6 w-6" />
+        </div>
+        <div>
+          <h3 className="font-semibold text-neutral-900">{title}</h3>
+          <p className="text-sm text-neutral-600">{description}</p>
+        </div>
+      </div>
+    </div>
+    <Button variant="outline" className="w-full mt-auto" onClick={() => onAction(actionType, actionText)}>
+      {actionText}
+    </Button>
+  </Card>
+);
+
+const FaqItem = ({ question, answer, categoryLabel }) => (
+  <Card className="p-6">
+    <div className="flex items-start justify-between mb-3">
+      <h3 className="text-lg font-medium text-neutral-900 pr-4">
+        {question}
+      </h3>
+      <Badge variant="secondary" className="text-xs flex-shrink-0">
+        {categoryLabel}
+      </Badge>
+    </div>
+    <p className="text-neutral-600 leading-relaxed">
+      {answer}
+    </p>
+  </Card>
+);
 
 const HelpSupportPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [formState, setFormState] = useState({ subject: '', category: '', message: '' });
 
   const supportCategories = [
     { id: 'all', label: 'All Topics', icon: Book },
@@ -132,6 +173,18 @@ const HelpSupportPage = () => {
               </Card>
             );
           })}
+          {contactOptions.map((option) => (
+            <ActionCard
+              key={option.title}
+              {...option}
+              onAction={(type, value) => {
+                if (type === 'email') window.location.href = `mailto:${value}`;
+                if (type === 'phone') window.location.href = `tel:${value}`;
+                // Add other actions like opening a chat widget
+                if (type === 'chat') alert('Live chat is not yet implemented.');
+              }}
+            />
+          ))}
         </div>
 
         {/* Search and Filter */}
