@@ -2,12 +2,14 @@
 let API_BASE_URL = process.env.REACT_APP_API_URL ||
   (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) ||
   (window && window.location && window.location.hostname.includes('causehive.tech')
-    ? 'https://causehive.tech/'
-    : 'http://localhost:8000/');
-
-// Normalize base URL: remove trailing slashes and strip a trailing '/api' segment
+    ? ''  // Use relative URLs when on causehive.tech domain
+    : 'http://www.causehive.tech');// Normalize base URL: remove trailing slashes and strip a trailing '/api' segment
 if (typeof API_BASE_URL === 'string') {
   API_BASE_URL = API_BASE_URL.replace(/\/+$|\s+$/g, '');
+  // Treat a single-root slash as relative base
+  if (API_BASE_URL === '/') {
+    API_BASE_URL = '';
+  }
   if (API_BASE_URL.toLowerCase().endsWith('/api')) {
     API_BASE_URL = API_BASE_URL.slice(0, -4);
   }
@@ -22,7 +24,9 @@ class ApiService {
     };
     try {
       const token = typeof window !== 'undefined' ? window.localStorage.getItem('accessToken') : null;
-      if (token) this.setAuthToken(token);
+      if (token) {
+      this.setAuthToken(token);
+    }
     } catch (_) {}
   }
 
@@ -38,8 +42,12 @@ class ApiService {
   setTokens(access, refresh) {
     if (typeof window !== 'undefined') {
       try {
-        if (access) window.localStorage.setItem('accessToken', access);
-        if (refresh) window.localStorage.setItem('refreshToken', refresh);
+        if (access) {
+          window.localStorage.setItem('accessToken', access);
+        }
+        if (refresh) {
+          window.localStorage.setItem('refreshToken', refresh);
+        }
         if (access) {
           const payload = this.parseJwt(access);
           const uid = payload && (payload.user_id || payload.user || payload.sub);
@@ -55,9 +63,26 @@ class ApiService {
   // Low-level request helpers
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
+    const { requiresAuth = true, ...otherOptions } = options;
+    
+    // Create headers object, conditionally including Authorization
+    const requestHeaders = {
+      'Content-Type': 'application/json',
+      ...otherOptions.headers,
+    };
+    
+    if (requiresAuth) {
+      try {
+        const token = typeof window !== 'undefined' ? window.localStorage.getItem('accessToken') : null;
+        if (token) {
+          requestHeaders.Authorization = `Bearer ${token}`;
+        }
+      } catch (_) {}
+    }
+    
     const config = {
-      headers: this.headers,
-      ...options,
+      headers: requestHeaders,
+      ...otherOptions,
     };
     try {
       const resp = await fetch(url, config);
@@ -77,8 +102,8 @@ class ApiService {
     }
   }
 
-  async get(endpoint) {
-    return this.request(endpoint, { method: 'GET' });
+  async get(endpoint, options = {}) {
+    return this.request(endpoint, { method: 'GET', ...options });
   }
 
   getStoredUserId() {
@@ -89,17 +114,19 @@ class ApiService {
     }
   }
 
-  async post(endpoint, data) {
+  async post(endpoint, data, options = {}) {
     return this.request(endpoint, {
       method: 'POST',
       body: JSON.stringify(data),
+      ...options,
     });
   }
 
-  async put(endpoint, data) {
+  async put(endpoint, data, options = {}) {
     return this.request(endpoint, {
       method: 'PUT',
       body: JSON.stringify(data),
+      ...options,
     });
   }
 
@@ -120,22 +147,42 @@ class ApiService {
     }
   }
 
-  async postForm(endpoint, formData) {
+  async postForm(endpoint, formData, options = {}) {
     // Do not set Content-Type so the browser adds proper multipart boundary
-    const { Authorization } = this.headers;
+    const { requiresAuth = true } = options;
+    const headers = {};
+    if (requiresAuth) {
+      try {
+        const token = typeof window !== 'undefined' ? window.localStorage.getItem('accessToken') : null;
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (_) {}
+    }
     return this.request(endpoint, {
       method: 'POST',
-      headers: Authorization ? { Authorization } : {},
+      headers,
       body: formData,
+      ...options,
     });
   }
 
-  async putForm(endpoint, formData) {
-    const { Authorization } = this.headers;
+  async putForm(endpoint, formData, options = {}) {
+    const { requiresAuth = true } = options;
+    const headers = {};
+    if (requiresAuth) {
+      try {
+        const token = typeof window !== 'undefined' ? window.localStorage.getItem('accessToken') : null;
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (_) {}
+    }
     return this.request(endpoint, {
       method: 'PUT',
-      headers: Authorization ? { Authorization } : {},
+      headers,
       body: formData,
+      ...options,
     });
   }
 
@@ -188,9 +235,43 @@ class ApiService {
   async validateBankAccount({ bank_code, account_number }) { return this.post('/api/user/validate-bank-account/', { bank_code, account_number }); }
 
   // Causes
-  async getCauses(page = 1) { return this.get(`/api/causes/list/?page=${page}`); }
-  async getCausesList(page = 1) { return this.get(`/api/causes/list/?page=${page}`); }
-  async getCauseDetails(id) { return this.get(`/api/causes/details/${id}/`); }
+  async getCauses(page = 1) { return this.get(`/api/causes/list/?page=${page}`, { requiresAuth: false }); }
+  async getCausesList(page = 1) { return this.get(`/api/causes/list/?page=${page}`, { requiresAuth: false }); }
+  async getCauseDetails(id) { return this.get(`/api/causes/details/${id}/`, { requiresAuth: false }); }
+  async getUserCauses(page = 1) { 
+    return this.get(`/api/causes/my-causes/?page=${page}`); 
+  }
+  async updateCause(id, data) { return this.put(`/api/causes/my-causes/${id}/update/`, data); }
+  async deleteCause(id) { return this.delete(`/api/causes/delete/${id}/`); }
+
+  // Search functionality
+  async searchSuggestions(query) {
+    try {
+      // Search across causes, organizers, and categories
+      const response = await this.get(`/api/causes/search/?q=${encodeURIComponent(query)}&limit=8`);
+      
+      // Format suggestions for the SearchBar component
+      const suggestions = [];
+      
+      if (response.results) {
+        // Add cause suggestions
+        response.results.forEach(cause => {
+          suggestions.push({
+            type: 'cause',
+            title: cause.name || cause.title,
+            description: cause.description ? cause.description.slice(0, 60) + '...' : '',
+            id: cause.id,
+            url: `/causes/${cause.id}`
+          });
+        });
+      }
+      
+      return suggestions;
+    } catch (error) {
+      console.error('Error fetching search suggestions:', error);
+      throw error; // Re-throw to let caller handle the error
+    }
+  }
   async createCause({ name, description, target_amount, organizer_id, category, category_data, cover_image }) {
     const form = new FormData();
     form.append('name', name);
@@ -203,51 +284,110 @@ class ApiService {
     return this.postForm('/api/causes/create/', form);
   }
 
+  // Categories
+  async getCategories() { return this.get('/api/categories/'); }
+
   // Donations and payments (subset wired)
   async initiatePayment({ email, amount, user_id, donation_id }) { return this.post('/api/payments/initiate/', { email, amount, user_id, donation_id }); }
   async verifyPayment(reference) { return this.get(`/api/payments/verify/${reference}/`); }
 
-  // Cart (for later wiring in UI)
-  async getCart(params = '') { return this.get(`/api/cart/${params}`); }
-  getStoredCartId() {
-    try {
-      return typeof window !== 'undefined' ? window.localStorage.getItem('cart_id') : null;
-    } catch (_) { return null; }
-  }
-  setStoredCartId(id) {
-    try {
-      if (typeof window !== 'undefined') window.localStorage.setItem('cart_id', id);
-    } catch (_) {}
-  }
-  async addToCart({ cart_id, cause_id, donation_amount, quantity = 1 }) {
-    const payload = { cart_id: cart_id || this.getStoredCartId(), cause_id, donation_amount, quantity };
-    const res = await this.post('/api/cart/add/', payload);
-    if (res && res.cart_id) this.setStoredCartId(res.cart_id);
-    return res;
-  }
-  async updateCartItem(item_id, { cart_id, quantity }) { return this.request(`/api/cart/update/${item_id}/`, { method: 'PATCH', body: JSON.stringify({ cart_id: cart_id || this.getStoredCartId(), quantity }) }); }
-  async removeFromCart(item_id, { cart_id }) { return this.request(`/api/cart/remove/${item_id}/`, { method: 'DELETE', body: JSON.stringify({ cart_id: cart_id || this.getStoredCartId() }) }); }
-  async checkout({ email, cart_id }) { return this.post('/api/cart/checkout/', { email, cart_id: cart_id || this.getStoredCartId() }); }
-  async donate({ email, cause_id, donation_amount, quantity = 1, cart_id }) {
-    return this.post('/api/cart/donate/', { email, cause_id, donation_amount, quantity, cart_id: cart_id || this.getStoredCartId() });
+  // Direct donation (currently used method)
+  async donate({ email, cause_id, donation_amount, quantity = 1 }) {
+    return this.post('/api/donations/create/', { email, cause_id, donation_amount, quantity });
   }
 
   // Landing/demo placeholder APIs (safe fallbacks)
-  async getDonationStatistics() { return this.get('/api/donations/statistics/'); }
-  async createDonation(donationData) { return this.post('/api/donations/', donationData); }
-  async getDonations(page = 1) { return this.get(`/api/donations/?page=${page}`); }
+  async getDonationStatistics() { 
+    return this.get('/api/donations/statistics/');
+  }
 
-  // Optional CMS-style placeholders
-  async getSuccessStories() { return this.get('/api/success-stories/'); }
-  async getBlogPosts() { return this.get('/api/blog-posts/'); }
-  async getContributors() { return this.get('/api/contributors/'); }
-  async getTestimonials() { return this.get('/api/testimonials/'); }
-  async getStatistics() { return this.get('/api/statistics/'); }
-  async subscribeToNewsletter(email) { return this.post('/api/newsletter/subscribe/', { email }); }
+  async createDonation(donationData) { 
+    return this.post('/api/donations/', donationData); 
+  }
 
-  // Notifications
-  async getNotifications(page = 1) { return this.get(`/api/notifications/?page=${page}`); }
+  async getDonations(page = 1) { 
+    return this.get(`/api/donations/?page=${page}`);
+  }
+
+  // Optional CMS-style placeholders with fallbacks
+  async getSuccessStories() { 
+    return this.get('/api/success-stories/');
+  }
+
+  async getBlogPosts() { 
+    try {
+      return await this.get('/api/blog-posts/');
+    } catch (error) {
+      console.warn('Blog posts endpoint not available, using fallback data');
+      return { 
+        results: [
+          {
+            id: 1,
+            title: "Making a Difference Together",
+            excerpt: "Discover how your contributions are creating positive change in communities worldwide.",
+            date: new Date().toISOString(),
+            slug: "making-difference-together"
+          }
+        ], 
+        count: 1 
+      };
+    };
+  };
+
+
+
+  // Admin APIs
+  async getAdminCauses(page = 1, status = '') {
+    const params = new URLSearchParams({ page });
+    if (status) params.append('status', status);
+    return this.get(`/api/causes/admin/causes/?${params}`);
+  }
+  async approveRejectCause(id, status, rejection_reason = '') {
+    return this.put(`/api/causes/admin/causes/${id}/update/`, { status, rejection_reason });
+  }
+  async getAdminUsers(page = 1) { return this.get(`/api/users/admin-see/users/?page=${page}`); }
+  async getAdminWithdrawals(page = 1) { return this.get(`/api/withdrawal/admin/requests/?page=${page}`); }
+  async getAdminStatistics() { return this.get('/api/withdrawal/admin/statistics/'); }
+  async retryWithdrawal(requestId) { return this.post(`/api/withdrawal/admin/requests/${requestId}/retry/`); }
+
+  // User Dashboard
+  async getUserDashboard() { return this.get('/api/user/dashboard/'); }
+
+  // Testimonials
+  async getTestimonials(causeId, params = {}) {
+    const queryParams = new URLSearchParams({
+      ...params,
+      ...(params.page && { page: params.page }),
+      ...(params.sort && { sort: params.sort })
+    }).toString();
+    return this.get(`/api/testimonials/cause/${causeId}/${queryParams ? `?${queryParams}` : ''}`);
+  }
+
+  async createTestimonial(testimonialData) {
+    return this.post('/api/testimonials/create/', testimonialData);
+  }
+
+  async updateTestimonial(testimonialId, testimonialData) {
+    return this.put(`/api/testimonials/${testimonialId}/update/`, testimonialData);
+  }
+
+  async deleteTestimonial(testimonialId) {
+    return this.delete(`/api/testimonials/${testimonialId}/delete/`);
+  }
+
+  async likeTestimonial(testimonialId) {
+    return this.post(`/api/testimonials/${testimonialId}/like/`);
+  }
+
+  async getUserTestimonials(page = 1) {
+    const userId = this.getStoredUserId();
+    if (!userId) throw new Error('User not authenticated');
+    return this.get(`/api/testimonials/user/${userId}/?page=${page}`);
+  }
+
+  async getTestimonialStats(causeId) {
+    return this.get(`/api/testimonials/cause/${causeId}/stats/`);
+  }
 }
 
-const apiService = new ApiService();
-export default apiService;
+export default ApiService;

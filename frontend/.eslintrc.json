@@ -1,0 +1,39 @@
+{
+  "extends": [
+    "react-app",
+    "react-app/jest"
+  ],
+  "rules": {
+    // React specific rules
+    "react-hooks/exhaustive-deps": "warn",
+    "react-hooks/rules-of-hooks": "error",
+
+    // Accessibility rules
+    "jsx-a11y/heading-has-content": "off", // Disabled for reusable components
+    "jsx-a11y/alt-text": "warn",
+    "jsx-a11y/anchor-has-content": "warn",
+    "jsx-a11y/click-events-have-key-events": "warn",
+    "jsx-a11y/no-static-element-interactions": "warn",
+
+    // Code quality rules - relaxed for existing codebase
+    "no-unused-vars": "warn",
+    "no-console": "off", // Allow console statements in development
+    "prefer-const": "warn",
+    "no-var": "error",
+
+    // Import rules
+    "import/no-unresolved": "off", // Let TypeScript handle this
+    "import/no-unused-modules": "off",
+
+    // Best practices - relaxed for existing codebase
+    "eqeqeq": "off", // Allow == and != for now
+    "curly": "off", // Allow single-line if statements
+    "no-eval": "error",
+    "no-implied-eval": "error"
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
+}

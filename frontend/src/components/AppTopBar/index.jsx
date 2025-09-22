@@ -8,7 +8,12 @@ const AppTopBar = ({ brand = 'CauseHive.', showBrand = true, onBack, onCart, onA
         {onBack ? (
           <button className={styles.back} onClick={onBack} aria-label="Back">← Back</button>
         ) : null}
-        {showBrand ? <div className={styles.brand}>{brand}</div> : null}
+        {showBrand ? (
+          <div className={styles.brandContainer}>
+            <img src="/favicon.ico" alt="CauseHive Logo" className={styles.logo} />
+            <div className={styles.brand}>{brand}</div>
+          </div>
+        ) : null}
       </div>
       <div className={styles.right}>
         {onCart ? (
