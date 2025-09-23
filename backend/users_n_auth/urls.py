@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 from .views import (register_user, LoginView, LogoutView, GoogleLogin, request_password_reset, reset_password_confirm,
-                    UserProfileDetailView, UserAccountDeleteView, UserDetailView, AdminUserListView, BankListAPIView, MobileMoneyListAPIView, ValidateBankAccountAPIView, google_oauth_callback, google_oauth_url)
+                    UserProfileDetailView, UserAccountDeleteView, UserDetailView, AdminUserListView, BankListAPIView, MobileMoneyListAPIView, ValidateBankAccountAPIView, google_oauth_callback, google_oauth_url, UserMeView, UserCombinedView)
 # from .google_oauth_views import google_oauth_callback, google_oauth_url  # Deleted file
 
 # JWT Authentication URLs
@@ -29,6 +29,8 @@ urlpatterns = [
     path('auth/login/', LoginView.as_view(), name='login'),
     path('auth/logout/', LogoutView.as_view(), name='logout'),
     path('profile/', UserProfileDetailView.as_view(), name='profile_view'),
+    path('me/', UserMeView.as_view(), name='user_me'),
+    path('combined/', UserCombinedView.as_view(), name='user_combined'),
     path('users/<uuid:id>/', UserDetailView.as_view(), name='user_detail'),
     path('profile/delete', UserAccountDeleteView.as_view(), name='account_delete'),
     # path('admin-see/users/', AdminUserListView.as_view(), name='user_list'),
@@ -40,3 +42,16 @@ urlpatterns = [
 urlpatterns += jwt_urlpatterns
 urlpatterns += social_urlpatterns
 urlpatterns += password_urlpatterns
+
+# Compatibility aliases under /api/user/auth/* expected by frontend
+from django.urls import re_path
+from django.http import HttpResponseRedirect
+from django.utils.http import urlencode
+
+urlpatterns += [
+    path('auth/password-reset/', request_password_reset, name='auth_password_reset'),
+    # For backwards compatibility, accept confirm via /auth/password-reset-confirm/?uid=..&token=..
+    path('auth/password-reset-confirm/', lambda request: HttpResponseRedirect(
+        f"/api/user/password-reset/confirm/{request.GET.get('uid','')}/{request.GET.get('token','')}/"
+    )),
+]

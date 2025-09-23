@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from .models import UserProfile
+from .models import UserProfile, User
 
 User = get_user_model()
 
@@ -51,3 +51,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
         if file_mime_type not in valid_mime_types:
             raise serializers.ValidationError("Unsupported file type. Only JPEG, PNG, and GIF are allowed.")
         return value
+
+class UserMeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name']
+        extra_kwargs = {
+            'first_name': {'required': False},
+            'last_name': {'required': False},
+        }

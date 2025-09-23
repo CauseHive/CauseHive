@@ -260,6 +260,7 @@ REST_FRAMEWORK = {
         'user': '10/minute',
         'admin_action': '20/minute',
         'password_reset': '3/hour',
+        'name_change': '5/minute',
     },
     'USER_ID_FIELD': 'id',
 }

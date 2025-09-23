@@ -22,6 +22,14 @@ from causes.serializers import CausesSerializer
 def is_authenticated(request):
     return hasattr(request, 'user_id') and request.user_id
 
+# Compatibility adapter to route DELETE /api/cart/<id>/ to remove_from_cart
+@api_view(['DELETE'])
+@permission_classes([AllowAny])
+@extract_user_from_token
+@validate_request
+def cart_item_compat_delete(request, item_id):
+    return remove_from_cart(request, item_id)
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @extract_user_from_token
@@ -33,12 +41,19 @@ def get_cart(request):
         validate_user_id_with_service(request.user_id, request)
         try:
             cart, created = get_or_create_user_cart(request.user_id)
-            cart = Cart.objects.only('id', 'user_id', 'status').select_related('user_id').prefetch_related('items__cause_id').get(id=cart.id)
+            cart = Cart.objects.only('id', 'user_id', 'status').select_related('user_id').prefetch_related('items').get(id=cart.id)
             serializer = CartSerializer(cart)
+            items = serializer.data.get("items", [])
+            try:
+                total_amount = sum([float(i.get('donation_amount', 0)) * int(i.get('quantity', 1)) for i in items])
+            except Exception:
+                total_amount = 0
             return Response({
                 "cart_id": str(cart.id),
                 "cart": serializer.data,
-                "items": serializer.data.get("items", [])
+                "items": items,
+                "total_amount": total_amount,
+                "item_count": len(items),
             }, status=status.HTTP_200_OK)
         except Cart.DoesNotExist:
             return Response({
@@ -48,12 +63,19 @@ def get_cart(request):
             }, status=status.HTTP_200_OK)
     elif cart_id:
         try:
-            cart = Cart.objects.only('id', 'user_id', 'status').select_related('user_id').prefetch_related('items__cause_id').get(id=cart_id, user_id=None)
+            cart = Cart.objects.only('id', 'user_id', 'status').select_related('user_id').prefetch_related('items').get(id=cart_id, user_id=None)
             serializer = CartSerializer(cart)
+            items = serializer.data.get("items", [])
+            try:
+                total_amount = sum([float(i.get('donation_amount', 0)) * int(i.get('quantity', 1)) for i in items])
+            except Exception:
+                total_amount = 0
             return Response({
                 "cart_id": str(cart_id),
                 "cart": serializer.data,
-                "items": serializer.data.get("items", [])
+                "items": items,
+                "total_amount": total_amount,
+                "item_count": len(items),
             }, status=status.HTTP_200_OK)
         except Cart.DoesNotExist:
             return Response({
@@ -65,7 +87,9 @@ def get_cart(request):
         return Response({
             "message": "No active cart found",
             "cart": None,
-            "items": []
+            "items": [],
+            "total_amount": 0,
+            "item_count": 0,
         }, status=status.HTTP_200_OK)
 
 
@@ -75,7 +99,11 @@ def get_cart(request):
 @validate_request
 def add_to_cart(request):
     cart_id = request.data.get('cart_id')
-    serializer = CartItemSerializer(data=request.data)
+    # Accept 'amount' alias from frontend and map to donation_amount for serializer
+    data = request.data.copy()
+    if 'amount' in data and 'donation_amount' not in data:
+        data['donation_amount'] = data.get('amount')
+    serializer = CartItemSerializer(data=data)
     if serializer.is_valid():
         if is_authenticated(request):
             validate_user_id_with_service(request.user_id, request)
@@ -157,11 +185,14 @@ def add_to_cart(request):
     #
     # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['PATCH'])
+@api_view(['PATCH', 'DELETE'])
 @permission_classes([AllowAny])
 @extract_user_from_token
 @validate_request
 def update_cart_item(request, item_id):
+    # Handle DELETE for compatibility with /api/cart/<uuid>/
+    if request.method == 'DELETE':
+        return remove_from_cart(request, item_id)
     cart_id = request.data.get('cart_id') or request.query_params.get('cart_id')
     if is_authenticated(request):
         validate_user_id_with_service(request.user_id, request)
@@ -171,12 +202,20 @@ def update_cart_item(request, item_id):
     else:
         return Response({"error": "cart_id is required for anonymous users"}, status=status.HTTP_400_BAD_REQUEST)
 
-    quantity = request.data.get('quantity', cart_item.quantity)
-    if quantity <= 0:
-        cart_item.delete()
-        return Response({"message": "Item removed from cart"}, status=status.HTTP_204_NO_CONTENT)
-
-    cart_item.quantity = quantity
+    # Support updating donation_amount via 'amount' alias from frontend
+    if 'amount' in request.data or 'donation_amount' in request.data:
+        try:
+            new_amount = request.data.get('amount', request.data.get('donation_amount'))
+            cart_item.donation_amount = new_amount
+        except Exception:
+            pass
+    # Also support quantity updates
+    quantity = request.data.get('quantity')
+    if quantity is not None:
+        if int(quantity) <= 0:
+            cart_item.delete()
+            return Response({"message": "Item removed from cart"}, status=status.HTTP_204_NO_CONTENT)
+        cart_item.quantity = quantity
     cart_item.save()
     return Response({"message": "Cart item updated"}, status=status.HTTP_200_OK)
 

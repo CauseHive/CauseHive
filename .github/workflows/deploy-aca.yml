@@ -1,0 +1,82 @@
+name: Deploy to Azure Container Apps
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment name'
+        required: true
+        default: 'prod'
+      imageTag:
+        description: 'Image tag to deploy'
+        required: true
+        default: 'latest'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      ACR_NAME: ${{ secrets.AZURE_ACR_NAME }}
+      RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+      ACA_ENV: ${{ secrets.AZURE_ACA_ENVIRONMENT }}
+      SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      FRONTEND_APP: causehive-frontend
+      BACKEND_APP: causehive-backend
+      IMAGE_TAG: ${{ github.event.inputs.imageTag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set subscription
+        run: az account set --subscription $SUBSCRIPTION_ID
+
+      - name: Build and push frontend image
+        uses: azure/docker-login@v2
+        with:
+          login-server: ${{ env.ACR_NAME }}.azurecr.io
+          username: ${{ secrets.AZURE_ACR_USERNAME }}
+          password: ${{ secrets.AZURE_ACR_PASSWORD }}
+      - name: Frontend docker build
+        working-directory: frontend
+        run: |
+          docker build -t $ACR_NAME.azurecr.io/causehive-frontend:$IMAGE_TAG --build-arg VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }} .
+          docker push $ACR_NAME.azurecr.io/causehive-frontend:$IMAGE_TAG
+
+      - name: Build and push backend image
+        run: |
+          docker build -t $ACR_NAME.azurecr.io/causehive-backend:$IMAGE_TAG -f backend/Dockerfile .
+          docker push $ACR_NAME.azurecr.io/causehive-backend:$IMAGE_TAG
+
+      - name: Deploy frontend to Azure Container Apps
+        run: |
+          az containerapp update \
+            --name $FRONTEND_APP \
+            --resource-group $RESOURCE_GROUP \
+            --image $ACR_NAME.azurecr.io/causehive-frontend:$IMAGE_TAG \
+            --set-env-vars VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
+
+      - name: Deploy backend to Azure Container Apps
+        run: |
+          az containerapp update \
+            --name $BACKEND_APP \
+            --resource-group $RESOURCE_GROUP \
+            --image $ACR_NAME.azurecr.io/causehive-backend:$IMAGE_TAG \
+            --set-env-vars \
+              SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }} \
+              DEBUG=False \
+              ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} \
+              FRONTEND_URL=${{ secrets.FRONTEND_URL }} \
+              BACKEND_URL=${{ secrets.BACKEND_URL }} \
+              DATABASE_URL=${{ secrets.DATABASE_URL }} \
+              REDIS_HOST=${{ secrets.REDIS_HOST }} \
+              REDIS_PORT=${{ secrets.REDIS_PORT }} \
+              CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }} \
+              CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }} \
+              PAYSTACK_PUBLIC_KEY=${{ secrets.PAYSTACK_PUBLIC_KEY }} \
+              PAYSTACK_SECRET_KEY=${{ secrets.PAYSTACK_SECRET_KEY }} \
+              GOOGLE_OAUTH2_CLIENT_ID=${{ secrets.GOOGLE_OAUTH2_CLIENT_ID }} \
+              GOOGLE_OAUTH2_SECRET=${{ secrets.GOOGLE_OAUTH2_SECRET }}

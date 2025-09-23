@@ -16,8 +16,10 @@ GOOGLE_OAUTH2_SECRET=your_google_client_secret_here
 4. Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client IDs"
 5. Set application type to "Web application"
 6. Add authorized redirect URIs:
-   - `http://127.0.0.1:9000/api/user/google/callback/` (development)
-   - `https://yourdomain.com/api/user/google/callback/` (production)
+
+- `http://127.0.0.1:8000/api/user/google/callback/` (development)
+- `https://yourdomain.com/api/user/google/callback/` (production)
+
 7. Copy Client ID and Client Secret to your `.env` file
 
 ### 3. Django Setup
@@ -47,7 +49,7 @@ const GoogleOAuthButton = ({ onSuccess, onError }) => {
     setLoading(true);
     try {
       // Get Google OAuth URL from backend
-      const response = await fetch('http://127.0.0.1:9000/api/user/google/url/');
+  const response = await fetch('http://127.0.0.1:8000/api/user/google/url/');
       const data = await response.json();
       
       if (data.google_oauth_url) {
@@ -118,7 +120,7 @@ export const useGoogleOAuth = () => {
     try {
       // The backend already redirected to profile with token
       // We need to extract the data from the current page
-      const response = await fetch(`http://127.0.0.1:9000/api/user/profile/?access_token=${token}`);
+  const response = await fetch(`http://127.0.0.1:8000/api/user/profile/?access_token=${token}`);
       const data = await response.json();
       
       if (data.user && data.access_token) {
@@ -156,7 +158,7 @@ export const useGoogleOAuth = () => {
 // services/api.js
 class ApiService {
   constructor() {
-    this.baseURL = 'http://127.0.0.1:9000/api';
+  this.baseURL = 'http://127.0.0.1:8000/api';
     this.accessToken = localStorage.getItem('access_token');
   }
 
@@ -323,7 +325,7 @@ export default {
     async handleGoogleLogin() {
       this.loading = true;
       try {
-        const response = await fetch('http://127.0.0.1:9000/api/user/google/url/');
+  const response = await fetch('http://127.0.0.1:8000/api/user/google/url/');
         const data = await response.json();
         
         if (data.google_oauth_url) {
@@ -357,7 +359,7 @@ export function useGoogleOAuth() {
 
   const handleOAuthCallback = async (token) => {
     try {
-      const response = await fetch(`http://127.0.0.1:9000/api/user/profile/?access_token=${token}`);
+  const response = await fetch(`http://127.0.0.1:8000/api/user/profile/?access_token=${token}`);
       const data = await response.json();
       
       if (data.user && data.access_token) {
@@ -473,7 +475,7 @@ export function useGoogleOAuth() {
 // app.js
 class GoogleOAuthApp {
     constructor() {
-        this.baseURL = 'http://127.0.0.1:9000/api';
+  this.baseURL = 'http://127.0.0.1:8000/api';
         this.accessToken = localStorage.getItem('access_token');
         this.user = JSON.parse(localStorage.getItem('user') || 'null');
         
@@ -631,7 +633,7 @@ GET /api/user/profile/?access_token=JWT_TOKEN
     "id": "profile_uuid",
     "full_name": "John Doe",
     "bio": null,
-    "profile_picture": "http://127.0.0.1:9000/media/profile_pictures/default.jpg",
+  "profile_picture": "http://127.0.0.1:8000/media/profile_pictures/default.jpg",
     "phone_number": null,
     "address": null,
     "withdrawal_address": null,
@@ -655,11 +657,11 @@ GET /api/user/profile/?access_token=JWT_TOKEN
 
 ### 1. Test Google OAuth URL
 ```bash
-curl http://127.0.0.1:9000/api/user/google/url/
+curl http://127.0.0.1:8000/api/user/google/url/
 ```
 
 ### 2. Test Complete OAuth Flow
-1. Start your Django server: `uv run python manage.py runserver 127.0.0.1:9000`
+1. Start your Django server: `uv run python manage.py runserver 127.0.0.1:8000`
 2. Open your frontend application
 3. Click the Google OAuth button
 4. Complete the Google OAuth flow
@@ -668,10 +670,10 @@ curl http://127.0.0.1:9000/api/user/google/url/
 ### 3. Test with cURL
 ```bash
 # Get OAuth URL
-curl http://127.0.0.1:9000/api/user/google/url/ | jq .
+curl http://127.0.0.1:8000/api/user/google/url/ | jq .
 
 # Test profile with access token (replace with actual token)
-curl "http://127.0.0.1:9000/api/user/profile/?access_token=YOUR_JWT_TOKEN" | jq .
+curl "http://127.0.0.1:8000/api/user/profile/?access_token=YOUR_JWT_TOKEN" | jq .
 ```
 
 ## 🔧 Troubleshooting
@@ -690,10 +692,10 @@ curl "http://127.0.0.1:9000/api/user/profile/?access_token=YOUR_JWT_TOKEN" | jq 
 uv run python -c "from django.conf import settings; print('Client ID:', settings.GOOGLE_OAUTH2_CLIENT_ID)"
 
 # Test OAuth URL generation
-curl http://127.0.0.1:9000/api/user/google/url/ | jq .
+curl http://127.0.0.1:8000/api/user/google/url/ | jq .
 
 # Check server logs
-uv run python manage.py runserver 127.0.0.1:9000 --verbosity=2
+uv run python manage.py runserver 127.0.0.1:8000 --verbosity=2
 ```
 
 ## 🚀 Production Deployment

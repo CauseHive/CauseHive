@@ -12,6 +12,12 @@ class CausesSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all(), required=False, allow_null=True
     )
     category_data = serializers.DictField(write_only=True, required=False)
+    # Compatibility fields expected by frontend
+    title = serializers.CharField(source='name', read_only=True)
+    featured_image = serializers.ImageField(source='cover_image', read_only=True)
+    progress_percentage = serializers.SerializerMethodField(read_only=True)
+    donation_count = serializers.SerializerMethodField(read_only=True)
+    creator = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Causes
@@ -41,3 +47,30 @@ class CausesSerializer(serializers.ModelSerializer):
             )
             validated_data['category'] = category
         return super().create(validated_data)
+
+    def get_progress_percentage(self, obj):
+        try:
+            if obj.target_amount and obj.target_amount > 0:
+                return round((obj.current_amount / obj.target_amount) * 100, 2)
+        except Exception:
+            pass
+        return 0
+
+    def get_donation_count(self, obj):
+        try:
+            return getattr(obj, 'donation_set', None).count() if hasattr(obj, 'donation_set') else obj.donation_set.count()
+        except Exception:
+            # Fallback if relation or count fails
+            from donations.models import Donation
+            return Donation.objects.filter(cause_id=obj.id).count()
+
+    def get_creator(self, obj):
+        user = getattr(obj, 'organizer_id', None)
+        if not user:
+            return None
+        full_name = f"{getattr(user, 'first_name', '')} {getattr(user, 'last_name', '')}".strip()
+        return {
+            'id': str(getattr(user, 'id', '')),
+            'full_name': full_name or getattr(user, 'email', ''),
+            'profile_picture': getattr(getattr(user, 'userprofile', None), 'profile_picture', None),
+        }

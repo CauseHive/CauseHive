@@ -60,7 +60,7 @@ Authorization: Bearer <access_token>
 
 ### Base URL
 ```
-Development: http://127.0.0.1:9000/api
+Development: http://127.0.0.1:8000/api
 Production: https://yourdomain.com/api
 ```
 
@@ -290,7 +290,7 @@ Authorization: Bearer <access_token>
   "id": "profile_uuid",
   "full_name": "John Doe",
   "bio": "Passionate about helping others",
-  "profile_picture": "http://127.0.0.1:9000/media/profile_pictures/user.jpg",
+  "profile_picture": "http://127.0.0.1:8000/media/profile_pictures/user.jpg",
   "phone_number": "+233123456789",
   "address": "Accra, Ghana",
   "withdrawal_address": {
@@ -330,7 +330,7 @@ Authorization: Bearer <access_token>
   "id": "profile_uuid",
   "full_name": "John Smith",
   "bio": "Updated bio",
-  "profile_picture": "http://127.0.0.1:9000/media/profile_pictures/user.jpg",
+  "profile_picture": "http://127.0.0.1:8000/media/profile_pictures/user.jpg",
   "phone_number": "+233987654321",
   "address": "Kumasi, Ghana",
   "withdrawal_address": "0x1234...",
@@ -413,7 +413,7 @@ GET /api/causes/?category=1&status=live&search=education&ordering=-created_at&pa
 ```json
 {
   "count": 25,
-  "next": "http://127.0.0.1:9000/api/causes/?page=2",
+  "next": "http://127.0.0.1:8000/api/causes/?page=2",
   "previous": null,
   "results": [
     {
@@ -432,12 +432,12 @@ GET /api/causes/?category=1&status=live&search=education&ordering=-created_at&pa
       "creator": {
         "id": "user_uuid",
         "full_name": "John Doe",
-        "profile_picture": "http://127.0.0.1:9000/media/profile_pictures/user.jpg"
+  "profile_picture": "http://127.0.0.1:8000/media/profile_pictures/user.jpg"
       },
       "created_at": "2025-09-14T10:30:00Z",
       "updated_at": "2025-09-14T11:00:00Z",
       "deadline": "2025-12-31T23:59:59Z",
-      "featured_image": "http://127.0.0.1:9000/media/causes/school.jpg",
+  "featured_image": "http://127.0.0.1:8000/media/causes/school.jpg",
       "donation_count": 45,
       "is_featured": true
     }
@@ -468,16 +468,16 @@ GET /api/causes/{id}/
   "creator": {
     "id": "user_uuid",
     "full_name": "John Doe",
-    "profile_picture": "http://127.0.0.1:9000/media/profile_pictures/user.jpg",
+  "profile_picture": "http://127.0.0.1:8000/media/profile_pictures/user.jpg",
     "bio": "Passionate educator"
   },
   "created_at": "2025-09-14T10:30:00Z",
   "updated_at": "2025-09-14T11:00:00Z",
   "deadline": "2025-12-31T23:59:59Z",
-  "featured_image": "http://127.0.0.1:9000/media/causes/school.jpg",
+  "featured_image": "http://127.0.0.1:8000/media/causes/school.jpg",
   "gallery": [
-    "http://127.0.0.1:9000/media/causes/school1.jpg",
-    "http://127.0.0.1:9000/media/causes/school2.jpg"
+  "http://127.0.0.1:8000/media/causes/school1.jpg",
+  "http://127.0.0.1:8000/media/causes/school2.jpg"
   ],
   "donation_count": 45,
   "is_featured": true,
@@ -539,10 +539,10 @@ Authorization: Bearer <access_token>
   "created_at": "2025-09-14T10:30:00Z",
   "updated_at": "2025-09-14T10:30:00Z",
   "deadline": "2025-12-31T23:59:59Z",
-  "featured_image": "http://127.0.0.1:9000/media/causes/community.jpg",
+  "featured_image": "http://127.0.0.1:8000/media/causes/community.jpg",
   "gallery": [
-    "http://127.0.0.1:9000/media/causes/community1.jpg",
-    "http://127.0.0.1:9000/media/causes/community2.jpg"
+  "http://127.0.0.1:8000/media/causes/community1.jpg",
+  "http://127.0.0.1:8000/media/causes/community2.jpg"
   ],
   "donation_count": 0,
   "is_featured": false,
@@ -817,7 +817,7 @@ Admin-only endpoint that returns all donations across the platform. Requires adm
 ```json
 {
   "count": 150,
-  "next": "http://127.0.0.1:9000/api/admin/donations/?page=2",
+  "next": "http://127.0.0.1:8000/api/admin/donations/?page=2",
   "previous": null,
   "results": [
     {
@@ -1352,7 +1352,7 @@ Authorization: Bearer <access_token>
       "cause": {
         "id": "cause_uuid",
         "title": "Build a School in Rural Ghana",
-        "featured_image": "http://127.0.0.1:9000/media/causes/school.jpg"
+  "featured_image": "http://127.0.0.1:8000/media/causes/school.jpg"
       },
       "amount": 50.00,
       "created_at": "2025-09-14T10:30:00Z"
@@ -1562,7 +1562,7 @@ Authorization: Bearer <access_token>
 ```json
 {
   "count": 100,
-  "next": "http://127.0.0.1:9000/api/endpoint/?page=2",
+  "next": "http://127.0.0.1:8000/api/endpoint/?page=2",
   "previous": null,
   "results": [
     // Array of objects

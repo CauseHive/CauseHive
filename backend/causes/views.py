@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
+from rest_framework.pagination import PageNumberPagination
 
 from .models import Causes
 from .permissions import IsAdminService
@@ -23,28 +24,64 @@ class CauseCreateView(generics.CreateAPIView):
         # Automatically set the organizer to the current authenticated user
         serializer.save(organizer_id=self.request.user)
 
+class CausesPagination(PageNumberPagination):
+    page_size = 12
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
 class CauseListView(generics.ListAPIView):
     serializer_class = CausesSerializer
     permission_classes = [AllowAny]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    # Base-level filtering (we also apply custom mapping in get_queryset)
+    filterset_fields = ['category']
+    search_fields = ['name', 'description']
+    ordering_fields = ['created_at', 'name', 'current_amount', 'target_amount']
+    ordering = ['-created_at']
+    pagination_class = CausesPagination
 
     @method_decorator(cache_page(60 * 5))  # Cache for 5 minutes
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
-        # Optimize queryset: select_related/prefetch_related if organizer/category exist
-        return Causes.objects.exclude(status__in=['under_review', 'rejected']) \
-            .select_related('organizer_id') \
-            .only('id', 'name', 'description', 'category', 'organizer_id', 'status', 'created_at')
+        # Optimize queryset and expose fields expected by frontend
+        qs = (
+            Causes.objects.exclude(status__in=['under_review', 'rejected'])
+            .select_related('organizer_id', 'category')
+            .only('id', 'name', 'description', 'category', 'organizer_id', 'status', 'created_at', 'target_amount', 'current_amount', 'cover_image')
+        )
+
+        # Map status=live -> status=ongoing
+        status_param = self.request.query_params.get('status')
+        if status_param:
+            mapped = 'ongoing' if status_param.lower() == 'live' else status_param.lower()
+            qs = qs.filter(status=mapped)
+
+        # Optional explicit category filter by UUID string (filterset handles this too)
+        category_param = self.request.query_params.get('category')
+        if category_param:
+            qs = qs.filter(category__id=category_param)
+
+        return qs
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
+        try:
+            queryset = self.get_queryset()
+        except Exception as e:
+            # Gracefully contain unexpected errors
+            return Response({"message": "Unable to load causes at this time.", "error": str(e), "results": []}, status=status.HTTP_200_OK)
         if not queryset.exists():
-            return Response({"message": "There are no active causes to display.", "results": []}, status=status.HTTP_200_OK)
+            # Return an empty paginated structure
+            page = self.paginate_queryset(queryset)
+            return self.get_paginated_response([])
         return super().list(request, *args, **kwargs)
 
 class CauseDetailView(generics.RetrieveAPIView):
-    queryset = Causes.objects.select_related('organizer_id').only('id', 'title', 'description', 'category', 'organizer_id', 'status', 'created_at')
+    queryset = Causes.objects.select_related('organizer_id', 'category').only(
+        'id', 'name', 'description', 'category', 'organizer_id', 'status', 'created_at', 'target_amount', 'current_amount', 'cover_image'
+    )
     serializer_class = CausesSerializer
     lookup_field = 'id'
 

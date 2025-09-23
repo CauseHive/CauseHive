@@ -24,7 +24,7 @@ class Command(BaseCommand):
         site, created = Site.objects.get_or_create(
             id=settings.SITE_ID,
             defaults={
-                'domain': 'localhost:9000',  # Update this for production
+                'domain': 'localhost:8000',  # Update this for production
                 'name': 'CauseHive'
             }
         )
@@ -61,5 +61,5 @@ class Command(BaseCommand):
             )
         )
         self.stdout.write(
-            f'Google OAuth URL: http://localhost:9000/api/user/accounts/google/login/'
+            f'Google OAuth URL: http://localhost:8000/api/user/accounts/google/login/'
         )

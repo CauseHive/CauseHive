@@ -95,6 +95,28 @@ def custom_admin_dashboard(request):
 
 
 @staff_member_required
+def admin_dashboard_api(request):
+    """Aggregate metrics for admin dashboard API."""
+    from users_n_auth.models import User
+    from causes.models import Causes
+    from donations.models import Donation
+
+    total_users = User.objects.count()
+    total_causes = Causes.objects.count()
+    total_donations = Donation.objects.count()
+    total_amount_raised = Donation.objects.filter(status='completed').aggregate(Sum('amount'))['amount__sum'] or 0
+    pending_causes = Causes.objects.filter(status='under_review').count()
+
+    return JsonResponse({
+        'total_users': total_users,
+        'total_causes': total_causes,
+        'total_donations': total_donations,
+        'total_amount_raised': float(total_amount_raised),
+        'pending_causes': pending_causes,
+    })
+
+
+@staff_member_required
 def donation_chart_data(request):
     """
     API endpoint for donation chart data
@@ -222,3 +244,32 @@ def user_activity_data(request):
         'donations': donations,
         'amounts': amounts
     })
+
+
+def platform_metrics(request):
+    """Public-safe platform totals aggregated from the database.
+    Returns only non-sensitive, aggregate metrics so the homepage can display real data without admin privileges.
+    Accessible without authentication.
+    """
+    from donations.models import Donation
+    from causes.models import Causes
+    from categories.models import Category
+    from users_n_auth.models import User
+    totals = {
+        'total_donations': 0,
+        'total_amount': 0.0,
+        'live_causes': 0,
+        'categories': 0,
+        'total_users': 0,
+    }
+    try:
+        totals['total_donations'] = Donation.objects.count()
+        total_amount = Donation.objects.filter(status='completed').aggregate(Sum('amount'))['amount__sum'] or 0
+        totals['total_amount'] = float(total_amount)
+        totals['live_causes'] = Causes.objects.filter(status='ongoing').count()
+        totals['categories'] = Category.objects.count()
+        totals['total_users'] = User.objects.count()
+    except Exception as e:
+        # Return zeros on error but with a message for observability
+        return JsonResponse({ 'message': 'metrics_unavailable', **totals }, status=200)
+    return JsonResponse(totals)

@@ -7,10 +7,11 @@ from .models import Cart, CartItem
 
 class CartItemSerializer(serializers.ModelSerializer):
     cause_id = serializers.UUIDField()  # Change to UUIDField
+    amount = serializers.DecimalField(source='donation_amount', max_digits=10, decimal_places=2, read_only=True)
 
     class Meta:
         model = CartItem
-        fields = ['id', 'cause_id', 'donation_amount', 'quantity']
+        fields = ['id', 'cause_id', 'donation_amount', 'quantity', 'amount']
         read_only_fields = ['id']
         extra_kwargs = {
             'cart': {'read_only': True},
@@ -27,6 +28,27 @@ class CartItemSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Ensure we're passing the UUID to create
         return super().create(validated_data)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        # Map nested cause fields expected by frontend
+        try:
+            from causes.models import Causes
+            cause = Causes.objects.only('id', 'name', 'cover_image').get(id=instance.cause_id)
+            data['cause'] = {
+                'id': str(cause.id),
+                'title': cause.name,
+                'featured_image': cause.cover_image.url if cause.cover_image else None,
+            }
+        except Exception:
+            data['cause'] = {
+                'id': str(instance.cause_id),
+                'title': '',
+                'featured_image': None,
+            }
+        # Ensure 'amount' key is present
+        data['amount'] = str(instance.donation_amount)
+        return data
 
 
 class CartSerializer(serializers.ModelSerializer):

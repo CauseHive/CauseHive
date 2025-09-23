@@ -13,7 +13,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from .health_views import health_check, readiness_check
-from .dashboard_views import custom_admin_dashboard, donation_chart_data, cause_progress_data, user_activity_data
+from .dashboard_views import custom_admin_dashboard, donation_chart_data, cause_progress_data, user_activity_data, admin_dashboard_api, platform_metrics
 from .error_views import health_check as error_health_check
 from rest_framework.routers import DefaultRouter
 
@@ -67,6 +67,10 @@ urlpatterns = [
     path('admin/api/donations-chart/', donation_chart_data, name='donation_chart_data'),
     path('admin/api/causes-progress/', cause_progress_data, name='cause_progress_data'),
     path('admin/api/user-activity/', user_activity_data, name='user_activity_data'),
+    path('admin/api/dashboard/', admin_dashboard_api, name='admin_dashboard_api'),
+    path('admin/api/platform-metrics/', platform_metrics, name='platform_metrics'),
+    # Alias so frontend can call /api/admin/platform-metrics/
+    path('api/admin/platform-metrics/', platform_metrics, name='platform_metrics_api_alias'),
     
     # Django admin
     path('admin/', admin.site.urls),
@@ -80,12 +84,14 @@ urlpatterns = [
     
     # Cause service endpoints
     path('api/causes/', include('causes.urls')),
+    path('api/categories/', include('categories.urls')),
     
     # Donation processing service endpoints
     path('api/donations/', include('donations.urls')),
     path('api/payments/', include('payments.urls')),
     path('api/cart/', include('cart.urls')),
     path('api/withdrawals/', include('withdrawal_transfer.urls')),
+    path('api/notifications/', include('notifications.urls')),
     
     # # Admin reporting service endpoints
     # path('api/admin/', include('admin_auth.urls')),
