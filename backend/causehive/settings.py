@@ -322,7 +322,8 @@ CELERY_BEAT_SCHEDULE = {
 PAYSTACK_PUBLIC_KEY = env('PAYSTACK_PUBLIC_KEY', default='')
 
 # CORS settings for frontend
-CORS_ALLOWED_ORIGINS = [
+# Base local origins
+_base_cors = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:5173",
@@ -330,6 +331,15 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ]
+
+# Allow production origin(s) via env (comma separated) e.g. https://app.yourdomain.com,https://staging.yourdomain.com
+EXTRA_CORS_ORIGINS = env.list('CORS_ALLOWED_EXTRA', default=[])
+CORS_ALLOWED_ORIGINS = list(dict.fromkeys(_base_cors + EXTRA_CORS_ORIGINS))  # preserve order / uniqueness
+
+# Optional: regex support for dynamic subdomains (set CORS_ALLOWED_ORIGIN_REGEXES env as regex patterns)
+_regex_list = env.list('CORS_ALLOWED_ORIGIN_REGEXES', default=[])
+if _regex_list:
+    CORS_ALLOWED_ORIGIN_REGEXES = _regex_list
 
 # Include production frontend/backend origins if provided
 if FRONTEND_URL and FRONTEND_URL not in CORS_ALLOWED_ORIGINS:
