@@ -8,6 +8,24 @@ import { RouterProvider } from 'react-router-dom'
 import ErrorBoundary from '@/components/common/ErrorBoundary'
 import { emitToast } from '@/lib/notify'
 import { prefetchRoutes } from '@/lib/prefetchRoutes'
+import { loadRuntimeConfig, SENTRY_DSN, APP_ENV } from '@/lib/config'
+
+// Lazy import Sentry only if DSN provided (avoid bundle cost otherwise)
+async function initSentry() {
+  if (!SENTRY_DSN) return
+  const Sentry = await import('@sentry/react')
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    environment: APP_ENV,
+    tracesSampleRate: 0.1,
+    integrations: [
+      Sentry.browserTracingIntegration(),
+      Sentry.replayIntegration(),
+    ],
+    replaysSessionSampleRate: 0.01,
+    replaysOnErrorSampleRate: 1.0,
+  })
+}
  
 import { router } from './routes/router'
 import './index.css'
@@ -52,16 +70,29 @@ export function Boot() {
   )
 }
 
-const container = document.getElementById('root')!
-// Prevent duplicate createRoot during HMR by caching the root on the element
-// @ts-expect-error - attach a custom marker
-if (!container._root) {
-  const root = ReactDOM.createRoot(container)
+async function start() {
+  await loadRuntimeConfig()
+  await initSentry()
+  const container = document.getElementById('root')!
+  // Register a basic service worker for offline shell if available
+  if ('serviceWorker' in navigator) {
+    try {
+      await navigator.serviceWorker.register('/service-worker.js')
+    // eslint-disable-next-line no-empty
+    } catch {}
+  }
+  // Prevent duplicate createRoot during HMR by caching the root on the element
   // @ts-expect-error - attach a custom marker
-  container._root = root
-  root.render(
-    <React.StrictMode>
-      <Boot />
-    </React.StrictMode>
-  )
+  if (!container._root) {
+    const root = ReactDOM.createRoot(container)
+    // @ts-expect-error - attach a custom marker
+    container._root = root
+    root.render(
+      <React.StrictMode>
+        <Boot />
+      </React.StrictMode>
+    )
+  }
 }
+
+void start()

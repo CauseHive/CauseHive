@@ -1,0 +1,6 @@
+{
+  "apiBaseUrl": "/api",
+  "environment": "production",
+  "sentryDsn": "https://examplePublicKey.ingest.sentry.io/1234567",
+  "enableRQDevtools": false
+}

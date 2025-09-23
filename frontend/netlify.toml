@@ -1,0 +1,76 @@
+###############################################
+# Netlify configuration for CauseHive Frontend
+# - SPA routing fallback
+# - Security headers (baseline)
+# - Asset caching strategy (immutable hashed assets)
+# - Health endpoint
+# - Service worker cache controls
+###############################################
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+  # Directory containing package.json (this file sits in frontend/ already)
+  base = ""
+
+# Redirect all non-asset routes to index.html for React Router
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = true
+  conditions = { Country = [ ] }
+
+# Friendly health endpoint (maps to our static file)
+[[redirects]]
+  from = "/health"
+  to = "/health.html"
+  status = 200
+  force = true
+
+###############################################
+# Headers
+###############################################
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    # Adjust CSP if you add external analytics, fonts, etc.
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data: blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' https: http:;"
+
+# Long‑term caching of hashed assets (vite produces content-hashed filenames)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML should not be aggressively cached
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+# Service worker: always revalidate to pick up new versions
+[[headers]]
+  for = "/service-worker.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+# Health page: allow short caching only
+[[headers]]
+  for = "/health.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+###############################################
+# (Optional) Custom 404 page handling: we rely on SPA redirect above.
+###############################################
+
+# To inject a runtime config (config.json) during deploy you can add a
+# post-processing step or use a Netlify build plugin / environment variables.
+# Example (bash) snippet in a build command override:
+#   echo '{"apiBaseUrl": "'"$API_BASE_URL"'", "environment": "'"$NODE_ENV"'"}' > dist/config.json
