@@ -25,15 +25,18 @@ const formSchema = z.object({
   paymentMethod: z.enum(['mobile_money', 'credit_card']),
   mobileNumber: z.string().optional(),
   comments: z.string().optional(),
-}).refine(data => !data.isAnonymous ? data.donorName.trim().length > 0 : true, {
-  message: "Name is required for non-anonymous donations.",
+}).refine(data => !data.isAnonymous ? (data.donorName && data.donorName.trim().length >= 2) : true, {
+  message: "Full name must be at least 2 characters for non-anonymous donations.",
   path: ["donorName"],
-}).refine(data => !data.isAnonymous ? data.donorEmail.trim().length > 0 : true, {
-    message: "Email is required for non-anonymous donations.",
-    path: ["donorEmail"],
-}).refine(data => data.paymentMethod === 'mobile_money' ? (data.mobileNumber && /^0[235][0-9]{8}$/.test(data.mobileNumber.replace(/\s+/g, ''))) : true, {
-  message: "A valid Ghana mobile number is required.",
+}).refine(data => !data.isAnonymous ? (data.donorEmail && data.donorEmail.trim().length > 0) : true, {
+  message: "Email is required for non-anonymous donations.",
+  path: ["donorEmail"],
+}).refine(data => data.paymentMethod === 'mobile_money' ? (data.mobileNumber && /^(0[235][0-9]{8}|\+233[235][0-9]{8})$/.test(data.mobileNumber.replace(/\s+/g, ''))) : true, {
+  message: "Please enter a valid Ghana mobile number (e.g., 024 123 4567 or +233 24 123 4567).",
   path: ["mobileNumber"],
+}).refine(data => data.paymentMethod === 'credit_card', {
+  message: "Credit card payments are currently being set up. Please use Mobile Money for now.",
+  path: ["paymentMethod"],
 });
 
 export function CheckoutPage() {

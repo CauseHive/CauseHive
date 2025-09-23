@@ -1,24 +1,54 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { ArrowLeft, Upload, Save, AlertCircle } from 'lucide-react';
 import apiService from '../services';
 import { useToast } from '../components/Toast/ToastProvider';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../components/ui/form';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Textarea } from '../components/ui/textarea';
+
+// Zod schema for cause creation validation
+const formSchema = z.object({
+  name: z.string()
+    .min(3, "Cause name must be at least 3 characters long")
+    .max(200, "Cause name must not exceed 200 characters"),
+  description: z.string()
+    .min(50, "Description must be at least 50 characters to help people understand your cause")
+    .max(2000, "Description must not exceed 2000 characters"),
+  target_amount: z.number()
+    .min(10, "Target amount must be at least ₵10")
+    .max(1000000, "Target amount must not exceed ₵1,000,000"),
+  category: z.string()
+    .min(1, "Please select a category for your cause"),
+  cover_image: z.any()
+    .optional()
+    .refine((file) => !file || file.size <= 5 * 1024 * 1024, "Image must be smaller than 5MB")
+    .refine((file) => !file || ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type), "Only JPG, JPEG, and PNG files are allowed")
+});
 
 const CreateCausePage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const toast = useToast();
 
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    target_amount: '',
-    category: '',
-    cover_image: null
-  });
   const [imagePreview, setImagePreview] = useState(null);
-  const [errors, setErrors] = useState({});
+
+  // Initialize react-hook-form with validation
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      target_amount: 0,
+      category: '',
+      cover_image: null
+    }
+  });
 
   // Fetch categories
   const { data: categories = [] } = useQuery({
@@ -41,28 +71,10 @@ const CreateCausePage = () => {
     },
   });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-  };
-
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData(prev => ({
-        ...prev,
-        cover_image: file
-      }));
+      form.setValue('cover_image', file, { shouldValidate: true });
       
       // Create preview
       const reader = new FileReader();
@@ -70,39 +82,13 @@ const CreateCausePage = () => {
         setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
+    } else {
+      form.setValue('cover_image', null);
+      setImagePreview(null);
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Cause name is required';
-    }
-
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
-    }
-
-    if (!formData.target_amount || parseFloat(formData.target_amount) <= 0) {
-      newErrors.target_amount = 'Please enter a valid target amount';
-    }
-
-    if (!formData.category) {
-      newErrors.category = 'Please select a category';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
+  const onSubmit = async (values) => {
     const userId = apiService.getStoredUserId();
     if (!userId) {
       toast.error('You must be logged in to create a cause');
@@ -111,12 +97,12 @@ const CreateCausePage = () => {
     }
 
     const causeData = {
-      name: formData.name,
-      description: formData.description,
-      target_amount: parseFloat(formData.target_amount),
+      name: values.name,
+      description: values.description,
+      target_amount: values.target_amount,
       organizer_id: userId,
-      category: formData.category,
-      cover_image: formData.cover_image
+      category: values.category,
+      cover_image: values.cover_image
     };
 
     createCauseMutation.mutate(causeData);
@@ -140,192 +126,163 @@ const CreateCausePage = () => {
 
         {/* Form */}
         <div className="bg-white rounded-lg shadow-sm border p-6 md:p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Cause Name */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Cause Name *
-              </label>
-              <input
-                type="text"
-                id="name"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Cause Name */}
+              <FormField
+                control={form.control}
                 name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.name ? 'border-red-300' : 'border-gray-300'
-                }`}
-                placeholder="Enter a compelling name for your cause"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cause Name *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter a compelling name for your cause"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {errors.name}
-                </p>
-              )}
-            </div>
 
-            {/* Category */}
-            <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-                Category *
-              </label>
-              <select
-                id="category"
+              {/* Category */}
+              <FormField
+                control={form.control}
                 name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  errors.category ? 'border-red-300' : 'border-gray-300'
-                }`}
-              >
-                <option value="">Select a category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-              {errors.category && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {errors.category}
-                </p>
-              )}
-            </div>
-
-            {/* Target Amount */}
-            <div>
-              <label htmlFor="target_amount" className="block text-sm font-medium text-gray-700 mb-2">
-                Target Amount *
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
-                <input
-                  type="number"
-                  id="target_amount"
-                  name="target_amount"
-                  value={formData.target_amount}
-                  onChange={handleInputChange}
-                  min="1"
-                  step="0.01"
-                  className={`w-full pl-8 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.target_amount ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                  placeholder="0.00"
-                />
-              </div>
-              {errors.target_amount && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {errors.target_amount}
-                </p>
-              )}
-            </div>
-
-            {/* Cover Image */}
-            <div>
-              <label htmlFor="cover_image" className="block text-sm font-medium text-gray-700 mb-2">
-                Cover Image
-              </label>
-              <div className="space-y-4">
-                <div className="flex items-center justify-center w-full">
-                  <label
-                    htmlFor="cover_image"
-                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
-                  >
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Upload className="h-8 w-8 text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-500">
-                        <span className="font-semibold">Click to upload</span> or drag and drop
-                      </p>
-                      <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                    </div>
-                    <input
-                      id="cover_image"
-                      name="cover_image"
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                    />
-                  </label>
-                </div>
-                
-                {imagePreview && (
-                  <div className="relative">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImagePreview(null);
-                        setFormData(prev => ({ ...prev, cover_image: null }));
-                      }}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors"
-                    >
-                      ×
-                    </button>
-                  </div>
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category *</FormLabel>
+                    <FormControl>
+                      <select
+                        {...field}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="">Select a category</option>
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.id.toString()}>
+                            {category.name}
+                          </option>
+                        ))}
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </div>
-            </div>
-
-            {/* Description */}
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                Description *
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                rows={6}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none ${
-                  errors.description ? 'border-red-300' : 'border-gray-300'
-                }`}
-                placeholder="Tell people about your cause. What problem are you solving? How will donations be used? Why should people support you?"
               />
-              {errors.description && (
-                <p className="mt-1 text-sm text-red-600 flex items-center">
-                  <AlertCircle className="h-4 w-4 mr-1" />
-                  {errors.description}
-                </p>
-              )}
-            </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-end space-x-4 pt-6 border-t">
-              <button
-                type="button"
-                onClick={() => navigate('/my-causes')}
-                className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={createCauseMutation.isPending}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
-              >
-                {createCauseMutation.isPending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Create Cause
-                  </>
+              {/* Target Amount */}
+              <FormField
+                control={form.control}
+                name="target_amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Target Amount (₵) *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Enter your fundraising goal"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </button>
-            </div>
-          </form>
+              />
+
+              {/* Description */}
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description *</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Tell people why your cause matters. Share your story, explain how donations will be used, and inspire others to support you."
+                        className="min-h-[120px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Cover Image */}
+              <div>
+                <label htmlFor="cover_image" className="block text-sm font-medium text-gray-700 mb-2">
+                  Cover Image
+                </label>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center w-full">
+                    <label
+                      htmlFor="cover_image"
+                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-500">
+                          <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-gray-500">PNG, JPG or JPEG (MAX. 5MB)</p>
+                      </div>
+                      <input
+                        id="cover_image"
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  </div>
+                  
+                  {imagePreview && (
+                    <div className="relative w-full max-w-sm">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-32 object-cover rounded-lg border"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImagePreview(null);
+                          form.setValue('cover_image', null);
+                          document.getElementById('cover_image').value = '';
+                        }}
+                        className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex gap-4">
+                <Button
+                  type="submit"
+                  disabled={createCauseMutation.isPending}
+                  className="flex-1"
+                >
+                  {createCauseMutation.isPending ? (
+                    <>
+                      <Save className="h-4 w-4 mr-2 animate-spin" />
+                      Creating Cause...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Create Cause
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
         </div>
 
         {/* Info Box */}

@@ -7,7 +7,7 @@ import { SavedCausesProvider } from './contexts/SavedCausesContext';
 import { SearchAnalyticsProvider } from './contexts/SearchAnalyticsContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute, PublicRoute } from './components/auth/ProtectedRoute';
-import ErrorBoundary from './components/ErrorBoundary';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import AppLayout from './components/layout/AppLayout';
 import PublicLayout from './components/layout/PublicLayout';
 import SmartLayout from './components/layout/SmartLayout';
@@ -33,6 +33,8 @@ import CookiePolicyPage from './pages/CookiePolicyPage';
 import DonationCartPage from './pages/DonationCartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import DonationSuccessPage from './pages/DonationSuccessPage';
+import SystemStatusPage from './pages/SystemStatusPage';
+import ErrorTestPage from './pages/ErrorTestPage';
 import MyTestimonialsPage from './pages/MyTestimonialsPage';
 import SearchAnalyticsPage from './pages/SearchAnalyticsPage';
 
@@ -48,14 +50,14 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <ErrorBoundary>
+    <ErrorBoundary level="app" name="App Root">
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <SearchAnalyticsProvider>
             <SavedCausesProvider>
               <DonationCartProvider>
                 <Router>
-                  <ErrorBoundary>
+                  <ErrorBoundary level="page" name="Routes">
                     <Routes>
                   {/* Public routes - accessible only to unauthenticated users */}
                   <Route path="/login" element={
@@ -120,6 +122,16 @@ function App() {
                   <Route path="/cookies" element={
                     <PublicLayout>
                       <CookiePolicyPage />
+                    </PublicLayout>
+                  } />
+                  <Route path="/system-status" element={
+                    <PublicLayout>
+                      <SystemStatusPage />
+                    </PublicLayout>
+                  } />
+                  <Route path="/error-test" element={
+                    <PublicLayout>
+                      <ErrorTestPage />
                     </PublicLayout>
                   } />
 

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback, useRef } from 'react';
 import apiService from '../services';
 
 const AuthContext = createContext(null);
@@ -13,6 +13,15 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   });
+  
+  // Use ref to track token without causing dependency loops
+  const tokenRef = useRef(token);
+  const isInitializedRef = useRef(false);
+  
+  // Update ref when token changes
+  useEffect(() => {
+    tokenRef.current = token;
+  }, [token]);
 
   // Memoized function to refresh token
   const refreshTokenIfNeeded = useCallback(async () => {
@@ -28,39 +37,46 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // Initialize auth state on mount
+  // Initialize auth state on mount - FIXED to prevent infinite loops
   useEffect(() => {
+    let isMounted = true; // Prevent state updates if component unmounts
+    
     const initializeAuth = async () => {
-      if (!token) {
-        setLoading(false);
+      const currentToken = tokenRef.current;
+      
+      if (!currentToken) {
+        if (isMounted) setLoading(false);
         return;
       }
 
       try {
         // Try to get user profile with current token
         const profile = await apiService.getProfile();
-        setUser(profile);
+        if (isMounted) setUser(profile);
       } catch (error) {
         // Token might be expired, try refreshing
+        console.log('Profile fetch failed, attempting token refresh...');
         const refreshed = await refreshTokenIfNeeded();
-        if (refreshed) {
+        if (refreshed && isMounted) {
           try {
             const profile = await apiService.getProfile();
-            setUser(profile);
+            if (isMounted) setUser(profile);
           } catch {
             // Refresh failed, clear auth state
-            setToken(null);
-            setUser(null);
-            apiService.setAuthToken(null);
-            try {
-              if (typeof window !== 'undefined') {
-                window.localStorage.removeItem('accessToken');
-                window.localStorage.removeItem('refreshToken');
-                window.localStorage.removeItem('user_id');
-              }
-            } catch {}
+            if (isMounted) {
+              setToken(null);
+              setUser(null);
+              apiService.setAuthToken(null);
+              try {
+                if (typeof window !== 'undefined') {
+                  window.localStorage.removeItem('accessToken');
+                  window.localStorage.removeItem('refreshToken');
+                  window.localStorage.removeItem('user_id');
+                }
+              } catch {}
+            }
           }
-        } else {
+        } else if (isMounted) {
           // No refresh possible, clear auth state
           setToken(null);
           setUser(null);
@@ -74,12 +90,30 @@ export const AuthProvider = ({ children }) => {
           } catch {}
         }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
-    initializeAuth();
-  }, [token, refreshTokenIfNeeded]);
+    // Only initialize once or when token changes significantly
+    if (!isInitializedRef.current || tokenRef.current !== token) {
+      isInitializedRef.current = true;
+      initializeAuth();
+    }
+    
+    return () => {
+      isMounted = false; // Cleanup flag
+    };
+  }, [token, refreshTokenIfNeeded]); // Safe to include token now that we use ref
+
+  // Update tokenRef when token state changes
+  useEffect(() => {
+    tokenRef.current = token;
+    
+    // Sync with apiService when token changes
+    if (token) {
+      apiService.setAuthToken(token);
+    }
+  }, [token]);
 
   const login = async (email, password) => {
     try {

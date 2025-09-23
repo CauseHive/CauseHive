@@ -40,6 +40,7 @@ DEBUG = env.bool('DEBUG', default=True)
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[
     '127.0.0.1',
     'localhost',
+    'testserver',  # For Django testing
     '*.railway.app',
     'causehive.tech',
     'www.causehive.tech',
@@ -53,22 +54,49 @@ BACKEND_URL = env('BACKEND_URL', default='http://localhost:8000')
 REDIS_HOST = env('REDIS_HOST', default='localhost')
 REDIS_PORT = env('REDIS_PORT', default=6379)
 
-# Cache configuration
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': f'redis://{REDIS_HOST}:{REDIS_PORT}/2',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
-        'KEY_PREFIX': 'causehive',
-        'TIMEOUT': 300,  # 5 minutes default
+# Cache configuration with Redis fallback
+try:
+    # Test Redis connection
+    import redis
+    r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, socket_connect_timeout=1, socket_timeout=1)
+    r.ping()
+    
+    # Redis is available - use Redis cache
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': f'redis://{REDIS_HOST}:{REDIS_PORT}/2',
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            },
+            'KEY_PREFIX': 'causehive',
+            'TIMEOUT': 300,  # 5 minutes default
+        }
     }
-}
+    print("✅ Redis cache configured and connected")
+    
+except Exception as e:
+    # Redis is not available - use local memory cache for development
+    print(f"⚠️ Redis not available ({e}), using local memory cache for development")
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'causehive-cache',
+            'TIMEOUT': 300,  # 5 minutes default
+            'OPTIONS': {
+                'MAX_ENTRIES': 1000,
+                'CULL_FREQUENCY': 3,
+            }
+        }
+    }
 
-# Session storage in Redis
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'default'
+# Session storage configuration
+if CACHES['default']['BACKEND'] == 'django_redis.cache.RedisCache':
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
+else:
+    # Use database sessions when Redis is not available
+    SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 # # Service URLs for microservice communication
 # CAUSE_SERVICE_URL = env('CAUSE_SERVICE_URL', default='http://localhost:8001')
@@ -140,6 +168,9 @@ INSTALLED_APPS = [
 
     'users_n_auth',
 
+    # CauseHive apps
+    'causehive',
+
     'causes',
     'categories',
 
@@ -160,8 +191,10 @@ SITE_ID = 1
 
 # Middleware
 MIDDLEWARE = [
+    'causehive.middleware.RequestLoggingMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'causehive.middleware.SecurityHeadersMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -170,6 +203,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'causehive.middleware.ErrorHandlingMiddleware',
 ]
 
 ROOT_URLCONF = 'causehive.urls'
@@ -200,7 +234,6 @@ DATABASES = {
         'CONN_MAX_AGE': 300,  # Keep connections alive for 5 minutes (Supabase optimized)
         'OPTIONS': {
             'connect_timeout': 30,  # Longer timeout for Supabase
-            'options': '-c default_transaction_isolation=read_committed -c statement_timeout=30000 -c idle_in_transaction_session_timeout=300000'
         }
     }
 }
@@ -245,6 +278,10 @@ SIMPLE_JWT = {
     "TOKEN_TYPE_CLAIM": "token_type",
     "AUTH_TOKEN_CLASSES": ('rest_framework_simplejwt.tokens.AccessToken',),
 }
+
+# Ensure registration returns JWT token
+REST_USE_JWT = True
+REST_AUTH_TOKEN_CREATOR = 'dj_rest_auth.utils.default_create_jwt'
 
 # Google OAuth credentials
 GOOGLE_OAUTH2_CLIENT_ID = env('GOOGLE_OAUTH2_CLIENT_ID', default='set_the_client_id_dumbo')
@@ -392,12 +429,11 @@ DATABASES['default']['CONN_HEALTH_CHECKS'] = True  # Enable connection health ch
 # Force connection reuse
 DATABASES['default']['ATOMIC_REQUESTS'] = False  # Disable atomic requests for better performance
 
-# Additional Supabase optimizations
+# Additional database optimizations
 DATABASES['default']['OPTIONS'].update({
-    'sslmode': 'require',  # Ensure SSL for Supabase
+    'sslmode': 'disable' if DEBUG else 'require',  # Disable SSL for local development, require for production
     'application_name': 'causehive_backend',  # Help with connection tracking
     'connect_timeout': 30,
-    'options': '-c default_transaction_isolation=read_committed -c statement_timeout=30000 -c idle_in_transaction_session_timeout=300000 -c tcp_keepalives_idle=600 -c tcp_keepalives_interval=30 -c tcp_keepalives_count=3'
 })
 
 # Logging configuration for Railway
@@ -407,6 +443,10 @@ LOGGING = {
     'formatters': {
         'verbose': {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
             'style': '{',
         },
     },
@@ -426,8 +466,25 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'causehive': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
     },
 }
+
+# Add file logging only in production
+if not DEBUG:
+    LOGGING['handlers']['error_file'] = {
+        'class': 'logging.handlers.RotatingFileHandler',
+        'filename': '/tmp/causehive_error.log',
+        'maxBytes': 1024*1024*5,  # 5 MB
+        'backupCount': 5,
+        'formatter': 'verbose',
+        'level': 'ERROR',
+    }
+    LOGGING['loggers']['causehive']['handlers'].append('error_file')
 
 # # Disable database query logging in production for performance
 # if not DEBUG:

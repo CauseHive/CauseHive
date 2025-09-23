@@ -6,3 +6,4 @@ export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
 export { Skeleton } from "./skeleton"
 export { Toast, ToastProvider, ToastViewport, ToastTitle, ToastDescription, ToastClose, ToastAction } from "./toast"
 export { useToast, toast, Toaster } from "./use-toast"
+export { LoadingSpinner, LoadingCard, LoadingGrid, LoadingTable, LoadingPage, ButtonLoading } from "./loading"

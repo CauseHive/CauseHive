@@ -14,6 +14,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from .health_views import health_check, readiness_check
 from .dashboard_views import custom_admin_dashboard, donation_chart_data, cause_progress_data, user_activity_data
+from .error_views import health_check as error_health_check
 from rest_framework.routers import DefaultRouter
 
 # Import viewsets for API router - handle gracefully if not available
@@ -59,6 +60,7 @@ urlpatterns = [
     # Health check endpoints for Railway
     path('api/health/', health_check, name='health_check'),
     path('api/ready/', readiness_check, name='readiness_check'),
+    path('api/status/', error_health_check, name='status_check'),
     
     # Custom admin dashboard (must come before admin.site.urls)
     path('admin/dashboard/', custom_admin_dashboard, name='admin_dashboard'),
@@ -97,3 +99,9 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# Error handlers
+handler404 = 'causehive.error_views.handler404'
+handler500 = 'causehive.error_views.handler500'
+handler403 = 'causehive.error_views.handler403'
+handler400 = 'causehive.error_views.handler400'
