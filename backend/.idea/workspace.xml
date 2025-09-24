@@ -5,29 +5,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="56fa4bb4-e39d-4638-9870-2c0548eaeee3" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/causes/email_utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/donations/email_utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/email/cause_approved.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/email/cause_rejected.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/email/donation_successful.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/email/withdrawal_processed.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/users_n_auth/email_utils.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/withdrawal_transfer/email_utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cart/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/cart/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/causehive/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/causehive/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/causes/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/causes/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/causehive/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/causehive/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/causes/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/causes/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/causes/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/causes/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/celerybeat-schedule" beforeDir="false" afterPath="$PROJECT_DIR$/celerybeat-schedule" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/donations/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/donations/tasks.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notifications/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/notifications/services.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/payments/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/payments/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/payments/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/payments/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/blog/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/blog/admin.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/blog/apps.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/blog/migrations/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/blog/models.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/blog/serializers.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/blog/urls.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/blog/views.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/newsletter/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/newsletter/admin.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/newsletter/apps.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/newsletter/migrations/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/newsletter/models.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/newsletter/serializers.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/newsletter/urls.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/monolithic_app/newsletter/views.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/email/password_reset_email.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/email/password_reset_email.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/email/verification_email.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/email/verification_email.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/users_n_auth/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/users_n_auth/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/users_n_auth/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/users_n_auth/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/users_n_auth/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/users_n_auth/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/withdrawal_transfer/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/withdrawal_transfer/tasks.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,28 +55,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "Django Server.backend.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "django.template.preview.state": "SHOW_EDITOR",
-    "git-widget-placeholder": "backend",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "/home/nii01/Desktop/Projects/CauseHive/backend",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;Django Server.backend.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;backend&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/nii01/Desktop/Projects/CauseHive/backend&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="backend" type="Python.DjangoServer" factoryName="Django server">
       <module name="backend" />
@@ -108,8 +107,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-PY-252.25557.178" />
-        <option value="bundled-python-sdk-ce6832f46686-7b97d883f26b-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.25557.178" />
+        <option value="bundled-js-predefined-d6986cc7102b-9c94529fcfe0-JavaScript-PY-252.26199.168" />
+        <option value="bundled-python-sdk-b3d66beaba9a-c6efb3732140-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.26199.168" />
       </set>
     </attachedChunks>
   </component>
@@ -120,7 +119,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1758541544321</updated>
-      <workItem from="1758541545681" duration="38104000" />
+      <workItem from="1758541545681" duration="36127000" />
     </task>
     <servers />
   </component>

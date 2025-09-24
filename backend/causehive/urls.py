@@ -77,7 +77,6 @@ urlpatterns = [
     
     # Cause service endpoints
     path('api/causes/', include('causes.urls')),
-    path('api/testimonials/', include('testimonials.urls')),
     
     # Donation processing service endpoints
     path('api/donations/', include('donations.urls')),
