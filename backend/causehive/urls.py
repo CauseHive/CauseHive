@@ -37,19 +37,20 @@ except ImportError:
     pass
 
 
-def home(request):
-    return JsonResponse({"Greetings": "Welcome to CauseHive!"})
-
 # Create API router for RESTful endpoints
 router = DefaultRouter()
 
 # Add donation service routes if available
 if DonationViewSet:
-    router.register(r'donations', DonationViewSet)
+    router.register(r'donations', DonationViewSet, basename='donation')
 if PaymentTransactionViewSet:
     router.register(r'payments', PaymentTransactionViewSet, basename='paymenttransaction')
 if WithdrawalRequestViewSet:
     router.register(r'withdrawals', WithdrawalRequestViewSet, basename='withdrawalrequest')
+
+
+def home(request):
+    return JsonResponse({"Greetings": "Welcome to CauseHive!"})
 
 urlpatterns = [
     #Home Endpoint
@@ -73,7 +74,7 @@ urlpatterns = [
     
     # User service endpoints
     path('api/user/', include('users_n_auth.urls')),
-    path('api/user/accounts/', include('allauth.urls')),
+    # path('api/user/accounts/', include('allauth.urls')),  # Disabled - using custom OAuth implementation
     
     # Cause service endpoints
     path('api/causes/', include('causes.urls')),
