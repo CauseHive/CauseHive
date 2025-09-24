@@ -8,6 +8,8 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 from datetime import timedelta
+
+from .email_utils import send_cause_approved_email, send_cause_rejected_email
 from .models import Causes
 from notifications.services import NotificationService
 
@@ -78,10 +80,14 @@ class CausesAdmin(admin.ModelAdmin):
     
     def approve_causes(self, request, queryset):
         causes_to_approve = queryset.filter(status__in=['under_review', 'rejected'])
+
+        # Causes approved
+        causes_list = list(causes_to_approve)
+
         updated = causes_to_approve.update(status='ongoing')
         
         # Send notifications to organizers and create admin notifications
-        for cause in causes_to_approve:
+        for cause in causes_list:
             self._send_approval_notification(cause, 'approved')
             NotificationService.notify_cause_approved(cause)
         
@@ -91,6 +97,9 @@ class CausesAdmin(admin.ModelAdmin):
     def reject_causes(self, request, queryset):
         # Get causes that will be rejected for notification
         causes_to_reject = queryset.filter(status__in=['under_review', 'approved'])
+
+        causes_list = list(causes_to_reject)
+
         updated = causes_to_reject.update(status='rejected')
         
         # Send notifications to organizers and create admin notifications
@@ -114,42 +123,33 @@ class CausesAdmin(admin.ModelAdmin):
         """Send email notification to cause organizer"""
         try:
             organizer = cause.organizer_id
-            subject = f"CauseHive: Your cause '{cause.name}' has been {action}"
+
             
             if action == 'approved':
-                message = f"""
-                🎉 Congratulations! Your cause "{cause.name}" has been approved and is now LIVE on CauseHive!
-                
-                Your cause is now visible to the public and you can start receiving donations from supporters.
-                
-                Cause Details:
-                - Target Amount: ₵{cause.target_amount:,.2f}
-                - Category: {cause.category.name}
-                - Description: {cause.description[:100]}...
-                - Status: LIVE (Ongoing)
-                
-                Share your cause with friends and family to start raising funds!
-                
-                Thank you for using CauseHive! 🚀
-                """
+
+                cause_url = f"{settings.FRONTEND_URL}/causes/{cause.id}/" if hasattr(settings, 'FRONTEND_URL') else None
+                send_cause_approved_email(
+                    to_email=organizer.email,
+                    organizer_name=organizer.first_name,
+                    cause_name=cause.name,
+                    target_amount=cause.target_amount,
+                    category_name=cause.category.name if cause.category else 'Uncategorized',
+                    cause_url=cause_url
+                )
             else:  # rejected
-                message = f"""
-                We regret to inform you that your cause "{cause.name}" has been rejected.
-                
-                Reason: {cause.rejection_reason or 'No specific reason provided'}
-                
-                You can review the feedback and submit a new cause if needed.
-                
-                Thank you for your understanding.
-                """
-            
-            send_mail(
-                subject,
-                message,
-                settings.DEFAULT_FROM_EMAIL,
-                [organizer.email],
-                fail_silently=False,
-            )
+                create_new_cause_url = f"{settings.FRONTEND_URL}/create-cause/" if hasattr(settings, 'FRONTEND_URL') else None
+                send_cause_rejected_email(
+                    to_email=organizer.email,
+                    organizer_name=organizer.first_name,
+                    cause_name=cause.name,
+                    currency="₵",
+                    target_amount=cause.target_amount,
+                    category_name=cause.category.name if cause.category else 'Uncategorized',
+                    rejection_reason=cause.rejection_reason or "No specific reason provided. Maybe admin forgot to add one.",
+                    create_new_cause_url=create_new_cause_url
+                )
+
+
         except Exception as e:
             print(f"Failed to send notification: {e}")
     
