@@ -1,8 +1,6 @@
 from tokenize import TokenError
 
 import requests
-from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
@@ -15,6 +13,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from django_filters.rest_framework import DjangoFilterBackend
+from pycparser.ply.yacc import default_lr
 from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.exceptions import AuthenticationFailed, NotFound
@@ -28,9 +27,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from django.http import HttpResponseRedirect
-import urllib.parse
 from rest_framework_simplejwt.views import TokenObtainPairView
+from twisted.mail.scripts.mailmail import failure
 
+from .email_utils import send_account_verification_email, send_password_reset_email
 from .models import User, UserProfile
 from .permissions import IsAdminService
 from .serializers import UserSerializer, UserProfileSerializer
@@ -44,31 +44,95 @@ def register_user(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
-        
+
         # Clear any cached user data to ensure fresh data
         cache.delete(f'user_email_{user.email}')
 
-        # Send verification email
-        # token = default_token_generator.make_token(user)
-        # uid = urlsafe_base64_encode(force_bytes(user.pk))
-        # verification_url = f"{settings.FRONTEND_URL}/verify-email/{uid}/{token}/"
-        #
-        # html_message = render_to_string('email/verification_email.html', {
-        #     'user': user,
-        #     'verification_url': verification_url
-        # })
-        # plain_message = strip_tags(html_message)
-        #
-        # send_mail(
-        #     subject='Verify your email address',
-        #     message=plain_message,
-        #     from_email=settings.DEFAULT_FROM_EMAIL,
-        #     recipient_list=[user.email],
-        #     html_message=html_message
-        # )
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        verification_url = f"{settings.FRONTEND_URL}/verify-email/{uid}/{token}/"
+
+        send_account_verification_email(
+            to_email=user.email,
+            first_name=user.first_name,
+            verification_url=verification_url,
+            expiry_minutes=30,
+            logo_filename="Causehive.png",
+        )
+
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def verify_account(request, uidb64: str, token: str):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except Exception:
+        return _verification_redirect_or_json(success=False, reason="Invalid uid")
+
+    if not default_token_generator.check_token(user, token):
+        return _verification_redirect_or_json(success=False, reason="Invalid or expired token")
+
+    # Mark as verified
+    updated = False
+    if hasattr(user, 'is_active') and not user.is_active:
+        user.is_active = True
+        updated = True
+    if hasattr(user, "is_verified") and not user.is_verified:
+        user.is_verified = True
+        updated = True
+    if updated:
+        user.save()
+
+    return _verification_redirect_or_json(success=True)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@throttle_classes([PasswordResetThrottle])
+def resend_verification_email(request):
+    email = request.data.get('email')
+    if not email:
+        return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.only("id", "email", "first_name", "is_active", "is_verified").get(email=email)
+    except User.DoesNotExist:
+        return Response({'detail': 'If an account with that email exists, a verification email has been sent.'}, status=status.HTTP_200_OK)
+
+    # Already verified?
+    already_verified = getattr(user, 'is_verified', None) is True or user.is_active
+    if already_verified:
+        return Response({'detail': 'Account is already verified.'}, status=status.HTTP_200_OK)
+
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    verification_url = f"{settings.FRONTEND_URL}/verify-email/{uid}/{token}/"
+
+    send_account_verification_email(
+        to_email=user.email,
+        first_name=user.first_name,
+        verification_url=verification_url,
+        expiry_minutes=30,
+        logo_filename="Causehive.png",
+    )
+    return Response({"detail": "Verification email sent"}, status=status.HTTP_200_OK)
+
+def _verification_redirect_or_json(*, success: bool, reason: str):
+    success_path = "/verify-email/success/"
+    failure_path = f"/verify-email/failure/?reason={reason or 'error'}"
+    target = success_path if success else failure_path
+    frontend = getattr(settings, 'FRONTEND_URL', None)
+    if frontend:
+        return HttpResponseRedirect(frontend.rstrip('/') + target)
+
+    payload = {"success": success}
+    if reason:
+        payload["reason"] = reason
+    return Response(payload, status=status.HTTP_200_OK if success else status.HTTP_400_BAD_REQUEST)
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = 'email'
@@ -146,18 +210,11 @@ def request_password_reset(request):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     reset_url = f"{settings.FRONTEND_URL}/reset-password-confirm/{uid}/{token}/"
 
-    html_message = render_to_string('email/password_reset_email.html', {
-        'user': user,
-        'reset_url': reset_url
-    })
-    plain_message = strip_tags(html_message)
-
-    send_mail(
-        subject='Reset Your Password',
-        message=plain_message,
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[email],
-        html_message=html_message
+    send_password_reset_email(
+        to_email=user.email,
+        first_name=user.first_name,
+        reset_url=reset_url,
+        expiry_minutes=30,
     )
 
     return Response({'message': 'Password reset email sent'})

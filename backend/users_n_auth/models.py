@@ -25,7 +25,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
-    # is_organizer = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 
@@ -52,7 +52,7 @@ class UserProfile(models.Model):
     def full_name(self):
         return f"{self.user.first_name} {self.user.last_name}"
     bio = models.TextField(blank=True, null=True)
-    profile_picture = models.ImageField(upload_to='profile_pictures/', default='profile_pictures/default.jpg',blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='profile_pictures/', default='profile_pictures/sample.jpg',blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
     withdrawal_address = models.JSONField(blank=True, null=True, help_text="Stores complete withdrawal payment info.")
