@@ -1,0 +1,1 @@
+import{j as s}from"./index-BOTlMoAj.js";function r(){return s.jsxs("div",{className:"prose dark:prose-invert max-w-3xl",children:[s.jsx("h1",{children:"Contact Us"}),s.jsx("p",{children:"Email: support@causehive.example"}),s.jsx("p",{children:"We usually respond within 1-2 business days."})]})}export{r as default};

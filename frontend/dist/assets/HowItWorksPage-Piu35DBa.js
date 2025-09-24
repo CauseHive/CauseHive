@@ -1,0 +1,1 @@
+import{j as e}from"./index-BOTlMoAj.js";function s(){return e.jsxs("div",{className:"prose dark:prose-invert max-w-3xl",children:[e.jsx("h1",{children:"How CauseHive Works"}),e.jsxs("ol",{children:[e.jsx("li",{children:"Explore causes"}),e.jsx("li",{children:"Donate securely"}),e.jsx("li",{children:"Track your impact"})]})]})}export{s as default};
