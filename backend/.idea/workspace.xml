@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="56fa4bb4-e39d-4638-9870-2c0548eaeee3" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/causes/email_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/donations/email_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/email/cause_approved.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/email/cause_rejected.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/email/donation_successful.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/templates/email/withdrawal_processed.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/users_n_auth/email_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/withdrawal_transfer/email_utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cart/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/cart/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/causehive/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/causehive/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/causes/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/causes/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/celerybeat-schedule" beforeDir="false" afterPath="$PROJECT_DIR$/celerybeat-schedule" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/donations/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/donations/tasks.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notifications/services.py" beforeDir="false" afterPath="$PROJECT_DIR$/notifications/services.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/payments/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/payments/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/payments/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/payments/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/email/password_reset_email.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/email/password_reset_email.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/email/verification_email.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/email/verification_email.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/users_n_auth/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/users_n_auth/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/users_n_auth/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/users_n_auth/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/users_n_auth/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/users_n_auth/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/withdrawal_transfer/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/withdrawal_transfer/tasks.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="333MwnVhhmgu0YDbCmT037iIwuL" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Django Server.backend.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "django.template.preview.state": "SHOW_EDITOR",
+    "git-widget-placeholder": "backend",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "/home/nii01/Desktop/Projects/CauseHive/backend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration name="backend" type="Python.DjangoServer" factoryName="Django server">
+      <module name="backend" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="DJANGO_SETTINGS_MODULE" value="causehive.settings" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <option name="port" value="8000" />
+      <option name="host" value="" />
+      <option name="additionalOptions" value="" />
+      <option name="browserUrl" value="" />
+      <option name="runTestServer" value="false" />
+      <option name="runNoReload" value="false" />
+      <option name="useCustomRunCommand" value="false" />
+      <option name="customRunCommand" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-b598e85cdad2-JavaScript-PY-252.25557.178" />
+        <option value="bundled-python-sdk-ce6832f46686-7b97d883f26b-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.25557.178" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="56fa4bb4-e39d-4638-9870-2c0548eaeee3" name="Changes" comment="" />
+      <created>1758541544321</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1758541544321</updated>
+      <workItem from="1758541545681" duration="38104000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
