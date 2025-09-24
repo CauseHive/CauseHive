@@ -7,18 +7,19 @@
 3. [Base URL & Headers](#base-url--headers)
 4. [Error Handling](#error-handling)
 5. [User Authentication APIs](#user-authentication-apis)
-6. [User Profile APIs](#user-profile-apis)
-7. [Cause Management APIs](#cause-management-apis)
-8. [Donation APIs](#donation-apis)
-9. [Payment APIs](#payment-apis)
-10. [Admin APIs](#admin-apis)
-11. [Notification APIs](#notification-apis)
-12. [Category APIs](#category-apis)
-13. [Cart APIs](#cart-apis)
-14. [Withdrawal APIs](#withdrawal-apis)
-15. [Response Examples](#response-examples)
-16. [Rate Limiting](#rate-limiting)
-17. [Webhooks](#webhooks)
+6. [Email Notification System](#email-notification-system)
+7. [User Profile APIs](#user-profile-apis)
+8. [Cause Management APIs](#cause-management-apis)
+9. [Donation APIs](#donation-apis)
+10. [Payment APIs](#payment-apis)
+11. [Admin APIs](#admin-apis)
+12. [Notification APIs](#notification-apis)
+13. [Category APIs](#category-apis)
+14. [Cart APIs](#cart-apis)
+15. [Withdrawal APIs](#withdrawal-apis)
+16. [Response Examples](#response-examples)
+17. [Rate Limiting](#rate-limiting)
+18. [Webhooks](#webhooks)
 
 ## Overview
 
@@ -27,9 +28,11 @@ The CauseHive API is a RESTful service built with Django REST Framework that ena
 ### Key Features
 - **JWT Authentication** with refresh token support
 - **Google OAuth 2.0** integration
+- **Email Verification System** with beautiful HTML templates
 - **Cause Management** with approval workflow
 - **Donation Processing** via Paystack
 - **Real-time Notifications**
+- **Comprehensive Email System** with 6 different email types
 - **Admin Dashboard** with analytics
 - **Multi-currency Support** (Ghanaian Cedi)
 - **User-Specific Donation Filtering** - Users only see their own donations
@@ -230,6 +233,59 @@ GET /api/user/google/callback/?code=AUTHORIZATION_CODE
 
 **Redirect URL:** `/api/user/profile/?access_token=JWT_TOKEN`
 
+### Verify Account Email
+```http
+GET /api/user/auth/verify/{uid}/{token}/
+```
+
+**Description:**
+Verifies a user's email address using the verification link sent during registration. This endpoint is typically called by the frontend when a user clicks the verification link in their email.
+
+**Response:**
+```json
+{
+  "message": "Email verified successfully",
+  "user": {
+    "id": "user_uuid",
+    "email": "user@example.com",
+    "is_active": true,
+    "is_verified": true
+  }
+}
+```
+
+**Error Response:**
+```json
+{
+  "error": "Invalid verification link",
+  "detail": "The verification link has expired or is invalid"
+}
+```
+
+### Resend Verification Email
+```http
+POST /api/user/auth/resend-verification/
+```
+
+**Headers:**
+```http
+Authorization: Bearer <access_token>
+```
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Verification email sent successfully"
+}
+```
+
 ### Request Password Reset
 ```http
 POST /api/user/auth/password-reset/
@@ -268,6 +324,183 @@ POST /api/user/auth/password-reset-confirm/
 {
   "message": "Password reset successfully"
 }
+```
+
+---
+
+## Email Notification System
+
+### Overview
+The CauseHive platform includes a comprehensive email notification system that sends beautifully designed HTML emails for various user actions and system events. All emails use a consistent design with the CauseHive branding and green color scheme.
+
+### Email Types
+
+#### 1. Account Verification Email
+**Triggered:** When a user registers for a new account
+**Template:** `templates/email/verification_email.html`
+**Features:**
+- Professional HTML design with CauseHive branding
+- Verification link with 30-minute expiry
+- Responsive design for all email clients
+- Fallback plain text version
+
+#### 2. Password Reset Email
+**Triggered:** When a user requests a password reset
+**Template:** `templates/email/password_reset_email.html`
+**Features:**
+- Secure password reset link
+- Clear instructions for password reset
+- Consistent branding with other emails
+
+#### 3. Donation Success Email
+**Triggered:** When a donation is successfully processed
+**Template:** `templates/email/donation_successful.html`
+**Features:**
+- Donation confirmation with amount and cause details
+- Professional receipt-style design
+- Cause information and impact details
+
+#### 4. Withdrawal Processed Email
+**Triggered:** When a withdrawal request is successfully processed
+**Template:** `templates/email/withdrawal_processed.html`
+**Features:**
+- Withdrawal confirmation with amount and processing details
+- Transaction reference information
+- Professional financial notification design
+
+#### 5. Cause Approval Email
+**Triggered:** When an admin approves a cause for publication
+**Template:** `templates/email/cause_approved.html`
+**Features:**
+- Congratulations message for cause organizers
+- Cause details and target amount
+- Direct link to view the live cause
+- Encouragement to share the cause
+
+#### 6. Cause Rejection Email
+**Triggered:** When an admin rejects a cause submission
+**Template:** `templates/email/cause_rejected.html`
+**Features:**
+- Professional rejection notification
+- Rejection reason (if provided)
+- Encouragement to create a new cause
+- Link to create a new cause
+
+### Email Configuration
+
+#### SMTP Settings
+```python
+# settings.py
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.zoho.com'  # or your SMTP provider
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your-email@domain.com'
+EMAIL_HOST_PASSWORD = 'your-app-password'
+DEFAULT_FROM_EMAIL = 'CauseHive <no-reply@causehive.tech>'
+SUPPORT_EMAIL = 'support@causehive.tech'
+```
+
+#### Email Templates
+All email templates are located in `templates/email/` and use Django template syntax with the following common context variables:
+- `first_name` or `organizer_name` - User's first name
+- `now` - Current timestamp
+- `support_email` - Support contact email
+- `logo_src` - Logo URL (hardcoded in templates)
+
+### Email Sending Functions
+
+#### User Authentication Emails
+```python
+# users_n_auth/email_utils.py
+from users_n_auth.email_utils import send_account_verification_email, send_password_reset_email
+
+# Send verification email
+send_account_verification_email(
+    to_email="user@example.com",
+    first_name="John",
+    verification_url="https://causehive.tech/verify/uid/token/"
+)
+
+# Send password reset email
+send_password_reset_email(
+    to_email="user@example.com",
+    first_name="John",
+    reset_url="https://causehive.tech/reset/uid/token/"
+)
+```
+
+#### Donation Emails
+```python
+# donations/email_utils.py
+from donations.email_utils import send_donation_success_email
+
+send_donation_success_email(
+    to_email="donor@example.com",
+    first_name="John",
+    amount=100.00,
+    currency="₵",
+    cause_name="Build a School",
+    donated_at=timezone.now()
+)
+```
+
+#### Withdrawal Emails
+```python
+# withdrawal_transfer/email_utils.py
+from withdrawal_transfer.email_utils import send_withdrawal_processed_email
+
+send_withdrawal_processed_email(
+    to_email="user@example.com",
+    first_name="John",
+    amount=500.00,
+    currency="₵",
+    processed_at=timezone.now()
+)
+```
+
+#### Cause Management Emails
+```python
+# causes/email_utils.py
+from causes.email_utils import send_cause_approved_email, send_cause_rejected_email
+
+# Send approval email
+send_cause_approved_email(
+    to_email="organizer@example.com",
+    organizer_name="Jane",
+    cause_name="Community Center",
+    target_amount=10000.00,
+    category_name="Community Development",
+    cause_url="https://causehive.tech/causes/uuid/"
+)
+
+# Send rejection email
+send_cause_rejected_email(
+    to_email="organizer@example.com",
+    organizer_name="Jane",
+    cause_name="Community Center",
+    target_amount=10000.00,
+    category_name="Community Development",
+    rejection_reason="Incomplete documentation"
+)
+```
+
+### Email Delivery Status
+All email functions return an integer indicating the number of emails sent:
+- `1` - Email sent successfully
+- `0` - Email failed to send
+- Exceptions are raised for critical failures (when `fail_silently=False`)
+
+### Email Testing
+Test email functionality using Django shell:
+```python
+# Test verification email
+from users_n_auth.email_utils import send_account_verification_email
+send_account_verification_email(
+    to_email="test@example.com",
+    first_name="Test User",
+    verification_url="https://example.com/verify/test/"
+)
 ```
 
 ---
@@ -742,6 +975,7 @@ Creates a new donation for the authenticated user. The `user_id` and `recipient_
 - The `currency` is automatically set to "GHS" (Ghanaian Cedi)
 - The `status` is initially set to "pending"
 - The `transaction_id` will be populated after payment processing
+- **Email Notification**: A donation success email is automatically sent to the donor after successful payment processing
 
 ### Get Donation Details
 ```http
@@ -1131,6 +1365,13 @@ Authorization: Bearer <admin_access_token>
 }
 ```
 
+**Email Notification:**
+When a cause is approved, an email notification is automatically sent to the cause organizer with:
+- Congratulations message
+- Cause details and target amount
+- Direct link to view the live cause
+- Encouragement to share the cause
+
 ### Reject Cause
 ```http
 POST /admin/api/causes/{id}/reject/
@@ -1156,6 +1397,20 @@ Authorization: Bearer <admin_access_token>
   "reason": "Incomplete documentation"
 }
 ```
+
+**Email Notification:**
+When a cause is rejected, an email notification is automatically sent to the cause organizer with:
+- Professional rejection notification
+- Rejection reason (if provided)
+- Encouragement to create a new cause
+- Link to create a new cause
+
+### Admin Email Notifications
+The admin interface includes automatic email notifications for:
+- **Cause Approval**: Sends congratulatory email to organizers
+- **Cause Rejection**: Sends rejection notification with reason
+- **Bulk Actions**: Supports bulk approval/rejection with individual emails
+- **Error Handling**: Graceful handling of email delivery failures
 
 ---
 
@@ -1469,6 +1724,12 @@ Authorization: Bearer <access_token>
   "net_amount": 975.00
 }
 ```
+
+**Email Notification:**
+When a withdrawal is successfully processed, an email notification is automatically sent to the user with:
+- Withdrawal confirmation with amount and processing details
+- Transaction reference information
+- Professional financial notification design
 
 ### List Withdrawals
 ```http

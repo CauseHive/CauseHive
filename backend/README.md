@@ -8,7 +8,8 @@ A robust Django REST API backend for CauseHive, a crowdfunding platform that ena
 - **User Authentication & Authorization**
   - JWT-based authentication with refresh tokens
   - Custom Google OAuth 2.0 integration with direct profile redirect
-  - Password reset functionality
+  - Email verification system with beautiful HTML templates
+  - Password reset functionality with email notifications
   - User profile management
   - Automatic user creation on OAuth login
 
@@ -22,14 +23,16 @@ A robust Django REST API backend for CauseHive, a crowdfunding platform that ena
   - Secure payment processing via Paystack
   - Real-time donation tracking
   - Donation analytics and reporting
-  - Automated notifications
+  - Automated email notifications for successful donations
+  - Donation confirmation emails with receipt-style design
 
 - **Admin Dashboard**
   - Comprehensive admin interface
   - Real-time analytics and charts
-  - Cause approval workflow
+  - Cause approval workflow with email notifications
   - User and donation management
   - Custom notifications system
+  - Automatic email notifications for cause approval/rejection
 
 ### Technical Features
 - **Performance Optimized**
@@ -43,6 +46,13 @@ A robust Django REST API backend for CauseHive, a crowdfunding platform that ena
   - CORS configuration
   - Rate limiting
   - Input validation
+
+- **Email Notification System**
+  - 6 different email types with beautiful HTML templates
+  - Consistent CauseHive branding and green color scheme
+  - Responsive design for all email clients
+  - Automatic email sending for key user actions
+  - SMTP integration with error handling
 
 - **Monitoring & Analytics**
   - Real-time dashboard metrics
@@ -102,10 +112,14 @@ PAYSTACK_SECRET_KEY=sk_live_...
 GOOGLE_OAUTH2_CLIENT_ID=your-client-id
 GOOGLE_OAUTH2_SECRET=your-client-secret
 
-# Email
-EMAIL_HOST=smtp.gmail.com
-EMAIL_HOST_USER=your-email@gmail.com
+# Email Configuration
+EMAIL_HOST=smtp.zoho.com
+EMAIL_HOST_USER=your-email@domain.com
 EMAIL_HOST_PASSWORD=your-app-password
+EMAIL_USE_TLS=True
+EMAIL_PORT=587
+DEFAULT_FROM_EMAIL=CauseHive <no-reply@causehive.tech>
+SUPPORT_EMAIL=support@causehive.tech
 ```
 
 ### Database Configuration
@@ -187,6 +201,35 @@ EMAIL_HOST_PASSWORD=your-app-password
 - **Error Handling**: Comprehensive error handling for OAuth failures
 - **Production Ready**: HTTPS support and proper security measures
 
+## 📧 Email Notification System
+
+### Overview
+The CauseHive platform includes a comprehensive email notification system that sends beautifully designed HTML emails for various user actions and system events. All emails use a consistent design with the CauseHive branding and green color scheme.
+
+### Email Types
+1. **Account Verification Email** - Sent during user registration
+2. **Password Reset Email** - Sent when users request password reset
+3. **Donation Success Email** - Sent after successful donation processing
+4. **Withdrawal Processed Email** - Sent when withdrawal is completed
+5. **Cause Approval Email** - Sent to organizers when cause is approved
+6. **Cause Rejection Email** - Sent to organizers when cause is rejected
+
+### Features
+- **Professional HTML Design**: Responsive templates that work across all email clients
+- **Consistent Branding**: CauseHive logo and green color scheme throughout
+- **Automatic Sending**: Emails are triggered automatically by system events
+- **Error Handling**: Graceful handling of email delivery failures
+- **SMTP Integration**: Configurable SMTP settings for reliable delivery
+
+### Email Templates
+All email templates are located in `templates/email/` and include:
+- `verification_email.html` - Account verification
+- `password_reset_email.html` - Password reset
+- `donation_successful.html` - Donation confirmation
+- `withdrawal_processed.html` - Withdrawal confirmation
+- `cause_approved.html` - Cause approval notification
+- `cause_rejected.html` - Cause rejection notification
+
 ## 💳 Payment Integration
 
 ### Paystack Integration
@@ -249,9 +292,13 @@ EMAIL_HOST_PASSWORD=your-app-password
 ## 📱 API Endpoints
 
 ### Authentication
-- `POST /api/user/auth/signup/` - User registration
+- `POST /api/user/auth/signup/` - User registration (sends verification email)
 - `POST /api/user/auth/login/` - User login
 - `POST /api/user/auth/logout/` - User logout
+- `GET /api/user/auth/verify/{uid}/{token}/` - Verify email address
+- `POST /api/user/auth/resend-verification/` - Resend verification email
+- `POST /api/user/auth/password-reset/` - Request password reset (sends email)
+- `POST /api/user/auth/password-reset-confirm/` - Confirm password reset
 - `GET /api/user/google/url/` - Get Google OAuth URL
 - `GET /api/user/google/callback/` - Google OAuth callback (handles redirect)
 - `GET /api/user/profile/?access_token=TOKEN` - Get user profile with OAuth token
