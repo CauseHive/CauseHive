@@ -58,7 +58,7 @@ export function mapCauseListItem(input: unknown): CauseListItem {
     created_at: String(obj.created_at ?? ''),
     updated_at: String(obj.updated_at ?? ''),
     deadline: obj.deadline as string | undefined,
-  featured_image: (obj.featured_image as string | undefined) ?? (typeof (obj as Record<string, unknown>).cover_image === 'string' ? (obj as Record<string, unknown>).cover_image as string : undefined),
+    featured_image: (obj.featured_image as string | undefined) ?? (typeof (obj as Record<string, unknown>).cover_image === 'string' ? (obj as Record<string, unknown>).cover_image as string : undefined),
     donation_count: toNumber(obj.donation_count, 0),
     is_featured: Boolean(obj.is_featured),
     organizer_id: organizerId
