@@ -42,7 +42,7 @@ export function CausesPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['causes', { page, search, category }],
     queryFn: async () => {
-      const { data } = await api.get<Pagination<CauseListItem>>('/causes/list/', {
+      const { data } = await api.get<Pagination<CauseListItem>>('/causes/', {
         params: {
           page,
           search: search || undefined,

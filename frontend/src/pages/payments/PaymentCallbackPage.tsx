@@ -18,12 +18,12 @@ export function PaymentCallbackPage() {
     }
     (async () => {
       try {
-        const { data } = await api.get<{ status?: string }>(`/payments/verify/${reference}/`)
-        const status = data?.status
-        if (status === 'completed' || status === 'success') {
+        const { data } = await api.get<{ status?: boolean; message?: string; data?: { status?: string } }>(`/payments/verify/${reference}/`)
+        const status = data?.data?.status
+        if (data?.status && (status === 'success' || status === 'completed')) {
           notify({ title: 'Payment verified', variant: 'success' })
         } else {
-          notify({ title: 'Payment status', description: status || 'Unknown', variant: 'default' })
+          notify({ title: 'Payment status', description: status || data?.message || 'Unknown', variant: 'default' })
         }
         navigate('/donations', { replace: true })
       } catch (e: unknown) {

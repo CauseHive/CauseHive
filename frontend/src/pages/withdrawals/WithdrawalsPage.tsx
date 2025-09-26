@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
@@ -9,9 +9,7 @@ import { Pagination as UIPagination } from '@/components/ui/pagination'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/components/ui/toast'
 import { api } from '@/lib/api'
-import type { Pagination, Withdrawal, CauseListItem } from '@/types/api'
-import { mapCauseListItem, mapPagination } from '@/lib/mappers'
-import { authStore } from '@/lib/auth'
+import type { Pagination, Withdrawal } from '@/types/api'
 import { Empty } from '@/components/ui/empty'
 
 export function WithdrawalsPage() {
@@ -27,11 +25,9 @@ export function WithdrawalsPage() {
     amount: number
     withdrawal_method: WithdrawalMethod
     account_details: BankDetails | MoMoDetails
-    cause_id: string
   }
 
   const [amount, setAmount] = useState<number>(100)
-  const [causeId, setCauseId] = useState<string>('')
   const [method, setMethod] = useState<WithdrawalMethod>('bank_transfer')
   const [accountNumber, setAccountNumber] = useState('')
   const [bankCode, setBankCode] = useState('')
@@ -47,36 +43,8 @@ export function WithdrawalsPage() {
     }
   })
 
-  const { data: ownedCauses } = useQuery({
-    queryKey: ['withdrawal-owned-causes'],
-    queryFn: async () => {
-      const { data } = await api.get<Pagination<CauseListItem>>('/causes/list/', { params: { page_size: 100 } })
-      return mapPagination(data, mapCauseListItem)
-    }
-  })
-
-  const user = authStore.getUser()
-  const availableCauses = useMemo(() => {
-    if (!ownedCauses || !user) return [] as CauseListItem[]
-    return ownedCauses.results.filter((cause) => {
-      const organizer = cause.organizer_id || (cause as unknown as { organizer_id?: string }).organizer_id
-      if (organizer) return String(organizer) === user.id
-      return cause.creator?.id ? cause.creator.id === user.id : false
-    })
-  }, [ownedCauses, user?.id])
-
-  useEffect(() => {
-    if (!causeId && availableCauses.length > 0) {
-      const first = availableCauses[0]
-      if (first?.id) setCauseId(first.id)
-    }
-  }, [availableCauses, causeId])
-
   const requestWithdrawal = useMutation({
     mutationFn: async () => {
-      if (!causeId) {
-        throw new Error('Select a cause before requesting a withdrawal')
-      }
       const payload: WithdrawalRequest =
         method === 'bank_transfer'
           ? {
@@ -86,8 +54,7 @@ export function WithdrawalsPage() {
                 bank_code: bankCode,
                 account_number: accountNumber,
                 account_name: accountName
-              },
-              cause_id: causeId
+              }
             }
           : {
               amount,
@@ -95,10 +62,9 @@ export function WithdrawalsPage() {
               account_details: {
                 phone_number: moMoPhone,
                 provider: moMoProvider as MoMoDetails['provider']
-              },
-              cause_id: causeId
+              }
             }
-      const { data } = await api.post('/withdrawals/', payload)
+      const { data } = await api.post('/withdrawals/request/', payload)
       return data as unknown
     },
     onSuccess: () => {
@@ -115,14 +81,6 @@ export function WithdrawalsPage() {
 
       <div className="rounded-lg border p-4 space-y-3 bg-white dark:bg-slate-900">
         <div className="grid sm:grid-cols-2 gap-3">
-          <label className="text-sm sm:col-span-2">Cause
-            <select className="w-full rounded-md border bg-transparent p-2" value={causeId} onChange={(e)=> setCauseId(e.target.value)}>
-              <option value="">Select a cause to withdraw from</option>
-              {availableCauses.map((cause) => (
-                <option key={cause.id} value={cause.id}>{cause.title}</option>
-              ))}
-            </select>
-          </label>
           <label className="text-sm">Amount (GHS)
             <Input type="number" min={1} value={amount} onChange={(e)=> setAmount(Number(e.target.value))} />
           </label>
@@ -163,7 +121,7 @@ export function WithdrawalsPage() {
             </>
           )}
         </div>
-        <Button onClick={()=> requestWithdrawal.mutate()} disabled={requestWithdrawal.isPending || !causeId}>
+        <Button onClick={()=> requestWithdrawal.mutate()} disabled={requestWithdrawal.isPending}>
           {requestWithdrawal.isPending? 'Submitting…':'Request withdrawal'}
         </Button>
       </div>

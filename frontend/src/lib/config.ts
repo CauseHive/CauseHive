@@ -24,7 +24,7 @@ export interface AppRuntimeConfig {
 }
 
 // Build-time values
-const defaultProdApiBase = 'https://causehive.railway.app/api'
+const defaultProdApiBase = 'https://causehive-monolithic-production.up.railway.app/api'
 
 const buildConfig: Partial<AppRuntimeConfig> = {
 	apiBaseUrl: import.meta.env.VITE_API_BASE_URL || (isDev ? '/api' : defaultProdApiBase),

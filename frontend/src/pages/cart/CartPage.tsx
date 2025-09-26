@@ -10,21 +10,21 @@ export function CartPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['cart'],
     queryFn: async () => {
-  const { data } = await api.get<CartSummary>('/cart/')
-  return mapCartSummary(data)
+      const { data } = await api.get<CartSummary>('/cart/')
+      return mapCartSummary(data)
     }
   })
 
   const updateItem = useMutation({
-    mutationFn: async ({ id, amount }: { id: string; amount: number }) => api.patch(`/cart/update/${id}/`, { amount, ...(data?.cart_id ? { cart_id: data.cart_id } : {}) }),
+    mutationFn: async ({ id, amount }: { id: string; amount: number }) => api.patch(`/cart/${id}/`, { amount, ...(data?.cart_id ? { cart_id: data.cart_id } : {}) }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cart'] })
   })
   const removeItem = useMutation({
-    mutationFn: async (id: string) => api.delete(`/cart/remove/${id}/`, { params: data?.cart_id ? { cart_id: data.cart_id } : undefined }),
+    mutationFn: async (id: string) => api.delete(`/cart/${id}/`, { params: data?.cart_id ? { cart_id: data.cart_id } : undefined }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cart'] })
   })
   const clearCart = useMutation({
-    mutationFn: async () => api.delete('/cart/delete/', { params: data?.cart_id ? { cart_id: data.cart_id } : undefined }),
+    mutationFn: async () => api.delete('/cart/clear/', { params: data?.cart_id ? { cart_id: data.cart_id } : undefined }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['cart'] })
   })
 

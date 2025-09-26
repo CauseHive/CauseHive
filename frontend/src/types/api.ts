@@ -85,7 +85,13 @@ export type Donation = {
 }
 
 export type PaymentInitResponse = {
-  authorization_url: string
+  status: boolean
+  message: string
+  data: {
+    authorization_url: string
+    access_code: string
+    reference: string
+  }
 }
 
 export type Notification = {

@@ -43,7 +43,7 @@ export function HomePage() {
   const { data: featured } = useQuery<CauseItem[]>({
     queryKey: ['home-featured-causes'],
     queryFn: async () => {
-      const { data } = await api.get('/causes/list/', { params: { status: 'live', ordering: '-created_at', page_size: 6 } })
+      const { data } = await api.get('/causes/', { params: { status: 'live', ordering: '-created_at', page_size: 6 } })
       return Array.isArray(data?.results) ? data.results.slice(0, 6).map(mapCauseListItem) as CauseItem[] : []
     }
   })
@@ -51,14 +51,14 @@ export function HomePage() {
   const { data: causesForAgg } = useQuery<CauseItem[]>({
     queryKey: ['home-causes-agg'],
     queryFn: async () => {
-      const { data } = await api.get('/causes/list/', { params: { status: 'live', ordering: '-created_at', page_size: 50 } })
+      const { data } = await api.get('/causes/', { params: { status: 'live', ordering: '-created_at', page_size: 50 } })
       return Array.isArray(data?.results) ? data.results.map(mapCauseListItem) as CauseItem[] : []
     }
   })
   const { data: liveCausesCount } = useQuery<number>({
     queryKey: ['home-live-causes-count'],
     queryFn: async () => {
-      const { data } = await api.get('/causes/list/', { params: { status: 'live', page_size: 1 } })
+      const { data } = await api.get('/causes/', { params: { status: 'live', page_size: 1 } })
       return Number(data?.count ?? 0)
     }
   })

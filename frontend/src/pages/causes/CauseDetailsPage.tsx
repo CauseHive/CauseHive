@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/components/ui/toast'
-import { authStore } from '@/lib/auth'
 
 export function CauseDetailsPage() {
   const { id } = useParams<{ id: string }>()
@@ -18,7 +17,7 @@ export function CauseDetailsPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['cause', id],
     queryFn: async () => {
-      const { data } = await api.get<CauseDetails>(`/causes/details/${id}/`)
+      const { data } = await api.get<CauseDetails>(`/causes/${id}/`)
       return data
     }
   })
@@ -28,19 +27,17 @@ export function CauseDetailsPage() {
       // 1) Create donation
       const { data: donation } = await api.post('/donations/', { cause_id: id, amount })
       // 2) Initialize payment
-      const user = authStore.getUser()
-      const { data: pay } = await api.post<PaymentInitResponse>('/payments/initiate/', {
+      const { data: pay } = await api.post<PaymentInitResponse>('/payments/initialize/', {
         donation_id: donation.id,
         amount,
         email: donation.donor?.email,
-        user_id: user?.id,
         callback_url: window.location.origin + '/payment/callback'
       })
       return pay
     },
     onSuccess: (res) => {
-      const url = res.authorization_url
-      if (url) {
+      const url = res.data?.authorization_url
+      if (res.status && url) {
         window.location.href = url
       } else {
         notify({ title: 'Payment initialization incomplete' })
