@@ -61,7 +61,7 @@ export const router = createBrowserRouter([
       { path: 'notifications', element: <Navigate to="/app/notifications" replace /> },
       { path: 'withdrawals', element: <Navigate to="/app/withdrawals" replace /> },
 
-      // Authenticated app area with sidebar
+      // Authenticated app area with sidebar and yes
       { path: 'app', element: (
         <ProtectedRoute>
           <UserLayout />
