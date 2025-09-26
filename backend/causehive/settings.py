@@ -82,6 +82,7 @@ AUTH_USER_MODEL = 'users_n_auth.User'
 
 # Account settings for allauth
 ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 EMAIL_VERIFICATION = 'optional'
 ACCOUNT_UNIQUE_EMAIL = True
