@@ -1,0 +1,15 @@
+{
+  "short_name": "CauseHive",
+  "name": "CauseHive - Donate and manage causes",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5a4"
+}

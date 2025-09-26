@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Search, Mail, MessageCircle, Phone, Book, FileText, AlertCircle, CheckCircle, User, CreditCard, Plus } from 'lucide-react';
-import React, { useMemo } from 'react';
-import { Search, AlertCircle } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
@@ -47,90 +45,9 @@ const FaqItem = ({ question, answer, categoryLabel }) => (
 const HelpSupportPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [formState, setFormState] = useState({ subject: '', category: '', message: '' });
 
-  const supportCategories = [
-    { id: 'all', label: 'All Topics', icon: Book },
-    { id: 'account', label: 'Account & Profile', icon: User },
-    { id: 'donations', label: 'Donations & Payments', icon: CreditCard },
-    { id: 'causes', label: 'Creating Causes', icon: Plus },
-    { id: 'technical', label: 'Technical Issues', icon: AlertCircle },
-  ];
-
-  const faqItems = [
-    {
-      id: 1,
-      category: 'account',
-      question: 'How do I update my profile information?',
-      answer: 'Go to Settings > Profile to update your personal information, profile picture, and account preferences.'
-    },
-    {
-      id: 2,
-      category: 'donations',
-      question: 'How do I make a donation?',
-      answer: 'Browse causes, click on one you want to support, enter your donation amount, and follow the secure payment process.'
-    },
-    {
-      id: 3,
-      category: 'donations',
-      question: 'What payment methods do you accept?',
-      answer: 'We accept major credit cards, debit cards, and bank transfers through our secure payment processor Paystack.'
-    },
-    {
-      id: 4,
-      category: 'causes',
-      question: 'How do I create a new cause?',
-      answer: 'Click "Create Cause" in the sidebar, fill out the detailed form with your cause information, upload images, and submit for admin approval.'
-    },
-    {
-      id: 5,
-      category: 'causes',
-      question: 'How long does cause approval take?',
-      answer: 'Cause approval typically takes 1-3 business days. You\'ll receive an email notification once your cause is reviewed.'
-    },
-    {
-      id: 6,
-      category: 'account',
-      question: 'How do I change my password?',
-      answer: 'Go to Settings > Security to change your password. You\'ll need to enter your current password first.'
-    },
-    {
-      id: 7,
-      category: 'technical',
-      question: 'The website is running slowly. What should I do?',
-      answer: 'Try refreshing the page, clearing your browser cache, or using a different browser. Contact support if issues persist.'
-    },
-    {
-      id: 8,
-      category: 'donations',
-      question: 'Can I get a receipt for my donation?',
-      answer: 'Yes! You can download receipts from your Dashboard > Donation History or check your email for automatic receipts.'
-    }
-  ];
-
-  const contactOptions = [
-    {
-      title: 'Email Support',
-      description: 'Get help via email within 24 hours',
-      icon: Mail,
-      action: 'support@causehive.com',
-      color: 'bg-blue-50 text-blue-700'
-    },
-    {
-      title: 'Live Chat',
-      description: 'Chat with our support team',
-      icon: MessageCircle,
-      action: 'Start Chat',
-      color: 'bg-green-50 text-green-700'
-    },
-    {
-      title: 'Phone Support',
-      description: 'Call us during business hours',
-      icon: Phone,
-      action: '+1 (555) 123-4567',
-      color: 'bg-purple-50 text-purple-700'
-    }
-  ];
+  // use the centralized data imported from src/data/help-support-data.js
+  // imported variables: supportCategories, faqItems, contactOptions, additionalResources
 
   const filteredFAQs = faqItems.filter(item => {
     const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;

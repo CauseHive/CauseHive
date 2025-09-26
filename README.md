@@ -173,12 +173,12 @@ python manage.py createsuperuser
 
 6. **Start Celery Worker** (separate terminal):
    ```bash
-   celery -A causehive_monolith worker -l info
+   celery -A causehive worker -l info
    ```
 
 7. **Start Celery Beat** (separate terminal):
    ```bash
-   celery -A causehive_monolith beat -l info
+   celery -A causehive beat -l info
    ```
 
 ## 📡 API Endpoints
@@ -312,3 +312,26 @@ This project is licensed under the MIT License.
 ---
 
 **CauseHive Monolith** - Combining microservices for simplified deployment while maintaining data isolation 🚀
+
+
+## CI/CD and Deployment
+
+This repository includes production-ready artifacts:
+
+- Frontend Dockerfile at `frontend/Dockerfile` (builds Vite app and serves via Nginx)
+- Backend Dockerfile at `backend/Dockerfile` (Django served by Gunicorn)
+- CI workflow `.github/workflows/ci.yml` to lint/test/build both apps on push/PR
+- Deploy workflow `.github/workflows/deploy-aca.yml` to deploy images to Azure Container Apps
+
+Required GitHub Actions secrets (Repository → Settings → Secrets and variables → Actions):
+
+- AZURE_CREDENTIALS (JSON from `az ad sp create-for-rbac --sdk-auth`)
+- AZURE_SUBSCRIPTION_ID, AZURE_RESOURCE_GROUP, AZURE_ACA_ENVIRONMENT
+- AZURE_ACR_NAME, AZURE_ACR_USERNAME, AZURE_ACR_PASSWORD
+- VITE_API_BASE_URL (e.g., <https://api.causehive.tech/api>)
+- DJANGO_SECRET_KEY, ALLOWED_HOSTS, FRONTEND_URL, BACKEND_URL, DATABASE_URL
+- REDIS_HOST, REDIS_PORT, CELERY_BROKER_URL, CELERY_RESULT_BACKEND
+- PAYSTACK_PUBLIC_KEY, PAYSTACK_SECRET_KEY
+- GOOGLE_OAUTH2_CLIENT_ID, GOOGLE_OAUTH2_SECRET
+
+To deploy: trigger the "Deploy to Azure Container Apps" workflow, providing an imageTag (e.g., a commit SHA) and environment name.

@@ -1,70 +1,221 @@
-# Getting Started with Create React App
+# CauseHive Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React + Vite + TypeScript app with Tailwind, React Router, React Query.
 
-## Available Scripts
+## Env
 
-In the project directory, you can run:
+Create `.env` (or `.env.local`):
 
-### `npm start`
+```bash
+VITE_API_BASE_URL=http://127.0.0.1:9000/api
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Production example (`env.production`):
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```bash
+VITE_API_BASE_URL=https://api.yourdomain.com/api
+```
 
-### `npm test`
+## Scripts
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- dev: start dev server
+- build: production build
+- preview: preview production build
 
-### `npm run build`
+## Notes
+- Authentication uses JWT (login returns access/refresh). Tokens are stored in localStorage.
+- API endpoints are based on backend `API_DOCUMENTATION.md`.
+- Update the base URL as needed for production.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## UX & performance features
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Route lazy-loading with Suspense fallbacks using a shared `LoadingScreen` for consistent UX.
+- Route-level error boundary (`RouteErrorBoundary`) plus a global `ErrorBoundary` wrapper to catch non-route render errors.
+- Top navigation progress bar via `nprogress`, driven by React Router transition state; theme overridden in `src/index.css`.
+- Smooth scroll-to-top after each completed navigation for better page-perception.
+- Module prefetch for common routes (Causes, Donations, Profile) after app mount via `prefetchRoutes`.
+- Retryable lazy imports with `lazyWithRetry` to mitigate transient dynamic import failures.
+- Global toast notifications and React Query global error handlers for network/operation feedback.
+- 404 route: `NotFoundPage` is lazy-loaded and registered under `*`.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Customization points
 
-### `npm run eject`
+- Progress bar color: adjust CSS in `src/index.css` under the `#nprogress` rules.
+- Prefetch targets: edit `src/lib/prefetchRoutes.ts` to add/remove modules you want to warm up.
+- Lazy import retry behavior: tweak retries/delay in `src/lib/lazyWithRetry.ts`.
+- Error UIs: update copy and styles in `src/routes/RouteErrorBoundary.tsx` and `src/components/common/ErrorBoundary.tsx`.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Bundle analysis (optional)
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+We ship optional bundle analysis using `rollup-plugin-visualizer`. Enable it per-build.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Windows PowerShell:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```powershell
+$env:ANALYZE = "1"
+npm run build
+Remove-Item Env:ANALYZE
+```
 
-## Learn More
+Then open `dist/stats.html` in your browser.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## File map (key items)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- `src/routes/router.tsx` — lazy routes, Suspense fallbacks, route error element.
+- `src/components/ui/loading-screen.tsx` — shared route loading UI.
+- `src/components/common/ErrorBoundary.tsx` — global error boundary wrapper.
+- `src/components/layout/AppLayout.tsx` — header/nav, nprogress integration, smooth scroll restore.
+- `src/lib/prefetchRoutes.ts` — module preloading for common routes.
+- `src/lib/lazyWithRetry.ts` — retry wrapper for dynamic imports.
+- `src/lib/api.ts` — axios client with auth header injection and safe retry header handling.
 
-### Code Splitting
+## Deployment Guide
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### Netlify Hosting (Recommended for static SPA)
 
-### Analyzing the Bundle Size
+1. Set site base directory to `frontend/` (if deploying from monorepo) and publish directory to `frontend/dist`.
+2. Build command: `npm run build` (Netlify will run `npm install` automatically).
+3. Add environment variables in Netlify UI (Site Settings → Build & Deploy → Environment):
+   - `VITE_API_BASE_URL` = `https://api.yourdomain.com/api`
+   - `VITE_SENTRY_DSN` (optional)
+   - (Optional) If you want dynamic config.json, skip VITE_ vars and instead generate a file in a post-build command.
+4. Include the provided `netlify.toml` (already added) to handle:
+   - SPA fallback (all routes → `index.html`)
+   - Security headers & CSP
+   - Immutable caching for hashed assets (`/assets/*`)
+   - No-cache for HTML / service worker / health page
+5. (Optional) Runtime config approach:
+   - Add a command after build: `echo '{"apiBaseUrl":"'$API_BASE_URL'","environment":"production"}' > dist/config.json`
+   - Remove `VITE_API_BASE_URL` so build-time constant isn’t baked in.
+6. Verify health page at `<your-site>/health` or `<your-site>/health.html`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Backend CORS reminder: add your Netlify domain (e.g. `https://your-site.netlify.app`) or custom domain to the backend environment variable `CORS_ALLOWED_EXTRA`.
 
-### Making a Progressive Web App
+If using a custom domain via Netlify, ensure DNS + HTTPS is active before rolling out clients; otherwise early 308/redirects might affect first-load metrics.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### 1. Build
 
-### Advanced Configuration
+Local production build:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```bash
+npm ci
+npm run build
+```
 
-### Deployment
+Artifacts output to `dist/`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### 2. Docker Image
 
-### `npm run build` fails to minify
+The provided `Dockerfile` performs a multi‑stage build (Node 20 -> nginx). Build & run:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```bash
+docker build -t causehive-frontend --build-arg VITE_API_BASE_URL=https://api.yourdomain.com/api .
+docker run -p 8080:80 causehive-frontend
+```
+
+Visit <http://localhost:8080>
+
+### 3. Environment Variables
+
+Set `VITE_API_BASE_URL` at build time for static embedding. If you need runtime configurability (e.g., same image across environments), you can inject a `/config.json` fetched at app start; see "Runtime Config" below.
+
+### 4. Reverse Proxy / TLS
+
+Recommended to front nginx container with a TLS terminator (e.g., Caddy, Traefik, or nginx ingress). Sample Caddyfile:
+
+```caddyfile
+app.yourdomain.com {
+	reverse_proxy 127.0.0.1:8080
+}
+```
+
+### 5. Cache Strategy
+
+The Dockerfile sets long‑term caching for hashed JS/CSS and short cache for HTML. If you introduce non‑hashed assets, adjust `nginx` rules to avoid serving stale versions.
+
+### 6. Health Check
+
+Add a container health check (compose example):
+
+```yaml
+healthcheck:
+  test: ["CMD", "wget", "-qO-", "http://localhost/index.html"]
+  interval: 30s
+  timeout: 3s
+  retries: 3
+```
+
+### 7. Runtime Config (Optional)
+
+If you need to change API base without rebuilding, serve a `/config.json` and load before app mount:
+
+1. Place `config.template.json` in image and copy to `/usr/share/nginx/html/config.json` via entrypoint.
+2. Replace tokens using envsubst in an entrypoint shell script.
+3. Read it in `src/main.tsx` before rendering (fetch + assign to a window global).
+
+### 8. Security Headers
+
+The nginx config sets baseline security headers and a conservative CSP. If you add external CDNs, update the CSP `script-src`, `style-src`, or `img-src` directives accordingly.
+
+### 9. Observability
+
+Add basic access/error logging collection by binding `/var/log/nginx` or forwarding logs to structured logging stack (ELK, Loki). Frontend errors can be captured by adding a global `window.onerror` reporter tied to your backend or a service (Sentry, etc.).
+
+### 10. CI/CD Outline
+
+1. Lint & test: `npm ci && npm run lint && npm test`
+2. Build: `npm run build`
+3. Docker build & push: tag with commit SHA
+4. Deploy: update service (Kubernetes / container app / VM) and run a smoke test hitting `/`.
+
+## Checklist Before Deploy
+
+- [x] API base URL set via build ARG or env file
+- [x] Backend CORS allows your frontend origin
+- [x] Tokens stored securely (localStorage — consider future migration to HttpOnly cookies if threat model changes)
+- [x] 404 fallback verified (direct refresh on nested route works)
+- [x] Long‑term asset caching validated (hashes present in filenames)
+- [x] CSP updated for any external fonts, analytics, or media domains
+- [x] Health endpoint or simple GET `/` check integrated into deployment pipeline
+
+## Next Hardening Steps (Optional)
+
+- Introduce SRI hashes if serving any third‑party scripts.
+- Add a service worker for offline shell & pre‑cache (Workbox) if needed.
+- Implement runtime configuration loader if multiple environments share one image.
+- Add internationalization layer if future multilingual support planned.
+
+## SEO & Favicon
+
+Replace the placeholder `public/logo.png` and `public/favicon.ico` with your brand assets before deploy.
+
+Quick checklist:
+
+- Update `index.html` meta description, OG tags and Twitter tags to match your copy.
+- Replace `/logo.png` with a 512x512 PNG or SVG and `/favicon.ico` with a standard ICO (multi-size). The app references these from the root.
+- Update `public/sitemap.xml` with your canonical domain or generate it during CI with a script.
+- Verify `public/robots.txt` allows crawlers and points to your sitemap.
+
+
+## Runtime Configuration
+
+The app attempts to fetch `/config.json` on startup before mounting. Any keys here override build‑time `VITE_` values. Example `public/config.example.json`:
+
+```json
+{
+  "apiBaseUrl": "/api",
+  "environment": "production",
+  "sentryDsn": "https://example.ingest.sentry.io/123456",
+  "enableRQDevtools": false
+}
+```
+
+Serve a different `config.json` per environment without rebuilding the image.
+
+## Sentry Integration
+
+Provide `VITE_SENTRY_DSN` at build time or via `config.json` to enable Sentry. Without a DSN the code path is tree‑shaken (dynamic import never runs).
+
+## Service Worker
+
+A minimal `service-worker.js` provides an offline shell for `index.html` + `health.html`. Expand with Workbox if you need smarter runtime caching or version management. To disable offline behavior simply remove the registration block in `src/main.tsx`.

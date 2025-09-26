@@ -1,0 +1,14 @@
+node_modules
+dist
+.vite
+.vscode
+*.log
+.DS_Store
+**/.env*
+coverage
+stats.html
+*.tsbuildinfo
+*.local
+__tests__
+*.md
+!README.md

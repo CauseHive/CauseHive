@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" fill="#33CC33"/>
+  <g fill="white">
+    <!-- Main figure (left) -->
+    <path d="M8 24c0-2 1-4 3-5l2-1c1-1 2-2 2-3 0-1-1-2-2-2s-2 1-2 2l-2 1c-1 1-2 2-2 3v2z"/>
+    <!-- Middle figure -->
+    <path d="M12 20c0-1 1-2 2-2l1-1c1-1 1-2 1-3 0-1-1-1-2-1s-1 1-1 2l-1 1c-1 1-1 2-1 3v1z"/>
+    <!-- Small figure -->
+    <path d="M15 18c0-1 1-1 1-1l1-1c0-1 0-1 0-2 0-1-1-1-1-1s-1 0-1 1l-1 1c0 1 0 1 0 2v1z"/>
+  </g>
+  <text x="16" y="28" font-family="Arial, sans-serif" font-size="6" font-weight="bold" text-anchor="middle" fill="white">CH</text>
+</svg>
