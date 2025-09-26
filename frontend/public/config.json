@@ -1,5 +1,5 @@
 {
-  "apiBaseUrl": "/api",
+  "apiBaseUrl": "https://causehive-monolithic-production.up.railway.app/api",
   "environment": "production",
   "enableRQDevtools": false
 }

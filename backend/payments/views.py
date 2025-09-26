@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 
-from donations.tasks import publish_donation_completed_event
+from donations.tasks import publish_donation_completed_event, send_donation_success_notification
 
 from .models import PaymentTransaction
 from .paystack import Paystack
@@ -63,10 +63,22 @@ class VerifyPaymentView(APIView):
                     payment.status = 'completed'
                     payment.save()
 
+
                     if payment.donation:
                         # Update donation status
                         payment.donation.status = 'completed'
                         payment.donation.save()
+
+                        # Get email from payment data or donation user
+                        donor_email = None
+                        if payment.donation.user_id:
+                            donor_email = payment.donation.user_id.email
+                        else:
+                            donor_email = data.get('customer', {}).get('email')
+
+                        if donor_email:
+                            # Send donation success email
+                            send_donation_success_notification(payment.donation.id, donor_email)
 
                         # Call task with proper parameters
                         publish_donation_completed_event.delay(

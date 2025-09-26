@@ -381,6 +381,7 @@ def checkout(request):
                 transaction_id=data['reference'],
                 status='pending',
                 payment_method='Paystack',
+                email=user_email,
             )
 
             # Mark cart as completed
@@ -520,6 +521,7 @@ def donate(request):
             transaction_id=data['reference'],
             status='pending',
             payment_method='Paystack',
+            email=user_email,
         )
 
         # Cleanup cart

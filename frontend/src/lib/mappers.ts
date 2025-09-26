@@ -31,6 +31,15 @@ export function mapCauseListItem(input: unknown): CauseListItem {
   const current = toNumber(obj.current_amount, 0)
   const rawProgress = typeof obj.progress_percentage === 'number' ? (obj.progress_percentage as number) : (target > 0 ? (current / target) * 100 : 0)
   const creator = (obj.creator ?? {}) as Record<string, unknown>
+  const organizerId = (() => {
+    const raw = obj.organizer_id
+    if (typeof raw === 'string') return raw
+    if (typeof raw === 'object' && raw !== null && 'id' in (raw as Record<string, unknown>)) {
+      const maybeId = (raw as Record<string, unknown>).id
+      if (typeof maybeId === 'string') return maybeId
+    }
+    return undefined
+  })()
   const maybeTitle = typeof obj.title === 'string' ? obj.title : (typeof obj.name === 'string' ? obj.name : '')
   return {
     id: String(obj.id ?? ''),
@@ -49,9 +58,10 @@ export function mapCauseListItem(input: unknown): CauseListItem {
     created_at: String(obj.created_at ?? ''),
     updated_at: String(obj.updated_at ?? ''),
     deadline: obj.deadline as string | undefined,
-  featured_image: (obj.featured_image as string | undefined) ?? (typeof (obj as Record<string, unknown>).cover_image === 'string' ? (obj as Record<string, unknown>).cover_image as string : undefined),
+    featured_image: (obj.featured_image as string | undefined) ?? (typeof (obj as Record<string, unknown>).cover_image === 'string' ? (obj as Record<string, unknown>).cover_image as string : undefined),
     donation_count: toNumber(obj.donation_count, 0),
-    is_featured: Boolean(obj.is_featured)
+    is_featured: Boolean(obj.is_featured),
+    organizer_id: organizerId
   }
 }
 

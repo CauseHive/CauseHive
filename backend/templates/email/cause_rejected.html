@@ -1,0 +1,96 @@
+{% load humanize tz %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>Your cause was rejected</title>
+</head>
+<body style="margin:0; padding:0; background:#f5f7fb;">
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+    Your cause has been rejected.
+  </div>
+
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f5f7fb;">
+    <tr>
+      <td align="center" style="padding:24px 12px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px;">
+          <tr>
+            <td align="center" style="padding:16px 20px;">
+              <table role="presentation" width="100%" style="background:#2ac343; border-radius:10px;">
+                <tr>
+                  <td align="center" style="padding:18px;">
+                    <img src="https://causehive.app/logo.png" width="120" alt="CauseHive" style="display:block; border:0; outline:none;">
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 20px;">
+              <table role="presentation" width="100%" style="background:#ffffff; border-radius:10px; border:1px solid #e6e9ef;">
+                <tr>
+                  <td style="padding:28px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif; color:#1b1b1b;">
+                    <h1 style="margin:0 0 10px; font-size:22px; font-weight:700;">Your cause was rejected</h1>
+                    <p style="margin:0 0 16px; font-size:15px;">Hi {{ organizer_name|default:"there" }},</p>
+                    <p style="margin:0 0 16px; font-size:15px;">
+                      We regret to inform you that your cause <strong>{{ cause_name }}</strong> has been rejected and will not be published on CauseHive.
+                    </p>
+
+                    <table role="presentation" width="100%" style="margin:12px 0 6px; border-collapse:collapse;">
+                      <tr>
+                        <td style="padding:6px 0; font-size:14px; color:#3a3a3a;">Cause name</td>
+                        <td align="right" style="padding:6px 0; font-size:14px; color:#1b1b1b; font-weight:600;">
+                          {{ cause_name }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:6px 0; font-size:14px; color:#3a3a3a;">Target amount</td>
+                        <td align="right" style="padding:6px 0; font-size:14px; color:#1b1b1b; font-weight:600;">
+                          {{ currency|default:"₵" }}{{ target_amount }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:6px 0; font-size:14px; color:#3a3a3a;">Category</td>
+                        <td align="right" style="padding:6px 0; font-size:14px; color:#1b1b1b; font-weight:600;">
+                          {{ category_name }}
+                        </td>
+                      </tr>
+                    </table>
+
+                    {% if rejection_reason %}
+                    <div style="background:#f8f9fa; border-left:4px solid #dc3545; padding:12px 16px; margin:16px 0; border-radius:4px;">
+                      <p style="margin:0 0 8px; font-size:14px; font-weight:600; color:#dc3545;">Reason for rejection:</p>
+                      <p style="margin:0; font-size:14px; color:#3a3a3a;">{{ rejection_reason }}</p>
+                    </div>
+                    {% endif %}
+
+                    <div style="text-align:center; margin:18px 0 0;">
+                      <a href="{{ create_new_cause_url|default:'#' }}" target="_blank" style="display:inline-block; background:#20a836; color:#ffffff; border-radius:6px; padding:12px 20px; font-size:15px; font-weight:700; text-decoration:none;">
+                        Create new cause
+                      </a>
+                    </div>
+
+                    <p style="margin:16px 0 0; font-size:13px; color:#5e6d7a;">
+                      You can review the feedback above and submit a new cause if needed. We're here to help you create a successful campaign.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:16px 20px 32px 20px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif; color:#6b7a88; font-size:12px;">
+              © {{ now|date:"Y" }} CauseHive ·
+              <a href="{{ support_email|default:'support@causehive.app' }}" style="color:#6b7a88; text-decoration:underline;">Support</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

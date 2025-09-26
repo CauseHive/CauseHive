@@ -1,4 +1,7 @@
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import type { AxiosError } from 'axios'
+
 import { api } from '@/lib/api'
 import type { Pagination, CauseListItem, Category } from '@/types/api'
 import { mapCategory, mapCauseListItem, mapPagination } from '@/lib/mappers'
@@ -20,11 +23,19 @@ export function CausesPage() {
   const search = params.get('search') ?? ''
   const category = params.get('category') ?? ''
 
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
+  const { data: categories, isLoading: categoriesLoading, error: categoriesError } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const { data } = await api.get<Pagination<Category>>('/categories/')
-      return Array.isArray(data?.results) ? data.results.map(mapCategory) : []
+      try {
+        const { data } = await api.get<Pagination<Category>>('/categories/')
+        return Array.isArray(data?.results) ? data.results.map(mapCategory) : []
+      } catch (err) {
+        const axiosErr = err as AxiosError
+        if (axiosErr.response?.status === 404) {
+          return []
+        }
+        throw err
+      }
     }
   })
 
@@ -43,6 +54,27 @@ export function CausesPage() {
       return mapPagination(data, mapCauseListItem)
     }
   })
+
+  const derivedCategories = useMemo(() => {
+    if (categories && categories.length > 0) return categories
+    const list = data?.results ?? []
+    const map = new Map<string, Category>()
+    list.forEach((cause) => {
+      const cat = cause.category
+      if (!cat?.id) return
+      if (!map.has(cat.id)) {
+        map.set(cat.id, {
+          id: cat.id,
+          name: cat.name,
+          description: cat.description,
+          icon: cat.icon,
+          color: cat.color,
+          cause_count: undefined
+        })
+      }
+    })
+    return Array.from(map.values())
+  }, [categories, data?.results])
 
   const onSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -72,10 +104,10 @@ export function CausesPage() {
 
       <div className="flex gap-3 overflow-x-auto">
         <button onClick={()=>{const p=new URLSearchParams(params);p.delete('category');p.set('page','1');setParams(p)}} className={`px-3 py-1 rounded-full border ${!category? 'bg-emerald-600 text-white border-emerald-600':'border-slate-300'}`}>All</button>
-        {categoriesLoading && Array.from({ length: 6 }).map((_, i) => (
+        {(categoriesLoading && !categoriesError) && Array.from({ length: 6 }).map((_, i) => (
           <Skeleton key={i} className="h-8 w-24 rounded-full" />
         ))}
-        {categories?.map(c => (
+        {derivedCategories.map(c => (
           <button key={c.id} onClick={()=>{const p=new URLSearchParams(params);p.set('category', String(c.id));p.set('page','1');setParams(p)}} className={`px-3 py-1 rounded-full border ${String(c.id)===category? 'bg-emerald-600 text-white border-emerald-600':'border-slate-300'}`}>{c.name}</button>
         ))}
       </div>

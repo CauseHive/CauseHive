@@ -49,6 +49,7 @@ export type CauseListItem = {
   featured_image?: string
   donation_count: number
   is_featured: boolean
+  organizer_id?: string
 }
 
 export type CauseDetails = CauseListItem & {

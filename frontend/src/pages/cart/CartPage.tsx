@@ -10,8 +10,8 @@ export function CartPage() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['cart'],
     queryFn: async () => {
-  const { data } = await api.get<CartSummary>('/cart/')
-  return mapCartSummary(data)
+      const { data } = await api.get<CartSummary>('/cart/')
+      return mapCartSummary(data)
     }
   })
 

@@ -24,8 +24,10 @@ export interface AppRuntimeConfig {
 }
 
 // Build-time values
+const defaultProdApiBase = 'https://causehive-monolithic-production.up.railway.app/api'
+
 const buildConfig: Partial<AppRuntimeConfig> = {
-	apiBaseUrl: import.meta.env.VITE_API_BASE_URL || (isDev ? '/api' : '/api'),
+	apiBaseUrl: import.meta.env.VITE_API_BASE_URL || (isDev ? '/api' : defaultProdApiBase),
 	sentryDsn: import.meta.env.VITE_SENTRY_DSN,
 	environment: import.meta.env.MODE || (isDev ? 'development' : 'production'),
 	enableRQDevtools: !!import.meta.env.VITE_ENABLE_RQ_DEVTOOLS && isDev,
@@ -44,7 +46,7 @@ function composeConfig(): AppRuntimeConfig {
 		return typeof v === 'boolean' ? v : fallback
 	}
 	return {
-		apiBaseUrl: pickString('apiBaseUrl', buildConfig.apiBaseUrl) || '/api',
+		apiBaseUrl: pickString('apiBaseUrl', buildConfig.apiBaseUrl) || (isDev ? '/api' : defaultProdApiBase),
 		sentryDsn: pickString('sentryDsn', buildConfig.sentryDsn),
 		environment: pickString('environment', buildConfig.environment) || 'production',
 		enableRQDevtools: pickBool('enableRQDevtools', buildConfig.enableRQDevtools ?? false),

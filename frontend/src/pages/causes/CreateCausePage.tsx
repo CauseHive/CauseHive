@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import type { AxiosError } from 'axios'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
@@ -17,10 +18,21 @@ export default function CreateCausePage() {
   const [categoryId, setCategoryId] = useState('')
   const fileRef = useRef<HTMLInputElement|null>(null)
   const [creating, setCreating] = useState(false)
+  const [newCategory, setNewCategory] = useState('')
+  const [newCategoryDescription, setNewCategoryDescription] = useState('')
 
   const { data: categories } = useQuery<CategoryLite[]>({
     queryKey: ['categories-basic'],
-    queryFn: async () => (await api.get('/categories/')).data?.results || []
+    queryFn: async () => {
+      try {
+        const { data } = await api.get('/categories/')
+        return Array.isArray(data?.results) ? data.results : []
+      } catch (err) {
+        const axiosErr = err as AxiosError
+        if (axiosErr.response?.status === 404) return []
+        throw err
+      }
+    }
   })
 
   const mutation = useMutation({
@@ -30,6 +42,10 @@ export default function CreateCausePage() {
       if (description) fd.append('description', description)
       if (target) fd.append('target_amount', target)
       if (categoryId) fd.append('category', categoryId)
+      else if (newCategory) {
+        fd.append('category_data[name]', newCategory)
+        if (newCategoryDescription) fd.append('category_data[description]', newCategoryDescription)
+      }
       const file = fileRef.current?.files?.[0]
       if (file) fd.append('cover_image', file)
       setCreating(true)
@@ -66,12 +82,20 @@ export default function CreateCausePage() {
             <label className="block text-xs mb-1" htmlFor="target_amount">Target Amount</label>
             <input id="target_amount" type="number" min="0" value={target} onChange={(e)=> setTarget(e.target.value)} className="w-full rounded-md border px-3 py-2" />
           </div>
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 space-y-2">
             <label className="block text-xs mb-1" htmlFor="category">Category</label>
-            <select id="category" value={categoryId} onChange={(e)=> setCategoryId(e.target.value)} className="w-full rounded-md border px-3 py-2">
-              <option value="">Select category (optional)</option>
-              {categories?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
+            {categories && categories.length > 0 ? (
+              <select id="category" value={categoryId} onChange={(e)=> setCategoryId(e.target.value)} className="w-full rounded-md border px-3 py-2">
+                <option value="">Select category (optional)</option>
+                {categories.map((c) => <option key={c.id} value={String(c.id)}>{c.name}</option>)}
+              </select>
+            ) : (
+              <div className="space-y-2">
+                <input value={newCategory} onChange={(e)=> setNewCategory(e.target.value)} placeholder="Category name" className="w-full rounded-md border px-3 py-2" />
+                <textarea value={newCategoryDescription} onChange={(e)=> setNewCategoryDescription(e.target.value)} placeholder="Category description (optional)" className="w-full rounded-md border px-3 py-2 h-20 resize-none" />
+                <p className="text-xs text-slate-500">No categories available yet. Provide a new category name and optional description.</p>
+              </div>
+            )}
           </div>
         </div>
         <div>

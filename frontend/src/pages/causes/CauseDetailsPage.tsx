@@ -31,13 +31,17 @@ export function CauseDetailsPage() {
         donation_id: donation.id,
         amount,
         email: donation.donor?.email,
-  callback_url: window.location.origin + '/payment/callback'
+        callback_url: window.location.origin + '/payment/callback'
       })
       return pay
     },
     onSuccess: (res) => {
-      const url = res.data.authorization_url
-      window.location.href = url
+      const url = res.data?.authorization_url
+      if (res.status && url) {
+        window.location.href = url
+      } else {
+        notify({ title: 'Payment initialization incomplete' })
+      }
     },
     onError: (e: unknown) => {
       const err = e as { response?: { data?: { error?: string }, status?: number } } | undefined

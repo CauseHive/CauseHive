@@ -18,10 +18,13 @@ export function PaymentCallbackPage() {
     }
     (async () => {
       try {
-        const { data } = await api.get(`/payments/verify/${reference}/`)
+        const { data } = await api.get<{ status?: boolean; message?: string; data?: { status?: string } }>(`/payments/verify/${reference}/`)
         const status = data?.data?.status
-        if (status === 'success') notify({ title: 'Payment verified', variant: 'success' })
-        else notify({ title: 'Payment status', description: status || 'Unknown', variant: 'default' })
+        if (data?.status && (status === 'success' || status === 'completed')) {
+          notify({ title: 'Payment verified', variant: 'success' })
+        } else {
+          notify({ title: 'Payment status', description: status || data?.message || 'Unknown', variant: 'default' })
+        }
         navigate('/donations', { replace: true })
       } catch (e: unknown) {
         const isAxios = (val: unknown): val is AxiosError =>

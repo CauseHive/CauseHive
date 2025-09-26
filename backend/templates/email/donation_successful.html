@@ -1,0 +1,78 @@
+{% load humanize tz %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>Donation successful</title>
+</head>
+<body style="margin:0; padding:0; background:#f5f7fb;">
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
+    Thank you for your donation.
+  </div>
+
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f5f7fb;">
+    <tr>
+      <td align="center" style="padding:24px 12px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px;">
+          <tr>
+            <td align="center" style="padding:16px 20px;">
+              <table role="presentation" width="100%" style="background:#2ac343; border-radius:10px;">
+                <tr>
+                  <td align="center" style="padding:18px;">
+                    <img src="https://causehive.app/logo.png" width="120" alt="CauseHive" style="display:block; border:0; outline:none;">
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:0 20px;">
+              <table role="presentation" width="100%" style="background:#ffffff; border-radius:10px; border:1px solid #e6e9ef;">
+                <tr>
+                  <td style="padding:28px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif; color:#1b1b1b;">
+                    <h1 style="margin:0 0 10px; font-size:22px; font-weight:700;">Thank you for your donation</h1>
+                    <p style="margin:0 0 16px; font-size:15px;">Hi {{ first_name|default:"there" }},</p>
+                    <p style="margin:0 0 16px; font-size:15px;">
+                      Your donation has been received successfully. Your support helps keep great causes moving forward.
+                    </p>
+                    <table role="presentation" width="100%" style="margin:12px 0 6px; border-collapse:collapse;">
+                      <tr>
+                        <td style="padding:6px 0; font-size:14px; color:#3a3a3a;">Amount</td>
+                        <td align="right" style="padding:6px 0; font-size:14px; color:#1b1b1b; font-weight:600;">
+                          {{ currency|default:"₵" }}{{ amount }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:6px 0; font-size:14px; color:#3a3a3a;">Cause</td>
+                        <td align="right" style="padding:6px 0; font-size:14px; color:#1b1b1b; font-weight:600;">
+                          {{ cause_name }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:6px 0; font-size:14px; color:#3a3a3a;">Date</td>
+                        <td align="right" style="padding:6px 0; font-size:14px; color:#1b1b1b; font-weight:600;">
+                          {{ donated_at|date:"Y-m-d H:i" }} {{ donated_tz|default:"UTC" }}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="padding:16px 20px 32px 20px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif; color:#6b7a88; font-size:12px;">
+              © {{ now|date:"Y" }} CauseHive ·
+              <a href="{{ support_email|default:'support@causehive.app' }}" style="color:#6b7a88; text-decoration:underline;">Support</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

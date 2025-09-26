@@ -1,5 +1,8 @@
 import { Link } from 'react-router-dom'
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import type { AxiosError } from 'axios'
+
 import { api } from '@/lib/api'
 import { mapCategory, mapCauseListItem } from '@/lib/mappers'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -9,7 +12,7 @@ import { Badge } from '@/components/ui/badge'
 export function HomePage() {
   const NEW_DAYS = Number(import.meta.env.VITE_NEW_DAYS ?? 14)
   const ENDING_SOON_DAYS = Number(import.meta.env.VITE_ENDING_SOON_DAYS ?? 7)
-  type CategoryItem = { id: number | string, name: string }
+  type CategoryItem = { id: number | string, name: string; cause_count?: number | null }
   type CategoryWithCount = CategoryItem & { cause_count?: number | null }
   type CauseItem = {
     id: number | string
@@ -25,8 +28,16 @@ export function HomePage() {
   const { data: categories } = useQuery<CategoryItem[]>({
     queryKey: ['home-categories'],
     queryFn: async () => {
-      const { data } = await api.get('/categories/', { params: { page_size: 6 } })
-      return Array.isArray(data?.results) ? data.results.slice(0, 6).map(mapCategory) as CategoryItem[] : []
+      try {
+        const { data } = await api.get('/categories/', { params: { page_size: 6 } })
+        return Array.isArray(data?.results) ? data.results.slice(0, 6).map(mapCategory) as CategoryItem[] : []
+      } catch (err) {
+        const axiosErr = err as AxiosError
+        if (axiosErr.response?.status === 404) {
+          return []
+        }
+        throw err
+      }
     }
   })
   const { data: featured } = useQuery<CauseItem[]>({
@@ -54,8 +65,16 @@ export function HomePage() {
   const { data: categoriesCount } = useQuery<number>({
     queryKey: ['home-categories-count'],
     queryFn: async () => {
-      const { data } = await api.get('/categories/', { params: { page_size: 1 } })
-      return Number(data?.count ?? 0)
+      try {
+        const { data } = await api.get('/categories/', { params: { page_size: 1 } })
+        return Number(data?.count ?? 0)
+      } catch (err) {
+        const axiosErr = err as AxiosError
+        if (axiosErr.response?.status === 404) {
+          return 0
+        }
+        throw err
+      }
     }
   })
   const { data: donationsCount } = useQuery<number | null>({
@@ -76,7 +95,7 @@ export function HomePage() {
     queryFn: async () => {
       try {
         // Prefer alias /api/admin/platform-metrics/ first (public-safe)
-  const { data } = await api.get('/admin/platform-metrics/')
+        const { data } = await api.get('/admin/platform-metrics/')
         if (typeof data?.total_amount === 'number' && typeof data?.total_donations === 'number') {
           return { total_amount: data.total_amount, total_donations: data.total_donations }
         }
@@ -95,6 +114,27 @@ export function HomePage() {
       }
     }
   })
+
+  const fallbackCategories = useMemo(() => {
+    if (categories && categories.length > 0) return categories
+    if (!causesForAgg) return []
+    const counts: Record<string, CategoryWithCount> = {}
+    causesForAgg.forEach((cause) => {
+      const key = String(cause.category?.id ?? cause.category?.name ?? '')
+      if (!key) return
+      const existing = counts[key]
+      if (existing) {
+        existing.cause_count = Number(existing.cause_count ?? 0) + 1
+      } else {
+        counts[key] = {
+          id: cause.category?.id ?? key,
+          name: cause.category?.name ?? key,
+          cause_count: 1
+        }
+      }
+    })
+    return Object.values(counts)
+  }, [categories, causesForAgg])
   return (
     <div className="space-y-12">
       <section className="grid gap-6 md:grid-cols-2 items-center">
@@ -199,24 +239,13 @@ export function HomePage() {
           })()}
           {/* Fallback: aggregate from causes list */}
           {(() => {
-            const cats: CategoryWithCount[] = (categories ?? []) as CategoryWithCount[]
-            const hasCounts = cats.some((c) => typeof c.cause_count === 'number')
-            if (hasCounts) return null
-            const counts: Record<string, { name: string; count: number; id?: string | number }> = {}
-            ;(causesForAgg || []).forEach((cause) => {
-              const key = String(cause.category?.id ?? cause.category?.name ?? '')
-              const name = cause.category?.name ?? 'Other'
-              const id = cause.category?.id
-              if (!key) return
-              counts[key] = counts[key] || { name, count: 0, id }
-              counts[key].count += 1
-            })
-            const top = Object.values(counts).sort((a, b) => b.count - a.count).slice(0, 8)
+            const cats = fallbackCategories
+            const top = cats.slice().sort((a, b) => Number(b.cause_count ?? 0) - Number(a.cause_count ?? 0)).slice(0, 8)
             if (top.length === 0) return null
             return top.map((c, i) => (
               <Link key={i} to={c.id ? `/causes?category=${c.id}` : `/causes?search=${encodeURIComponent(c.name)}`}
                 className="px-3 py-1 rounded-full border border-slate-300 dark:border-slate-700 whitespace-nowrap">
-                {c.name} <span className="text-xs text-slate-500">({c.count})</span>
+                {c.name} <span className="text-xs text-slate-500">({Number(c.cause_count ?? 0)})</span>
               </Link>
             ))
           })()}
@@ -229,7 +258,7 @@ export function HomePage() {
           {!categories && Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-8 w-28" />
           ))}
-          {categories?.map((c) => (
+          {(categories && categories.length > 0 ? categories : fallbackCategories).map((c) => (
             <Link key={c.id} to={`/causes?category=${c.id}`} className="px-3 py-1 rounded-full border border-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-900 whitespace-nowrap">{c.name}</Link>
           ))}
         </div>

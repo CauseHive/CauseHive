@@ -27,7 +27,7 @@ async function initSentry() {
   })
 }
  
-import { router } from './routes/router'
+import { router } from '@/routes/router'
 import './index.css'
 
 const queryClient = new QueryClient({
