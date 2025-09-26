@@ -39,4 +39,4 @@ USER appuser
 EXPOSE $PORT
 
 # Run migrations then start gunicorn with correct wsgi module
-CMD ["sh", "-c", "python backend/manage.py migrate && python backend/manage.py create_superuser_once && exec gunicorn --chdir backend --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --keep-alive 2 --max-requests 1000 --max-requests-jitter 50 --access-logfile - --error-logfile - --log-level info causehive.wsgi:application"]
+CMD ["sh", "-c", "python backend/manage.py migrate && python backend/manage.py createcachetable && python backend/manage.py create_superuser_once && exec gunicorn --chdir backend --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --keep-alive 2 --max-requests 1000 --max-requests-jitter 50 --access-logfile - --error-logfile - --log-level info causehive.wsgi:application"]
