@@ -307,7 +307,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "https://causehive.tech",
-    "https://causehive.app"
+    "https://causehive.app",
+    "https://www.causehive.app",
+    "https://causehive.netlify.app"
 ]
 
 # Include production frontend/backend origins if provided
@@ -323,6 +325,8 @@ PROD_FRONTEND_HOSTS = [
     'https://www.causehive.tech',
     'https://causehive.app',
     'https://www.causehive.app',
+    'https://causehive.netlify.app',
+    'https://www.causehive.netlify.app',
 ]
 for origin in PROD_FRONTEND_HOSTS:
     if origin not in CORS_ALLOWED_ORIGINS:
@@ -340,6 +344,8 @@ CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[
     'https://causehive.app',
     'https://www.causehive.app',
     'https://causehive-monolithic-production.up.railway.app',
+    'https://causehive.netlify.app',
+    'https://www.causehive.netlify.app',
 ])
 
 # CORS settings for Railway deployment
