@@ -1,50 +1,42 @@
-# Use Python 3.11 slim image
-FROM python:3.11-slim
+# backend/Dockerfile
+FROM python:3.12-slim
 
-# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DJANGO_SETTINGS_MODULE=causehive.settings
 ENV PORT=8000
 
-# Set work directory
 WORKDIR /app
 
-# Install system dependencies in smaller chunks to avoid memory issues
-RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client
-RUN apt-get install -y --no-install-recommends libpq-dev curl
-RUN apt-get install -y --no-install-recommends build-essential
-RUN rm -rf /var/lib/apt/lists/*
+# System deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    postgresql-client libpq-dev build-essential curl \
+ && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY backend/requirements.txt .
+# Install Python deps
+COPY backend/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip \
+ && pip install --no-cache-dir -r /app/requirements.txt
 
-# Install Python dependencies with memory optimization
-RUN pip install --no-cache-dir --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy project
+COPY . /app
 
-# Copy project files
-COPY . .
+# Prepare dirs
+RUN mkdir -p /app/backend/staticfiles /app/backend/media /app/logs
 
-# Create necessary directories and set permissions
-RUN mkdir -p staticfiles media logs
-
-# Set default environment variables for build
-ENV SECRET_KEY=build-time-secret-key-will-be-overridden
+# Build-time defaults (overridden in runtime env)
+ENV SECRET_KEY=build-time-secret
 ENV DEBUG=False
 
-# Collect static files during build (skip if fails)
-RUN python manage.py collectstatic --noinput --clear || echo "Static collection skipped"
+# Collect static from project root (specify manage.py path)
+RUN python backend/manage.py collectstatic --noinput --clear || true
 
-# Create a non-root user and set permissions
-RUN adduser --disabled-password --gecos '' appuser
-RUN chown -R appuser:appuser /app
-
-# Switch to non-root user
+# Non-root
+RUN adduser --disabled-password --gecos '' appuser \
+ && chown -R appuser:appuser /app
 USER appuser
 
-# Expose port
 EXPOSE $PORT
 
-# Start command with proper error handling
-CMD ["sh", "-c", "python migrate_databases.py all && exec gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --keep-alive 2 --max-requests 1000 --max-requests-jitter 50 --access-logfile - --error-logfile - --log-level info causehive_monolith.wsgi:application"]
+# Run migrations then start gunicorn with correct wsgi module
+CMD ["sh", "-c", "python backend/manage.py migrate && exec gunicorn --chdir backend --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --keep-alive 2 --max-requests 1000 --max-requests-jitter 50 --access-logfile - --error-logfile - --log-level info causehive.wsgi:application"]
