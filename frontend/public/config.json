@@ -1,0 +1,5 @@
+{
+  "apiBaseUrl": "https://causehive.railway.app/api",
+  "environment": "production",
+  "enableRQDevtools": false
+}

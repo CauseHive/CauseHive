@@ -2,35 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
-@import './styles/background.css';
-
-/* Global box-sizing reset */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+/* Typography and base styles */
+@layer base {
+  :root {
+    --radius: 12px;
+  }
+  html, body, #root { height: 100%; }
 }
 
-:root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --primary: 210 79% 46%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 143 64% 40%;
-  --secondary-foreground: 210 40% 98%;
-  --accent: 36 77% 49%;
-  --accent-foreground: 210 40% 2%;
-  --border: 214.3 31.8% 91.4%;
-  --ring: 210 79% 46%;
-  --radius: 0.5rem;
+/* nprogress theming */
+#nprogress .bar {
+  background: rgb(59 130 246); /* tailwind blue-500; adjust to your primary */
+  height: 2px;
 }
-
-body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  line-height: 1.6;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+#nprogress .peg {
+  box-shadow: 0 0 10px rgb(59 130 246), 0 0 5px rgb(59 130 246);
 }
