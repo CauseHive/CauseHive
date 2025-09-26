@@ -12,8 +12,14 @@ class Command(BaseCommand):
         email = os.environ.get("DJANGO_SUPERUSER_EMAIL")
         password = os.environ.get("DJANGO_SUPERUSER_PASSWORD")
 
+        self.stdout.write(f"Checking superuser creation...")
+        self.stdout.write(f"Email: {email}")
+        self.stdout.write(f"Password set: {'Yes' if password else 'No'}")
+
         if not all([email, password]):
             self.stderr.write("Missing superuser environment variables.")
+            self.stderr.write(f"Email: {email}")
+            self.stderr.write(f"Password: {'Set' if password else 'Not set'}")
             return
 
         if not User.objects.filter(email=email).exists():
