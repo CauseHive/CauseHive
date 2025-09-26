@@ -90,6 +90,13 @@ export function AppLayout() {
                 <button onClick={signOut} className="text-slate-600 dark:text-slate-300 text-xs">Sign out</button>
               </>
             )}
+            {/* Show Sign in / Register only on the landing page for unauthenticated users */}
+            {!user && location.pathname === '/' && (
+              <>
+                <Link to="/login" className="text-slate-600 dark:text-slate-300">Sign in</Link>
+                <Link to="/signup" className="px-3 py-1 rounded bg-emerald-600 text-white">Register</Link>
+              </>
+            )}
           </nav>
         </div>
       </header>
