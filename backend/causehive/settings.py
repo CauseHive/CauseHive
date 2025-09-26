@@ -53,22 +53,39 @@ BACKEND_URL = env('BACKEND_URL', default='http://localhost:8000')
 REDIS_HOST = env('REDIS_HOST', default='localhost')
 REDIS_PORT = env('REDIS_PORT', default=6379)
 
-# Cache configuration
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': f'redis://{REDIS_HOST}:{REDIS_PORT}/2',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
-        'KEY_PREFIX': 'causehive',
-        'TIMEOUT': 300,  # 5 minutes default
-    }
-}
+# Check if Redis is available, if not use database fallbacks
+REDIS_AVAILABLE = False
+try:
+    import redis
+    r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
+    r.ping()
+    REDIS_AVAILABLE = True
+except:
+    REDIS_AVAILABLE = False
 
-# Session storage in Redis
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-SESSION_CACHE_ALIAS = 'default'
+# Cache configuration
+if REDIS_AVAILABLE:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': f'redis://{REDIS_HOST}:{REDIS_PORT}/2',
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            },
+            'KEY_PREFIX': 'causehive',
+            'TIMEOUT': 300,  # 5 minutes default
+        }
+    }
+    SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+    SESSION_CACHE_ALIAS = 'default'
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+            'LOCATION': 'cache_table',
+        }
+    }
+    SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
 # # Service URLs for microservice communication
 # CAUSE_SERVICE_URL = env('CAUSE_SERVICE_URL', default='http://localhost:8001')
@@ -284,8 +301,13 @@ SUPPORT_EMAIL = env("SUPPORT_EMAIL")
 
 
 # Celery Configuration for background tasks
-CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default='redis://localhost:6379/1')
+if REDIS_AVAILABLE:
+    CELERY_BROKER_URL = env('CELERY_BROKER_URL', default=f'redis://{REDIS_HOST}:{REDIS_PORT}/0')
+    CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default=f'redis://{REDIS_HOST}:{REDIS_PORT}/1')
+    CELERY_TASK_ALWAYS_EAGER = False
+else:
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
 
 # Celery beat schedule
 CELERY_BEAT_SCHEDULE = {
