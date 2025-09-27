@@ -12,7 +12,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import { 
   Shield, 
   Key, 
@@ -83,10 +82,11 @@ export default function SettingsPage() {
       notify({ title: 'Password changed successfully', variant: 'success' })
       resetPassword()
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const axiosError = error as { response?: { data?: { error?: string } } }
       notify({ 
         title: 'Failed to change password', 
-        description: error.response?.data?.error || 'Please check your current password',
+        description: axiosError.response?.data?.error || 'Please check your current password',
         variant: 'error' 
       })
     }
