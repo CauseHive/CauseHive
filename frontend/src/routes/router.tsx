@@ -61,7 +61,7 @@ export const router = createBrowserRouter([
       { path: 'notifications', element: <Navigate to="/app/notifications" replace /> },
       { path: 'withdrawals', element: <Navigate to="/app/withdrawals" replace /> },
 
-      // Authenticated app area with sidebar
+      // Authenticated app area with sidebar and yes
       { path: 'app', element: (
         <ProtectedRoute>
           <UserLayout />
@@ -69,6 +69,7 @@ export const router = createBrowserRouter([
       ), children: [
         { index: true, element: <Suspense fallback={<LoadingScreen />}><DashboardPage /></Suspense> },
         { path: 'causes', element: <Suspense fallback={<LoadingScreen />}><CausesPage /></Suspense> },
+        { path: 'causes/create', element: <Suspense fallback={<LoadingScreen />}><CreateCausePage /></Suspense> },
         { path: 'donations', element: <Suspense fallback={<LoadingScreen />}><DonationsPage /></Suspense> },
         { path: 'cart', element: <Suspense fallback={<LoadingScreen />}><CartPage /></Suspense> },
         { path: 'profile', element: <Suspense fallback={<LoadingScreen />}><ProfilePage /></Suspense> },
