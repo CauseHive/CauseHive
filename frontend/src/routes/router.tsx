@@ -69,6 +69,7 @@ export const router = createBrowserRouter([
       ), children: [
         { index: true, element: <Suspense fallback={<LoadingScreen />}><DashboardPage /></Suspense> },
         { path: 'causes', element: <Suspense fallback={<LoadingScreen />}><CausesPage /></Suspense> },
+        { path: 'causes/create', element: <Suspense fallback={<LoadingScreen />}><CreateCausePage /></Suspense> },
         { path: 'donations', element: <Suspense fallback={<LoadingScreen />}><DonationsPage /></Suspense> },
         { path: 'cart', element: <Suspense fallback={<LoadingScreen />}><CartPage /></Suspense> },
         { path: 'profile', element: <Suspense fallback={<LoadingScreen />}><ProfilePage /></Suspense> },

@@ -1,8 +1,12 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import type { AxiosError } from 'axios'
 import { api } from '@/lib/api'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardFooter, CardTitle, CardDescription } from '@/components/ui/card'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { useNavigate } from 'react-router-dom'
 import { useToast } from '@/components/ui/toast'
 
@@ -17,6 +21,7 @@ export default function CreateCausePage() {
   const [target, setTarget] = useState('')
   const [categoryId, setCategoryId] = useState('')
   const fileRef = useRef<HTMLInputElement|null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
   const [newCategory, setNewCategory] = useState('')
   const [newCategoryDescription, setNewCategoryDescription] = useState('')
@@ -37,19 +42,30 @@ export default function CreateCausePage() {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const fd = new FormData()
-      fd.append('name', name)
-      if (description) fd.append('description', description)
-      if (target) fd.append('target_amount', target)
-      if (categoryId) fd.append('category', categoryId)
-      else if (newCategory) {
-        fd.append('category_data[name]', newCategory)
-        if (newCategoryDescription) fd.append('category_data[description]', newCategoryDescription)
-      }
       const file = fileRef.current?.files?.[0]
-      if (file) fd.append('cover_image', file)
       setCreating(true)
-      return api.post('/causes/create/', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      if (file) {
+        const fd = new FormData()
+        fd.append('name', name)
+        if (description) fd.append('description', description)
+        if (target) fd.append('target_amount', target)
+        if (categoryId) fd.append('category', categoryId)
+        else if (newCategory) {
+          // send flat keys for multipart; backend should accept this or you can send JSON string
+          fd.append('category_data[name]', newCategory)
+          if (newCategoryDescription) fd.append('category_data[description]', newCategoryDescription)
+        }
+        fd.append('cover_image', file)
+        return api.post('/causes/create/', fd)
+      }
+
+      // No file selected: send JSON so nested objects (category_data) are preserved
+      const payload: Record<string, unknown> = { name }
+      if (description) payload.description = description
+      if (target) payload.target_amount = target
+      if (categoryId) payload.category = categoryId
+      else if (newCategory) payload.category_data = { name: newCategory, description: newCategoryDescription }
+      return api.post('/causes/create/', payload)
     },
     onSuccess: (res) => {
       notify({ title: 'Cause submitted', description: 'Awaiting review', variant: 'success' })
@@ -65,47 +81,88 @@ export default function CreateCausePage() {
 
   const disabled = !name || !target
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [previewUrl])
+
   return (
-    <div className="max-w-2xl space-y-6">
-      <h1 className="text-2xl font-semibold">Create a Cause</h1>
-      <div className="space-y-4">
-        <div>
-          <label className="block text-xs mb-1" htmlFor="name">Title</label>
-          <input id="name" value={name} onChange={(e)=> setName(e.target.value)} className="w-full rounded-md border px-3 py-2" placeholder="Cause title" />
-        </div>
-        <div>
-          <label className="block text-xs mb-1" htmlFor="description">Description</label>
-            <textarea id="description" value={description} onChange={(e)=> setDescription(e.target.value)} className="w-full h-40 rounded-md border px-3 py-2 resize-none" placeholder="Explain the purpose and impact" />
-        </div>
-        <div className="grid md:grid-cols-3 gap-4">
-          <div className="md:col-span-1">
-            <label className="block text-xs mb-1" htmlFor="target_amount">Target Amount</label>
-            <input id="target_amount" type="number" min="0" value={target} onChange={(e)=> setTarget(e.target.value)} className="w-full rounded-md border px-3 py-2" />
-          </div>
-          <div className="md:col-span-2 space-y-2">
-            <label className="block text-xs mb-1" htmlFor="category">Category</label>
-            {categories && categories.length > 0 ? (
-              <select id="category" value={categoryId} onChange={(e)=> setCategoryId(e.target.value)} className="w-full rounded-md border px-3 py-2">
-                <option value="">Select category (optional)</option>
-                {categories.map((c) => <option key={c.id} value={String(c.id)}>{c.name}</option>)}
-              </select>
-            ) : (
-              <div className="space-y-2">
-                <input value={newCategory} onChange={(e)=> setNewCategory(e.target.value)} placeholder="Category name" className="w-full rounded-md border px-3 py-2" />
-                <textarea value={newCategoryDescription} onChange={(e)=> setNewCategoryDescription(e.target.value)} placeholder="Category description (optional)" className="w-full rounded-md border px-3 py-2 h-20 resize-none" />
-                <p className="text-xs text-slate-500">No categories available yet. Provide a new category name and optional description.</p>
+    <div className="max-w-3xl mx-auto">
+      <Card className="mt-6 bg-white text-slate-900">
+        <CardHeader>
+          <CardTitle>Create a Cause</CardTitle>
+          <CardDescription>Share your cause so donors can find and support it. Fields marked with * are required.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-6">
+            <div>
+              <Label htmlFor="name">Title *</Label>
+              <Input id="name" value={name} onChange={(e)=> setName(e.target.value)} className="mt-1" placeholder="Cause title" />
+            </div>
+
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <textarea id="description" value={description} onChange={(e)=> setDescription(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm h-40 resize-none" placeholder="Explain the purpose and impact" />
+            </div>
+
+            <div>
+              <Label htmlFor="target_amount">Target Amount (NGN) *</Label>
+              <Input id="target_amount" type="number" min="0" value={target} onChange={(e)=> setTarget(e.target.value)} className="mt-1" />
+            </div>
+
+            <div>
+              <Label htmlFor="category">Category</Label>
+                {categories && categories.length > 0 ? (
+                <div className="mt-1">
+                  <Select onValueChange={(val) => setCategoryId(val)}>
+                    <SelectTrigger className="w-full flex h-10 items-center justify-between rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"><SelectValue placeholder="Select category (optional)" /></SelectTrigger>
+                    <SelectContent>
+                      {categories.map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <div className="space-y-2 mt-1">
+                  <Input value={newCategory} onChange={(e)=> setNewCategory(e.target.value)} placeholder="Category name" />
+                    <textarea value={newCategoryDescription} onChange={(e)=> setNewCategoryDescription(e.target.value)} placeholder="Category description (optional)" className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 h-20 resize-none text-sm" />
+                    <p className="text-xs text-slate-600">No categories available yet. Provide a new category name and optional description.</p>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <Label>Cover Image</Label>
+              <input ref={fileRef} onChange={(e: React.ChangeEvent<HTMLInputElement>)=> {
+                const file = e.target.files?.[0]
+                if (file) {
+                  const url = URL.createObjectURL(file)
+                  if (previewUrl) URL.revokeObjectURL(previewUrl)
+                  setPreviewUrl(url)
+                } else {
+                  if (previewUrl) URL.revokeObjectURL(previewUrl)
+                  setPreviewUrl(null)
+                }
+              }} type="file" accept="image/*" className="mt-1 block w-full text-sm text-slate-700 file:border file:border-slate-300 file:bg-white file:text-slate-700 file:rounded-md file:px-3 file:py-2" />
+              <p className="text-xs text-slate-600 mt-2">Upload an image that represents the cause. Max size depends on backend limits.</p>
+
+              <div className="mt-3">
+                <Label>Preview</Label>
+                <div className="mt-1 h-40 w-full rounded-md border border-slate-200 bg-white flex items-center justify-center overflow-hidden">
+                  {previewUrl ? <img src={previewUrl} alt="cover preview" className="object-cover h-full w-full" /> : <span className="text-sm text-slate-400">No image selected</span>}
+                </div>
               </div>
-            )}
+            </div>
           </div>
-        </div>
-        <div>
-          <label className="block text-xs mb-1">Cover Image</label>
-          <input ref={fileRef} type="file" accept="image/*" />
-        </div>
-        <Button disabled={disabled || creating} onClick={()=> mutation.mutate()} className="w-full">
-          {creating? 'Creating…':'Submit for Review'}
-        </Button>
-      </div>
+        </CardContent>
+        <CardFooter>
+          <div className="w-full">
+            <Button disabled={disabled || creating} onClick={()=> mutation.mutate()} className="w-full">
+              {creating? 'Creating…':'Submit for Review'}
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
     </div>
   )
 }
