@@ -1,5 +1,21 @@
 import { useRef, useState, useMemo, useEffect } from 'react'
 import { useUserProfile, WithdrawalAddress } from '@/hooks/useUserProfile'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { 
+  User, 
+  Camera, 
+  Phone, 
+  MapPin, 
+  FileText, 
+  CreditCard, 
+  CheckCircle, 
+  Clock,
+  Mail,
+  Calendar
+} from 'lucide-react'
 
 type FieldStatus = 'idle' | 'saving' | 'saved'
 
@@ -88,99 +104,309 @@ export function ProfilePage() {
   const withdrawalComplete = missing.length === 0
   const badge = (field: string) => {
     const st = fieldStatus[field]
-    if (st === 'saving') return <span className="ml-2 text-[10px] text-amber-600">Saving…</span>
-    if (st === 'saved') return <span className="ml-2 text-[10px] text-emerald-600">Saved</span>
+    if (st === 'saving') return (
+      <span className="ml-2 inline-flex items-center gap-1 text-xs text-amber-600">
+        <Clock className="h-3 w-3 animate-spin" />
+        Saving…
+      </span>
+    )
+    if (st === 'saved') return (
+      <span className="ml-2 inline-flex items-center gap-1 text-xs text-emerald-600">
+        <CheckCircle className="h-3 w-3" />
+        Saved
+      </span>
+    )
     return null
   }
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="relative">
-          <img src={preview || composed.profile_picture || '/profile_pictures/default.jpg'} alt={composed.full_name} className="h-24 w-24 rounded-full object-cover border border-slate-200 dark:border-slate-700" />
-          <button type="button" onClick={()=> fileRef.current?.click()} className="absolute bottom-1 right-1 rounded bg-emerald-600 text-white text-xs px-2 py-1 shadow">Change</button>
-          <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFileChange} />
-          {badge('profile_picture')}
-        </div>
-        <div>
-          <h1 className="text-2xl font-semibold">My Profile</h1>
-          <p className="text-sm text-slate-500">Manage your personal information and avatar.</p>
-        </div>
+    <div className="max-w-4xl space-y-6">
+      {/* Profile Header */}
+      <Card className="overflow-hidden">
+        <div className="h-32 bg-gradient-to-r from-emerald-500 to-emerald-600"></div>
+        <CardContent className="relative pt-0 pb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-16">
+            <div className="relative">
+              <img 
+                src={preview || composed.profile_picture || '/profile_pictures/default.jpg'} 
+                alt={composed.full_name} 
+                className="h-32 w-32 rounded-full object-cover border-4 border-white shadow-lg bg-white" 
+              />
+              <Button
+                size="sm"
+                onClick={() => fileRef.current?.click()}
+                className="absolute bottom-2 right-2 rounded-full h-10 w-10 p-0 bg-emerald-600 hover:bg-emerald-700 shadow-lg"
+              >
+                <Camera className="h-4 w-4" />
+              </Button>
+              <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFileChange} />
+            </div>
+            <div className="flex-1 sm:mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{composed.full_name || 'Anonymous User'}</h1>
+                {badge('profile_picture')}
+              </div>
+              <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
+                <div className="flex items-center gap-1">
+                  <Mail className="h-4 w-4" />
+                  {composed.email}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  Joined {composed.updated_at ? new Date(composed.updated_at).toLocaleDateString() : 'Recently'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Personal Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5 text-emerald-600" />
+              Personal Information
+            </CardTitle>
+            <CardDescription>
+              Update your personal details and contact information
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="first_name" className="flex items-center gap-1">
+                  First name {badge('first_name')}
+                </Label>
+                <Input 
+                  id="first_name" 
+                  value={firstName} 
+                  onChange={(e) => { 
+                    setFirstName(e.target.value); 
+                    mark('first_name','saving'); 
+                    debouncedUserPatch({ first_name: e.target.value }, 'first_name') 
+                  }} 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="last_name" className="flex items-center gap-1">
+                  Last name {badge('last_name')}
+                </Label>
+                <Input 
+                  id="last_name" 
+                  value={lastName} 
+                  onChange={(e) => { 
+                    setLastName(e.target.value); 
+                    mark('last_name','saving'); 
+                    debouncedUserPatch({ last_name: e.target.value }, 'last_name') 
+                  }} 
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="email">Email address</Label>
+              <Input 
+                id="email" 
+                defaultValue={composed.email || ''} 
+                disabled
+                className="bg-slate-50 dark:bg-slate-900/40"
+              />
+              <p className="text-xs text-slate-500">Email cannot be changed. Contact support if needed.</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone_number" className="flex items-center gap-1">
+                <Phone className="h-4 w-4" />
+                Phone number {badge('phone_number')}
+              </Label>
+              <Input 
+                id="phone_number" 
+                value={phone} 
+                onChange={(e) => setPhone(e.target.value)} 
+                onBlur={(e) => { 
+                  mark('phone_number','saving'); 
+                  updateProfile.mutate({ phone_number: e.target.value }, { 
+                    onSuccess: () => mark('phone_number','saved'), 
+                    onError: () => mark('phone_number','idle') 
+                  }) 
+                }} 
+                placeholder="Enter your phone number"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="address" className="flex items-center gap-1">
+                <MapPin className="h-4 w-4" />
+                Address {badge('address')}
+              </Label>
+              <Input 
+                id="address" 
+                value={address} 
+                onChange={(e) => setAddress(e.target.value)} 
+                onBlur={(e) => { 
+                  mark('address','saving'); 
+                  updateProfile.mutate({ address: e.target.value }, { 
+                    onSuccess: () => mark('address','saved'), 
+                    onError: () => mark('address','idle') 
+                  }) 
+                }} 
+                placeholder="Enter your address"
+              />
+            </div>
+
+            <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-900/20 rounded-lg">
+              <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Account Details</h4>
+              <div className="text-xs text-slate-500 space-y-1">
+                <p><span className="font-semibold">Profile ID:</span> {composed.id}</p>
+                <p><span className="font-semibold">User ID:</span> {composed.user_id}</p>
+                <p><span className="font-semibold">Last updated:</span> {composed.updated_at ? new Date(composed.updated_at).toLocaleString() : '—'}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bio Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-blue-600" />
+              About Me {badge('bio')}
+            </CardTitle>
+            <CardDescription>
+              Tell supporters about yourself and your causes
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label htmlFor="bio">Bio</Label>
+              <textarea 
+                id="bio"
+                value={bio} 
+                onChange={(e) => setBio(e.target.value)} 
+                onBlur={(e) => { 
+                  mark('bio','saving'); 
+                  updateProfile.mutate({ bio: e.target.value }, { 
+                    onSuccess: () => mark('bio','saved'), 
+                    onError: () => mark('bio','idle') 
+                  }) 
+                }} 
+                className="w-full h-40 resize-none rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent" 
+                placeholder="Tell supporters about yourself, your passions, and what drives you to support causes..."
+              />
+              <p className="text-xs text-slate-500">Changes are saved automatically when you finish editing.</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-4 rounded-lg border p-4">
-            <h2 className="font-medium mb-2">Details</h2>
-            <label className="block text-xs mb-1" htmlFor="full_name">Full name</label>
-            <input id="full_name" value={composed.full_name} readOnly className="w-full rounded-md border px-3 py-2 bg-slate-100 dark:bg-slate-900/40 cursor-not-allowed" />
-            <label className="block text-xs mb-1 mt-3" htmlFor="email">Email</label>
-            <input id="email" defaultValue={composed.email || ''} readOnly className="w-full rounded-md border px-3 py-2 bg-slate-50 dark:bg-slate-900/40" />
-            <div className="grid grid-cols-2 gap-3 mt-3">
-              <div>
-                <label className="block text-xs mb-1" htmlFor="first_name">First name {badge('first_name')}</label>
-                <input id="first_name" value={firstName} onChange={(e)=> { setFirstName(e.target.value); mark('first_name','saving'); debouncedUserPatch({ first_name: e.target.value }, 'first_name') }} className="w-full rounded-md border px-3 py-2" />
-              </div>
-              <div>
-                <label className="block text-xs mb-1" htmlFor="last_name">Last name {badge('last_name')}</label>
-                <input id="last_name" value={lastName} onChange={(e)=> { setLastName(e.target.value); mark('last_name','saving'); debouncedUserPatch({ last_name: e.target.value }, 'last_name') }} className="w-full rounded-md border px-3 py-2" />
-              </div>
-            </div>
-            <label className="block text-xs mb-1" htmlFor="phone_number">Phone {badge('phone_number')}</label>
-            <input id="phone_number" value={phone} onChange={(e)=> setPhone(e.target.value)} onBlur={(e)=> { mark('phone_number','saving'); updateProfile.mutate({ phone_number: e.target.value }, { onSuccess: () => mark('phone_number','saved'), onError: () => mark('phone_number','idle') }) }} className="w-full rounded-md border px-3 py-2" />
-            <label className="block text-xs mb-1" htmlFor="address">Address {badge('address')}</label>
-            <input id="address" value={address} onChange={(e)=> setAddress(e.target.value)} onBlur={(e)=> { mark('address','saving'); updateProfile.mutate({ address: e.target.value }, { onSuccess: () => mark('address','saved'), onError: () => mark('address','idle') }) }} className="w-full rounded-md border px-3 py-2" />
-            <div className="mt-4 text-[11px] text-slate-500 space-y-1">
-              <p><span className="font-semibold">Profile ID:</span> {composed.id}</p>
-              <p><span className="font-semibold">User ID:</span> {composed.user_id}</p>
-              <p><span className="font-semibold">Updated:</span> {composed.updated_at ? new Date(composed.updated_at).toLocaleString() : '—'}</p>
-            </div>
-        </div>
-        <div className="space-y-4 rounded-lg border p-4">
-          <h2 className="font-medium mb-2">Bio {badge('bio')}</h2>
-          <textarea value={bio} onChange={(e)=> setBio(e.target.value)} onBlur={(e)=> { mark('bio','saving'); updateProfile.mutate({ bio: e.target.value }, { onSuccess: () => mark('bio','saved'), onError: () => mark('bio','idle') }) }} className="w-full h-40 resize-none rounded-md border px-3 py-2" placeholder="Tell supporters about yourself" />
-          <p className="text-xs text-slate-500">Changes auto-save on blur.</p>
-        </div>
-        <div className="space-y-4 rounded-lg border p-4 md:col-span-2">
-          <div className="flex items-center gap-2"><h2 className="font-medium">Withdrawal Info</h2> {badge('withdrawal_address')}</div>
-          <div className="grid md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs mb-1">Method</label>
-              <select className="w-full rounded-md border px-2 py-2" value={currentMethod} onChange={(e)=> handleWithdrawalChange('payment_method', e.target.value as WithdrawalAddress['payment_method'])}>
+
+      {/* Withdrawal Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-purple-600" />
+            Withdrawal Information {badge('withdrawal_address')}
+          </CardTitle>
+          <CardDescription>
+            Configure how you want to receive donations and withdrawals
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="payment_method">Payment Method</Label>
+              <select 
+                id="payment_method"
+                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                value={currentMethod} 
+                onChange={(e) => handleWithdrawalChange('payment_method', e.target.value as WithdrawalAddress['payment_method'])}
+              >
                 <option value="bank_transfer">Bank Transfer</option>
                 <option value="mobile_money">Mobile Money</option>
               </select>
             </div>
-            {currentMethod === 'bank_transfer' && (<>
-              <div>
-                <label className="block text-xs mb-1">Bank Code</label>
-                <input className="w-full rounded-md border px-2 py-2" value={withdrawal?.bank_code || ''} onChange={(e)=> handleWithdrawalChange('bank_code', e.target.value)} />
+
+            {currentMethod === 'bank_transfer' && (
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="bank_code">Bank Code</Label>
+                  <Input 
+                    id="bank_code"
+                    value={withdrawal?.bank_code || ''} 
+                    onChange={(e) => handleWithdrawalChange('bank_code', e.target.value)} 
+                    placeholder="Enter bank code"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="account_number">Account Number</Label>
+                  <Input 
+                    id="account_number"
+                    value={withdrawal?.account_number || ''} 
+                    onChange={(e) => handleWithdrawalChange('account_number', e.target.value)} 
+                    placeholder="Enter account number"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="account_name">Account Name</Label>
+                  <Input 
+                    id="account_name"
+                    value={withdrawal?.account_name || ''} 
+                    onChange={(e) => handleWithdrawalChange('account_name', e.target.value)} 
+                    placeholder="Enter account holder name"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-xs mb-1">Account Number</label>
-                <input className="w-full rounded-md border px-2 py-2" value={withdrawal?.account_number || ''} onChange={(e)=> handleWithdrawalChange('account_number', e.target.value)} />
+            )}
+
+            {currentMethod === 'mobile_money' && (
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="phone_number">Phone Number</Label>
+                  <Input 
+                    id="phone_number"
+                    value={withdrawal?.phone_number || ''} 
+                    onChange={(e) => handleWithdrawalChange('phone_number', e.target.value)} 
+                    placeholder="Enter mobile money phone number"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="provider">Provider</Label>
+                  <Input 
+                    id="provider"
+                    value={withdrawal?.provider || ''} 
+                    onChange={(e) => handleWithdrawalChange('provider', e.target.value)} 
+                    placeholder="e.g., MTN, Vodafone, AirtelTigo"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Input 
+                    id="country"
+                    value={withdrawal?.country || ''} 
+                    onChange={(e) => handleWithdrawalChange('country', e.target.value)} 
+                    placeholder="Enter country"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-xs mb-1">Account Name</label>
-                <input className="w-full rounded-md border px-2 py-2" value={withdrawal?.account_name || ''} onChange={(e)=> handleWithdrawalChange('account_name', e.target.value)} />
-              </div>
-            </>)}
-            {currentMethod === 'mobile_money' && (<>
-              <div>
-                <label className="block text-xs mb-1">Phone Number</label>
-                <input className="w-full rounded-md border px-2 py-2" value={withdrawal?.phone_number || ''} onChange={(e)=> handleWithdrawalChange('phone_number', e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-xs mb-1">Provider</label>
-                <input className="w-full rounded-md border px-2 py-2" value={withdrawal?.provider || ''} onChange={(e)=> handleWithdrawalChange('provider', e.target.value)} />
-              </div>
-              <div>
-                <label className="block text-xs mb-1">Country</label>
-                <input className="w-full rounded-md border px-2 py-2" value={withdrawal?.country || ''} onChange={(e)=> handleWithdrawalChange('country', e.target.value)} />
-              </div>
-            </>)}
+            )}
+
+            <div className="mt-4 p-3 rounded-lg bg-slate-50 dark:bg-slate-900/20">
+              {withdrawalComplete ? (
+                <div className="flex items-center gap-2 text-sm text-emerald-600">
+                  <CheckCircle className="h-4 w-4" />
+                  <span className="font-medium">Withdrawal information is complete</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-sm text-amber-600">
+                  <Clock className="h-4 w-4" />
+                  <span>Missing required fields: {missing.join(', ')}</span>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="text-xs mt-2">{withdrawalComplete ? <span className="text-emerald-600 font-medium">Withdrawal info complete</span> : <span className="text-amber-600">Missing: {missing.join(', ')}</span>}</div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
