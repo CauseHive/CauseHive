@@ -23,6 +23,7 @@ dependencies = [
     "google-auth>=2.40.3",
     "google-auth-oauthlib>=1.2.2",
     "gunicorn>=23.0.0",
+    "kombu>=5.5.4",
     "paystack>=1.5.0",
     "pillow>=11.3.0",
     "psycopg2-binary>=2.9.10",

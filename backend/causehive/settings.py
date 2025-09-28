@@ -306,7 +306,10 @@ if REDIS_AVAILABLE:
     CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default=f'redis://{REDIS_HOST}:{REDIS_PORT}/1')
     CELERY_TASK_ALWAYS_EAGER = False
 else:
-    CELERY_TASK_ALWAYS_EAGER = True
+    # Use database as broker for free tier (no Redis)
+    CELERY_BROKER_URL = 'db+sqlite:///celery.db'
+    CELERY_RESULT_BACKEND = 'db+sqlite:///celery.db'
+    CELERY_TASK_ALWAYS_EAGER = False
     CELERY_TASK_EAGER_PROPAGATES = True
 
 # Celery beat schedule
@@ -332,6 +335,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://causehive.app",
     "https://www.causehive.app",
     "https://causehive.netlify.app"
+    "https://causehive.up.railway.app"
+    "https://www.causehive.up.railway.app"
 ]
 
 # Include production frontend/backend origins if provided
@@ -349,6 +354,8 @@ PROD_FRONTEND_HOSTS = [
     'https://www.causehive.app',
     'https://causehive.netlify.app',
     'https://www.causehive.netlify.app',
+    'https://causehive.up.railway.app',
+    'https://www.causehive.up.railway.app',
 ]
 for origin in PROD_FRONTEND_HOSTS:
     if origin not in CORS_ALLOWED_ORIGINS:
