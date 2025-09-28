@@ -334,8 +334,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://causehive.tech",
     "https://causehive.app",
     "https://www.causehive.app",
-    "https://causehive.netlify.app"
-    "https://causehive.up.railway.app"
+    "https://causehive.netlify.app",
+    "https://causehive.up.railway.app",
     "https://www.causehive.up.railway.app"
 ]
 
