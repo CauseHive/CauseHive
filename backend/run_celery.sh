@@ -3,25 +3,19 @@
 
 echo "Starting CauseHive services..."
 
-# Start Redis if not running
-if ! redis-cli ping > /dev/null 2>&1; then
-    echo "Starting Redis..."
-    sudo systemctl start redis-server
-fi
-
 # Start Celery worker
 echo "Starting Celery worker..."
-uv run celery -A causehive worker --loglevel=info &
+celery -A causehive worker --loglevel=info &
 WORKER_PID=$!
 
 # Start Celery beat (scheduler)
 echo "Starting Celery beat..."
-uv run celery -A causehive beat --loglevel=info &
+celery -A causehive beat --loglevel=info &
 BEAT_PID=$!
 
 # Start donation event consumer
 echo "Starting donation event consumer..."
-uv run python manage.py consume_donation_events &
+python manage.py consume_donation_events &
 CONSUMER_PID=$!
 
 echo "All services started!"
