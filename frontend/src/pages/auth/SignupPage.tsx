@@ -5,6 +5,8 @@ import { useAuth } from '@/hooks/api'
 import { useNavigate, Link } from 'react-router-dom'
 import { authStore } from '@/lib/auth'
 import { useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { authService } from '@/lib/services'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -37,9 +39,28 @@ export function SignupPage() {
     signup(values)
   }
 
+  // Google OAuth URL fetching
+  const { data: googleUrl, error: googleUrlError, isLoading: googleUrlLoading } = useQuery({
+    queryKey: ['google-oauth-url'],
+    queryFn: async () => {
+      try {
+        const result = await authService.getGoogleAuthUrl()
+        return result.auth_url
+      } catch {
+        return ''
+      }
+    },
+    placeholderData: ''
+  })
+
   return (
     <div className="max-w-md mx-auto">
       <h1 className="text-2xl font-semibold mb-4">Create account</h1>
+      {googleUrlError && (
+        <div className="mb-4 text-amber-700 text-sm" role="alert">
+          Google sign-up isn't available right now. Try email/password, or contact the admin to configure Google OAuth.
+        </div>
+      )}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -74,9 +95,20 @@ export function SignupPage() {
           {isSignupLoading ? 'Creating…' : 'Create account'}
         </Button>
       </form>
-      <p className="text-sm mt-4">
-        Have an account? <Link to="/login" className="text-emerald-700">Sign in</Link>
-      </p>
+      <div className="mt-4 space-y-3">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => { if (googleUrl) window.location.href = googleUrl }}
+          className="w-full"
+          disabled={googleUrlLoading || !googleUrl}
+        >
+          Continue with Google
+        </Button>
+        <p className="text-sm text-center">
+          Have an account? <Link to="/login" className="text-emerald-700">Sign in</Link>
+        </p>
+      </div>
     </div>
   )
 }

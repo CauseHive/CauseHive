@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { Pagination as UIPagination } from '@/components/ui/pagination'
 import { Empty } from '@/components/ui/empty'
+import { ShoppingCart } from 'lucide-react'
 
 export function CausesPage() {
   const [params, setParams] = useSearchParams()
@@ -28,7 +29,7 @@ export function CausesPage() {
   const derivedCategories = useMemo(() => {
     if (categories && categories.length > 0) return categories
     const list = data?.results ?? []
-    const map = new Map<string, any>()
+    const map = new Map<string, { id: string; name: string; description?: string; icon?: string; color?: string; cause_count?: number }>()
     list.forEach((cause) => {
       const cat = cause.category
       if (!cat?.id) return
@@ -60,15 +61,24 @@ export function CausesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">Discover Causes</h1>
-        <form onSubmit={onSearch} className="flex gap-2">
-          <input 
-            name="q" 
-            defaultValue={search} 
-            placeholder="Search causes" 
-            className="rounded-md border px-3 py-2 w-64 bg-white dark:bg-slate-900" 
-          />
-          <Button type="submit">Search</Button>
-        </form>
+        <div className="flex items-center gap-3">
+          <form onSubmit={onSearch} className="flex gap-2">
+            <input 
+              name="q" 
+              defaultValue={search} 
+              placeholder="Search causes" 
+              className="rounded-md border px-3 py-2 w-64 bg-white dark:bg-slate-900" 
+            />
+            <Button type="submit">Search</Button>
+          </form>
+          <Link 
+            to="/app/cart" 
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 hover:text-emerald-600 border border-slate-200 hover:border-emerald-200 rounded-lg transition-colors"
+          >
+            <ShoppingCart className="h-4 w-4" />
+            Cart
+          </Link>
+        </div>
       </div>
 
       <div className="flex gap-3 overflow-x-auto">

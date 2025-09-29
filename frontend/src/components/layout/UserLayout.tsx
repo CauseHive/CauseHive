@@ -13,7 +13,8 @@ import {
   Bell, 
   CreditCard,
   LogOut,
-  Menu
+  Menu,
+  ShoppingCart
 } from 'lucide-react'
 
 export default function UserLayout() {
@@ -45,6 +46,7 @@ export default function UserLayout() {
     profile: <User className="h-5 w-5 flex-shrink-0" />,
     settings: <Settings className="h-5 w-5 flex-shrink-0" />,
     bell: <Bell className="h-5 w-5 flex-shrink-0" />,
+    cart: <ShoppingCart className="h-5 w-5 flex-shrink-0" />,
     withdraw: <CreditCard className="h-5 w-5 flex-shrink-0" />,
     logout: <LogOut className="h-5 w-5 flex-shrink-0" />,
     menu: <Menu className="h-4 w-4" />
@@ -53,15 +55,14 @@ export default function UserLayout() {
     <div className="flex min-h-screen w-full">
       {/* Sidebar */}
       <aside
-        className={(collapsed? 'w-16':'w-60') + ' group/sidebar transition-all duration-300 border-r border-slate-200/60 dark:border-slate-800/60 flex flex-col bg-white dark:bg-slate-950 fixed h-full z-30 shadow-lg'}
+        className={(collapsed? 'w-14':'w-60') + ' group/sidebar transition-all duration-300 border-r border-slate-200/60 dark:border-slate-800/60 flex flex-col bg-white dark:bg-slate-950 fixed h-screen z-30 shadow-lg left-0 top-7'}
         onMouseEnter={() => { if (!isMobile) setCollapsed(false) }}
         onMouseLeave={() => { if (!isMobile) setCollapsed(true) }}
       >
-        <div className="flex items-center justify-between p-4 border-b border-slate-200/40 dark:border-slate-800/40 bg-gradient-to-r from-emerald-50 to-transparent dark:from-emerald-900/10">
+        <div className="flex items-center justify-between p-3 border-b border-slate-200/40 dark:border-slate-800/40">
           {!collapsed && (
-            <div>
-              <p className="text-[10px] uppercase tracking-wide text-emerald-600 dark:text-emerald-400 font-semibold">Dashboard</p>
-              <div className="font-medium text-sm truncate max-w-[9rem] text-slate-900 dark:text-slate-100">{user?.first_name ? `${user.first_name} ${user.last_name ?? ''}`.trim() : user?.email}</div>
+            <div className="font-medium text-sm truncate max-w-[8rem] text-slate-900 dark:text-slate-100">
+              {user?.first_name ? `${user.first_name} ${user.last_name ?? ''}`.trim() : user?.email}
             </div>
           )}
           {/* Mobile toggle button (hamburger) */}
@@ -81,6 +82,7 @@ export default function UserLayout() {
             { to:'/app/causes', label:'Causes', icon:icons.causes },
             { to:'/app/donations', label:'Donations', icon:icons.donations },
             { to:'/app/causes/create', label:'Create Cause', icon:icons.create },
+            { to:'/app/cart', label:'Cart', icon:icons.cart },
             { to:'/app/profile', label:'Profile', icon:icons.profile },
             { to:'/app/settings', label:'Settings', icon:icons.settings },
             { to:'/app/notifications', label:'Notifications', icon:icons.bell, badge: unreadCount },
@@ -88,12 +90,13 @@ export default function UserLayout() {
           ].map(item => (
             <NavLink key={item.to} to={item.to} end={item.end}
               className={({isActive})=>[
-                'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden',
+                'group flex items-center rounded-lg py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden',
+                collapsed ? 'justify-center px-2' : 'gap-3 px-3',
                 isActive 
                   ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/30' 
                   : 'hover:bg-slate-50 dark:hover:bg-slate-900/50 text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:shadow-sm'
               ].join(' ')}>
-              <span className="text-inherit flex items-center justify-center transition-transform group-hover:scale-110">{item.icon}</span>
+              <span className="text-inherit flex items-center justify-center transition-transform group-hover:scale-110" title={collapsed ? item.label : ''}>{item.icon}</span>
               <span
                 className={(collapsed? 'opacity-0 translate-x-2 pointer-events-none':'opacity-100 translate-x-0') + ' transition-all duration-300 ease-out truncate'}
               >{item.label}</span>
@@ -107,16 +110,18 @@ export default function UserLayout() {
         <div className="p-3 border-t border-slate-200/60 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/20">
           <button
             onClick={()=> { authStore.clear(); navigate('/', { replace: true }) }}
-            className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group"
+            className={`w-full mb-4 flex items-center rounded-lg py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group ${
+              collapsed ? 'justify-center px-2' : 'gap-3 px-3'
+            }`}
             aria-label="Sign out"
           >
-            <span className="transition-transform group-hover:scale-110">{icons.logout}</span>
+            <span className="transition-transform group-hover:scale-110" title={collapsed ? 'Logout' : ''}>{icons.logout}</span>
             <span className={(collapsed? 'opacity-0 translate-x-2 pointer-events-none':'opacity-100 translate-x-0') + ' transition-all duration-300 ease-out truncate'}>Logout</span>
           </button>
         </div>
       </aside>
       {/* Main content with left margin to account for fixed sidebar */}
-      <section className={(collapsed? 'ml-16':'ml-60') + ' flex-1 p-4 md:p-6 transition-all duration-300'}>
+      <section className={(collapsed? 'ml-14':'ml-60') + ' flex-1 p-4 md:p-6 transition-all duration-300'}>
         <Outlet />
       </section>
     </div>

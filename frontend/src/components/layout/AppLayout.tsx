@@ -1,6 +1,5 @@
 import { Outlet, Link, NavLink, useLocation, useNavigation, useNavigate } from 'react-router-dom'
 import { authStore } from '@/lib/auth'
-import { postAuth } from '../../lib/postAuth'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { useUserProfile } from '@/hooks/useUserProfile'
@@ -27,14 +26,7 @@ export function AppLayout() {
   const { data: combined } = useUserProfile()
   const profile = combined?.profile
 
-  useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    const at = params.get('access_token')
-    if (at) {
-      // Use centralized helper for future extensibility
-      postAuth({ access: at, navigate })
-    }
-  }, [location.search, navigate])
+  // Google OAuth is now handled by dedicated callback page
 
   useEffect(() => {
     NProgress.configure({ showSpinner: false })

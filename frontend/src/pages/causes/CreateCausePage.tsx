@@ -88,8 +88,8 @@ export default function CreateCausePage() {
   }, [previewUrl])
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <Card className="mt-6 bg-white text-slate-900">
+    <div className="max-w-3xl mx-auto mt-0">
+      <Card className=" bg-white mt-0 text-slate-900">
         <CardHeader>
           <CardTitle>Create a Cause</CardTitle>
           <CardDescription>Share your cause so donors can find and support it. Fields marked with * are required.</CardDescription>

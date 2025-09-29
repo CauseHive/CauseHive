@@ -14,7 +14,9 @@ import {
   CheckCircle, 
   Clock,
   Mail,
-  Calendar
+  Calendar,
+  UserCircle,
+  Loader2
 } from 'lucide-react'
 
 type FieldStatus = 'idle' | 'saving' | 'saved'
@@ -86,8 +88,44 @@ export function ProfilePage() {
     updateProfile.mutate(fd, { onSuccess: () => mark('profile_picture','saved'), onError: () => mark('profile_picture','idle') })
   }
 
-  if (isLoading) return <div>Loading profile…</div>
-  if (isError || !composed) return <div className="text-red-600">Failed to load profile.</div>
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl space-y-6">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-emerald-600" />
+            <p className="text-slate-600 dark:text-slate-400">Loading your profile…</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (isError || !composed) {
+    return (
+      <div className="max-w-4xl space-y-6">
+        <Card>
+          <CardContent className="flex items-center justify-center min-h-[300px]">
+            <div className="text-center space-y-4">
+              <div className="h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center mx-auto">
+                <User className="h-8 w-8 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Unable to load profile</h3>
+                <p className="text-slate-600 dark:text-slate-400">There was an error loading your profile information. Please try refreshing the page.</p>
+              </div>
+              <Button 
+                onClick={() => window.location.reload()} 
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
+                Refresh Page
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   function handleWithdrawalChange<K extends keyof WithdrawalAddress>(key: K, value: WithdrawalAddress[K]) {
     if (!withdrawal) return
@@ -105,13 +143,13 @@ export function ProfilePage() {
   const badge = (field: string) => {
     const st = fieldStatus[field]
     if (st === 'saving') return (
-      <span className="ml-2 inline-flex items-center gap-1 text-xs text-amber-600">
-        <Clock className="h-3 w-3 animate-spin" />
+      <span className="ml-2 inline-flex items-center gap-1 text-xs text-amber-600 animate-pulse">
+        <Loader2 className="h-3 w-3 animate-spin" />
         Saving…
       </span>
     )
     if (st === 'saved') return (
-      <span className="ml-2 inline-flex items-center gap-1 text-xs text-emerald-600">
+      <span className="ml-2 inline-flex items-center gap-1 text-xs text-emerald-600 animate-fade-in">
         <CheckCircle className="h-3 w-3" />
         Saved
       </span>
@@ -123,19 +161,26 @@ export function ProfilePage() {
     <div className="max-w-4xl space-y-6">
       {/* Profile Header */}
       <Card className="overflow-hidden">
-        <div className="h-32 bg-gradient-to-r from-emerald-500 to-emerald-600"></div>
+        <div className="h-40 bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
         <CardContent className="relative pt-0 pb-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-16">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 -mt-10">
             <div className="relative">
-              <img 
-                src={preview || composed.profile_picture || '/profile_pictures/default.jpg'} 
-                alt={composed.full_name} 
-                className="h-32 w-32 rounded-full object-cover border-4 border-white shadow-lg bg-white" 
-              />
+              {preview || composed.profile_picture ? (
+                <img 
+                  src={preview || composed.profile_picture || ''} 
+                  alt={composed.full_name || 'Profile picture'} 
+                  className="h-32 w-32 rounded-full object-cover border-4 border-white shadow-lg bg-white" 
+                />
+              ) : (
+                <div className="h-32 w-32 rounded-full border-4 border-white shadow-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                  <UserCircle className="h-20 w-20 text-slate-400 dark:text-slate-500" />
+                </div>
+              )}
               <Button
                 size="sm"
                 onClick={() => fileRef.current?.click()}
                 className="absolute bottom-2 right-2 rounded-full h-10 w-10 p-0 bg-emerald-600 hover:bg-emerald-700 shadow-lg"
+                title="Upload profile picture"
               >
                 <Camera className="h-4 w-4" />
               </Button>
@@ -146,11 +191,23 @@ export function ProfilePage() {
                 <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{composed.full_name || 'Anonymous User'}</h1>
                 {badge('profile_picture')}
               </div>
-              <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
+              <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
                 <div className="flex items-center gap-1">
                   <Mail className="h-4 w-4" />
                   {composed.email}
                 </div>
+                {composed.phone_number && (
+                  <div className="flex items-center gap-1">
+                    <Phone className="h-4 w-4" />
+                    {composed.phone_number}
+                  </div>
+                )}
+                {composed.address && (
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-4 w-4" />
+                    {composed.address}
+                  </div>
+                )}
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
                   Joined {composed.updated_at ? new Date(composed.updated_at).toLocaleDateString() : 'Recently'}
@@ -187,6 +244,7 @@ export function ProfilePage() {
                     mark('first_name','saving'); 
                     debouncedUserPatch({ first_name: e.target.value }, 'first_name') 
                   }} 
+                  placeholder="Enter your first name"
                 />
               </div>
               <div className="space-y-2">
@@ -201,6 +259,7 @@ export function ProfilePage() {
                     mark('last_name','saving'); 
                     debouncedUserPatch({ last_name: e.target.value }, 'last_name') 
                   }} 
+                  placeholder="Enter your last name"
                 />
               </div>
             </div>
@@ -256,12 +315,28 @@ export function ProfilePage() {
               />
             </div>
 
-            <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-900/20 rounded-lg">
-              <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Account Details</h4>
-              <div className="text-xs text-slate-500 space-y-1">
-                <p><span className="font-semibold">Profile ID:</span> {composed.id}</p>
-                <p><span className="font-semibold">User ID:</span> {composed.user_id}</p>
-                <p><span className="font-semibold">Last updated:</span> {composed.updated_at ? new Date(composed.updated_at).toLocaleString() : '—'}</p>
+            <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-900/20 rounded-lg border border-slate-200 dark:border-slate-700">
+              <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Account Information
+              </h4>
+              <div className="text-xs text-slate-600 dark:text-slate-400 space-y-2">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="font-semibold text-slate-700 dark:text-slate-300">Profile ID</p>
+                    <p className="text-slate-500 dark:text-slate-400">{composed.id}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-700 dark:text-slate-300">User ID</p>
+                    <p className="text-slate-500 dark:text-slate-400">{composed.user_id}</p>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-600">
+                  <p className="font-semibold text-slate-700 dark:text-slate-300">Last Profile Update</p>
+                  <p className="text-slate-500 dark:text-slate-400">
+                    {composed.updated_at ? new Date(composed.updated_at).toLocaleString() : 'Never updated'}
+                  </p>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -292,7 +367,7 @@ export function ProfilePage() {
                     onError: () => mark('bio','idle') 
                   }) 
                 }} 
-                className="w-full h-40 resize-none rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent" 
+                className="w-full h-40 resize-none rounded-lg border bg-white border-slate-200 dark:border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent" 
                 placeholder="Tell supporters about yourself, your passions, and what drives you to support causes..."
               />
               <p className="text-xs text-slate-500">Changes are saved automatically when you finish editing.</p>
@@ -318,7 +393,7 @@ export function ProfilePage() {
               <Label htmlFor="payment_method">Payment Method</Label>
               <select 
                 id="payment_method"
-                className="w-full rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                className="w-full rounded-lg border bg-white border-slate-200 dark:border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
                 value={currentMethod} 
                 onChange={(e) => handleWithdrawalChange('payment_method', e.target.value as WithdrawalAddress['payment_method'])}
               >
@@ -391,16 +466,22 @@ export function ProfilePage() {
               </div>
             )}
 
-            <div className="mt-4 p-3 rounded-lg bg-slate-50 dark:bg-slate-900/20">
+            <div className="mt-4 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
               {withdrawalComplete ? (
                 <div className="flex items-center gap-2 text-sm text-emerald-600">
                   <CheckCircle className="h-4 w-4" />
                   <span className="font-medium">Withdrawal information is complete</span>
+                  <span className="text-xs text-slate-500 ml-2">You can receive donations and withdrawals</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 text-sm text-amber-600">
-                  <Clock className="h-4 w-4" />
-                  <span>Missing required fields: {missing.join(', ')}</span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-amber-600">
+                    <Clock className="h-4 w-4" />
+                    <span className="font-medium">Incomplete withdrawal setup</span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
+                    Please fill in the following required fields to enable withdrawals: <span className="font-semibold">{missing.join(', ')}</span>
+                  </p>
                 </div>
               )}
             </div>

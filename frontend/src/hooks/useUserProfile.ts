@@ -42,8 +42,24 @@ export function useUserProfile() {
   const query = useQuery<CombinedResponse>({
     queryKey: ['user-combined'],
     queryFn: async () => {
-      const { data } = await api.get<CombinedResponse>('/user/combined/')
-      return data
+      try {
+        // Fetch user and profile data separately since /user/combined/ doesn't exist
+        const [userResponse, profileResponse] = await Promise.all([
+          api.get<CombinedUser>('/user/me/'),
+          api.get<CombinedProfile>('/user/profile/').catch(() => ({ data: {} as CombinedProfile }))
+        ])
+        return {
+          user: userResponse.data,
+          profile: profileResponse.data
+        }
+      } catch {
+        // If user endpoint fails, try to get basic user info from auth store
+        const user = JSON.parse(localStorage.getItem('user') || '{}')
+        return {
+          user: user as CombinedUser,
+          profile: {} as CombinedProfile
+        }
+      }
     },
     staleTime: 60_000
   })

@@ -30,6 +30,8 @@ const PrivacyPage = lazyWithRetry(() => import('@/pages/info/PrivacyPage').then(
 const HowItWorksPage = lazyWithRetry(() => import('@/pages/info/HowItWorksPage').then(m => ({ default: m.default })))
 const FaqPage = lazyWithRetry(() => import('@/pages/info/FaqPage').then(m => ({ default: m.default })))
 const ContactPage = lazyWithRetry(() => import('@/pages/info/ContactPage').then(m => ({ default: m.default })))
+const EmailVerificationPage = lazyWithRetry(() => import('@/pages/auth/EmailVerificationPage'))
+const GoogleCallbackPage = lazyWithRetry(() => import('@/pages/auth/GoogleCallbackPage'))
 
 export const router = createBrowserRouter([
   {
@@ -40,12 +42,13 @@ export const router = createBrowserRouter([
         { index: true, element: <Suspense fallback={<LoadingScreen />}><HomePage /></Suspense> },
         { path: 'login', element: <Suspense fallback={<LoadingScreen />}><LoginPage /></Suspense> },
         { path: 'signup', element: <Suspense fallback={<LoadingScreen />}><SignupPage /></Suspense> },
+        { path: 'auth/google/callback', element: <Suspense fallback={<LoadingScreen />}><GoogleCallbackPage /></Suspense> },
         { path: 'password-reset', element: <Suspense fallback={<LoadingScreen />}><PasswordResetRequestPage /></Suspense> },
-  { path: 'password-reset/confirm', element: <Suspense fallback={<LoadingScreen />}><PasswordResetConfirmPage /></Suspense> },
-  { path: 'reset-password-confirm/:uid/:token', element: <Suspense fallback={<LoadingScreen />}><PasswordResetConfirmPage /></Suspense> },
+        { path: 'password-reset/confirm', element: <Suspense fallback={<LoadingScreen />}><PasswordResetConfirmPage /></Suspense> },
+        { path: 'reset-password-confirm/:uid/:token', element: <Suspense fallback={<LoadingScreen />}><PasswordResetConfirmPage /></Suspense> },
         { path: 'payment/callback', element: <Suspense fallback={<LoadingScreen />}><PaymentCallbackPage /></Suspense> },
         { path: 'causes', element: <Suspense fallback={<LoadingScreen />}><CausesPage /></Suspense> },
-  { path: 'causes/create', element: <Suspense fallback={<LoadingScreen />}><CreateCausePage /></Suspense> },
+        { path: 'causes/create', element: <Suspense fallback={<LoadingScreen />}><CreateCausePage /></Suspense> },
         { path: 'causes/:id', element: <Suspense fallback={<LoadingScreen />}><CauseDetailsPage /></Suspense> },
       // Public info pages
       { path: 'terms', element: <Suspense fallback={<LoadingScreen />}><TermsPage /></Suspense> },
@@ -54,7 +57,11 @@ export const router = createBrowserRouter([
       { path: 'faq', element: <Suspense fallback={<LoadingScreen />}><FaqPage /></Suspense> },
       { path: 'contact', element: <Suspense fallback={<LoadingScreen />}><ContactPage /></Suspense> },
 
+      // Email verification route
+      { path: 'verify-email/:uidb64/:token', element: <Suspense fallback={<LoadingScreen />}><EmailVerificationPage /></Suspense> },
+      
       // Back-compat: redirect old paths into the new /app area
+      { path: 'dashboard', element: <Navigate to="/app" replace /> },
       { path: 'cart', element: <Navigate to="/app/cart" replace /> },
       { path: 'donations', element: <Navigate to="/app/donations" replace /> },
       { path: 'profile', element: <Navigate to="/app/profile" replace /> },
@@ -68,6 +75,7 @@ export const router = createBrowserRouter([
         </ProtectedRoute>
       ), children: [
         { index: true, element: <Suspense fallback={<LoadingScreen />}><DashboardPage /></Suspense> },
+        { path: 'dashboard', element: <Suspense fallback={<LoadingScreen />}><DashboardPage /></Suspense> },
         { path: 'causes', element: <Suspense fallback={<LoadingScreen />}><CausesPage /></Suspense> },
         { path: 'causes/create', element: <Suspense fallback={<LoadingScreen />}><CreateCausePage /></Suspense> },
         { path: 'donations', element: <Suspense fallback={<LoadingScreen />}><DonationsPage /></Suspense> },

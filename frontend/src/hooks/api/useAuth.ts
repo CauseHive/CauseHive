@@ -5,6 +5,18 @@ import { authStore } from '@/lib/auth'
 import { postAuth } from '@/lib/postAuth'
 import { useToast } from '@/components/ui/toast'
 
+interface ApiError {
+  response?: {
+    data?: {
+      error?: string
+      detail?: string
+      email?: string | string[]
+      password?: string | string[]
+      non_field_errors?: string[]
+    }
+  }
+}
+
 /**
  * Custom hook for authentication operations
  * Provides login, signup, logout with proper error handling and state management
@@ -29,48 +41,72 @@ export function useAuth() {
       // Invalidate all queries to refresh user-specific data
       queryClient.invalidateQueries()
     },
-    onError: (error: any) => {
-      const message = error.response?.data?.error || 'Login failed. Please check your credentials.'
-      notify({ 
-        title: 'Login Failed', 
-        description: message, 
-        variant: 'error' 
-      })
+    onError: (error: unknown) => {
+      const errorData = (error as ApiError)?.response?.data
+      let message = 'Login failed. Please check your credentials.'
+      let isVerificationError = false
+      
+      if (errorData?.error) {
+        message = errorData.error
+        // Check if this is an email verification error
+        if (message.toLowerCase().includes('verify') || message.toLowerCase().includes('unverified')) {
+          isVerificationError = true
+        }
+      } else if (errorData?.detail) {
+        message = errorData.detail
+        if (message.toLowerCase().includes('verify') || message.toLowerCase().includes('unverified')) {
+          isVerificationError = true
+        }
+      } else if (errorData?.non_field_errors?.[0]) {
+        message = errorData.non_field_errors[0]
+        if (message.toLowerCase().includes('verify') || message.toLowerCase().includes('unverified')) {
+          isVerificationError = true
+        }
+      }
+      
+      if (isVerificationError) {
+        navigate('/login?unverified=true')
+        notify({ 
+          title: 'Email Not Verified', 
+          description: 'Please verify your email address before signing in.', 
+          variant: 'error' 
+        })
+      } else {
+        notify({ 
+          title: 'Login Failed', 
+          description: message, 
+          variant: 'error' 
+        })
+      }
     }
   })
 
   const signupMutation = useMutation({
     mutationFn: async (userData: SignupData) => {
-      await authService.signup(userData)
-      // Auto-login after signup
-      return authService.login({ 
-        email: userData.email, 
-        password: userData.password 
-      })
+      // Just signup, don't auto-login - user needs to verify email first
+      return authService.signup(userData)
     },
-    onSuccess: (data) => {
-      postAuth({
-        access: data.access,
-        refresh: data.refresh,
-        user: data.user,
-        navigate,
-        notify,
-        welcomeTitle: 'Welcome to CauseHive',
-        welcomeDescription: 'Your account has been created successfully!'
+    onSuccess: () => {
+      notify({
+        title: 'Account Created',
+        description: 'Please check your email to verify your account before signing in.',
+        variant: 'success'
       })
-      queryClient.invalidateQueries()
+      navigate('/login?unverified=true')
     },
-    onError: (error: any) => {
-      const errorData = error.response?.data
+    onError: (error: unknown) => {
+      const errorData = (error as ApiError)?.response?.data
       let message = 'Signup failed. Please try again.'
       
       if (errorData) {
         if (errorData.email) {
-          message = 'This email is already registered.'
+          message = Array.isArray(errorData.email) ? (errorData.email[0] || 'This email is already registered.') : 'This email is already registered.'
         } else if (errorData.password) {
-          message = 'Password requirements not met.'
+          message = Array.isArray(errorData.password) ? (errorData.password[0] || 'Password requirements not met.') : 'Password requirements not met.'
         } else if (errorData.non_field_errors) {
-          message = errorData.non_field_errors[0]
+          message = errorData.non_field_errors[0] || 'Signup failed'
+        } else if (errorData.detail) {
+          message = errorData.detail
         }
       }
       
