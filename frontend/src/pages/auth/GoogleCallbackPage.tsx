@@ -14,28 +14,53 @@ export default function GoogleCallbackPage() {
 
   const googleAuthMutation = useMutation({
     mutationFn: async ({ code, state }: { code: string; state?: string }) => {
+      console.log('Completing Google OAuth with code:', code.substring(0, 10) + '...')
       return authService.completeGoogleAuth(code, state)
     },
     onSuccess: (data) => {
+      console.log('Google OAuth completed successfully:', data)
       setStatus('success')
-      // Store auth data
+      
+      // Store auth data in multiple places for reliability
       authStore.setTokens(data.access, data.refresh)
       authStore.setUser(data.user)
+      localStorage.setItem('ch_access', data.access)
+      localStorage.setItem('ch_refresh', data.refresh)
+      localStorage.setItem('ch_user', JSON.stringify(data.user))
       
       notify({
-        title: 'Welcome!',
-        description: `Successfully signed in with Google.`,
+        title: 'Welcome to CauseHive!',
+        description: `Successfully signed in with Google as ${data.user.email}.`,
         variant: 'success'
       })
       
       // Redirect to app
       setTimeout(() => {
         navigate('/app', { replace: true })
-      }, 1000)
+      }, 1500)
     },
     onError: (error: unknown) => {
+      console.error('Google OAuth completion failed:', error)
       setStatus('error')
-      const errorMessage = error instanceof Error ? error.message : 'Google sign-in failed. Please try again.'
+      
+      let errorMessage = 'Google sign-in failed. Please try again.'
+      const err = error as { response?: { status?: number; data?: { error?: string; detail?: string } }; message?: string }
+      
+      if (err.response?.data?.error) {
+        errorMessage = err.response.data.error
+      } else if (err.response?.data?.detail) {
+        errorMessage = err.response.data.detail
+      } else if (err.message) {
+        errorMessage = err.message
+      }
+      
+      // Check if it's a backend configuration issue
+      if (err.response?.status === 404) {
+        errorMessage = 'Google OAuth is not configured on the server. Please contact support.'
+      } else if (err.response?.status === 400) {
+        errorMessage = 'Invalid OAuth request. Please try signing in again.'
+      }
+      
       notify({
         title: 'Sign-in Failed',
         description: errorMessage,

@@ -46,7 +46,7 @@ export default function EmailVerificationPage() {
         <CardContent className="text-center space-y-4">
           {status === 'verifying' && (
             <>
-              <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-500" />
+              <Loader2 className="h-12 w-12 animate-spin mx-auto text-emerald-500" />
               <p>Verifying your email address...</p>
             </>
           )}

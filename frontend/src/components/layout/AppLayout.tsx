@@ -53,9 +53,9 @@ export function AppLayout() {
     authStore.clear(); navigate('/', { replace: true })
   }
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
       <Toaster>
-      <header className="sticky top-0 z-40 border-b border-slate-200/40 dark:border-slate-800/60 backdrop-blur bg-white/70 dark:bg-slate-950/70">
+      <header className="sticky top-0 z-40 border-b border-slate-800/60 backdrop-blur bg-slate-950/90">
         <div className="container flex items-center justify-between py-3">
           <Link to="/" className="font-semibold tracking-tight text-lg">
             CauseHive

@@ -65,7 +65,7 @@ export function DonationsPage() {
           onSubmit={(e)=>{e.preventDefault(); const form=new FormData(e.currentTarget); const q=String(form.get('q')??''); const p=new URLSearchParams(params); if(q) p.set('search',q); else p.delete('search'); p.set('page','1'); setParams(p)}}
           className="flex gap-2"
         >
-          <input name="q" defaultValue={search} placeholder="Search by cause" className="rounded-md border px-3 py-2 bg-white dark:bg-slate-900" />
+          <input name="q" defaultValue={search} placeholder="Search by cause" className="rounded-md border border-slate-600 px-3 py-2 bg-slate-800 text-slate-100" />
           <button className="rounded-md border px-3 py-2">Search</button>
         </form>
       </div>

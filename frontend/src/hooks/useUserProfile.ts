@@ -43,10 +43,18 @@ export function useUserProfile() {
     queryKey: ['user-combined'],
     queryFn: async () => {
       try {
-        // Fetch user and profile data separately since /user/combined/ doesn't exist
+        // Fetch user and profile data separately with better error handling
         const [userResponse, profileResponse] = await Promise.all([
-          api.get<CombinedUser>('/user/me/'),
-          api.get<CombinedProfile>('/user/profile/').catch(() => ({ data: {} as CombinedProfile }))
+          api.get<CombinedUser>('/user/me/').catch((error) => {
+            console.error('Failed to fetch user data:', error)
+            // Try alternative endpoint or return cached user data
+            const cachedUser = JSON.parse(localStorage.getItem('ch_user') || '{}')
+            return { data: cachedUser as CombinedUser }
+          }),
+          api.get<CombinedProfile>('/user/profile/').catch((error) => {
+            console.error('Failed to fetch profile data:', error)
+            return { data: {} as CombinedProfile }
+          })
         ])
         return {
           user: userResponse.data,
@@ -75,7 +83,7 @@ export function useUserProfile() {
   })
 
   const updateUser = useMutation({
-    mutationFn: async (payload: Partial<CombinedUser>) => api.patch('/user/me/', payload),
+    mutationFn: async (payload: Partial<CombinedUser>) => api.patch('/user/details/', payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['user-combined'] })
   })
 

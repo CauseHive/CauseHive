@@ -3,6 +3,7 @@ import { authStore } from '@/lib/auth'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { useState, useEffect, useMemo } from 'react'
+import { AuthDebugPanel } from '@/components/debug/AuthDebugPanel'
 import { 
   LayoutDashboard, 
   Heart, 
@@ -55,7 +56,7 @@ export default function UserLayout() {
     <div className="flex min-h-screen w-full">
       {/* Sidebar */}
       <aside
-        className={(collapsed? 'w-14':'w-60') + ' group/sidebar transition-all duration-300 border-r border-slate-200/60 dark:border-slate-800/60 flex flex-col bg-white dark:bg-slate-950 fixed h-screen z-30 shadow-lg left-0 top-7'}
+        className={(collapsed? 'w-14':'w-60') + ' group/sidebar transition-all duration-300 border-r border-slate-800/60 flex flex-col bg-slate-950 fixed h-screen z-30 shadow-lg left-0 top-7'}
         onMouseEnter={() => { if (!isMobile) setCollapsed(false) }}
         onMouseLeave={() => { if (!isMobile) setCollapsed(true) }}
       >
@@ -124,6 +125,9 @@ export default function UserLayout() {
       <section className={(collapsed? 'ml-14':'ml-60') + ' flex-1 p-4 md:p-6 transition-all duration-300'}>
         <Outlet />
       </section>
+      
+      {/* Debug panel for development */}
+      <AuthDebugPanel />
     </div>
   )
 }

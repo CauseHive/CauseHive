@@ -56,7 +56,7 @@ export default function CreateCausePage() {
           if (newCategoryDescription) fd.append('category_data[description]', newCategoryDescription)
         }
         fd.append('cover_image', file)
-        return api.post('/causes/create/', fd)
+        return api.post('/causes/', fd)
       }
 
       // No file selected: send JSON so nested objects (category_data) are preserved
@@ -65,7 +65,7 @@ export default function CreateCausePage() {
       if (target) payload.target_amount = target
       if (categoryId) payload.category = categoryId
       else if (newCategory) payload.category_data = { name: newCategory, description: newCategoryDescription }
-      return api.post('/causes/create/', payload)
+      return api.post('/causes/', payload)
     },
     onSuccess: (res) => {
       notify({ title: 'Cause submitted', description: 'Awaiting review', variant: 'success' })
@@ -89,7 +89,7 @@ export default function CreateCausePage() {
 
   return (
     <div className="max-w-3xl mx-auto mt-0">
-      <Card className=" bg-white mt-0 text-slate-900">
+      <Card className="bg-slate-900 mt-0 text-slate-100">
         <CardHeader>
           <CardTitle>Create a Cause</CardTitle>
           <CardDescription>Share your cause so donors can find and support it. Fields marked with * are required.</CardDescription>
@@ -103,7 +103,7 @@ export default function CreateCausePage() {
 
             <div>
               <Label htmlFor="description">Description</Label>
-              <textarea id="description" value={description} onChange={(e)=> setDescription(e.target.value)} className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm h-40 resize-none" placeholder="Explain the purpose and impact" />
+              <textarea id="description" value={description} onChange={(e)=> setDescription(e.target.value)} className="mt-1 w-full rounded-md border border-slate-600 bg-slate-800 text-slate-100 px-3 py-2 text-sm h-40 resize-none" placeholder="Explain the purpose and impact" />
             </div>
 
             <div>
@@ -116,7 +116,7 @@ export default function CreateCausePage() {
                 {categories && categories.length > 0 ? (
                 <div className="mt-1">
                   <Select onValueChange={(val) => setCategoryId(val)}>
-                    <SelectTrigger className="w-full flex h-10 items-center justify-between rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"><SelectValue placeholder="Select category (optional)" /></SelectTrigger>
+                    <SelectTrigger className="w-full flex h-10 items-center justify-between rounded-md border border-slate-600 bg-slate-800 text-slate-100 px-3 py-2 text-sm"><SelectValue placeholder="Select category (optional)" /></SelectTrigger>
                     <SelectContent>
                       {categories.map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
                     </SelectContent>
@@ -125,7 +125,7 @@ export default function CreateCausePage() {
               ) : (
                 <div className="space-y-2 mt-1">
                   <Input value={newCategory} onChange={(e)=> setNewCategory(e.target.value)} placeholder="Category name" />
-                    <textarea value={newCategoryDescription} onChange={(e)=> setNewCategoryDescription(e.target.value)} placeholder="Category description (optional)" className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 h-20 resize-none text-sm" />
+                    <textarea value={newCategoryDescription} onChange={(e)=> setNewCategoryDescription(e.target.value)} placeholder="Category description (optional)" className="w-full rounded-md border border-slate-600 bg-slate-800 text-slate-100 px-3 py-2 h-20 resize-none text-sm" />
                     <p className="text-xs text-slate-600">No categories available yet. Provide a new category name and optional description.</p>
                 </div>
               )}
@@ -143,12 +143,12 @@ export default function CreateCausePage() {
                   if (previewUrl) URL.revokeObjectURL(previewUrl)
                   setPreviewUrl(null)
                 }
-              }} type="file" accept="image/*" className="mt-1 block w-full text-sm text-slate-700 file:border file:border-slate-300 file:bg-white file:text-slate-700 file:rounded-md file:px-3 file:py-2" />
+              }} type="file" accept="image/*" className="mt-1 block w-full text-sm text-slate-300 file:border file:border-slate-600 file:bg-slate-800 file:text-slate-100 file:rounded-md file:px-3 file:py-2" />
               <p className="text-xs text-slate-600 mt-2">Upload an image that represents the cause. Max size depends on backend limits.</p>
 
               <div className="mt-3">
                 <Label>Preview</Label>
-                <div className="mt-1 h-40 w-full rounded-md border border-slate-200 bg-white flex items-center justify-center overflow-hidden">
+                <div className="mt-1 h-40 w-full rounded-md border border-slate-600 bg-slate-800 flex items-center justify-center overflow-hidden">
                   {previewUrl ? <img src={previewUrl} alt="cover preview" className="object-cover h-full w-full" /> : <span className="text-sm text-slate-400">No image selected</span>}
                 </div>
               </div>

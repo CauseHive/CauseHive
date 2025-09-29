@@ -79,7 +79,7 @@ export function WithdrawalsPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Withdrawals</h1>
 
-      <div className="rounded-lg border p-4 space-y-3 bg-white dark:bg-slate-900">
+      <div className="rounded-lg border border-slate-700 p-4 space-y-3 bg-slate-900">
         <div className="grid sm:grid-cols-2 gap-3">
           <label className="text-sm">Amount (GHS)
             <Input type="number" min={1} value={amount} onChange={(e)=> setAmount(Number(e.target.value))} />

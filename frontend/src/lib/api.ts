@@ -4,7 +4,10 @@ import { authStore } from './auth'
 import { API_BASE_URL } from './config'
 
 export const api = axios.create({
-  baseURL: API_BASE_URL
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 })
 
 api.interceptors.request.use((config) => {
@@ -23,6 +26,15 @@ api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config
+    
+    // Log API errors for debugging
+    console.error('API Error:', {
+      method: error.config?.method?.toUpperCase(),
+      url: error.config?.url,
+      status: error.response?.status,
+      data: error.response?.data
+    })
+    
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true
       if (isRefreshing) {
@@ -46,8 +58,16 @@ api.interceptors.response.use(
           original.headers.Authorization = `Bearer ${newToken}`
           return api(original)
         }
-      } catch {
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError)
         authStore.clear()
+        
+        // Only redirect if we're not already on auth pages
+        if (!window.location.pathname.includes('/login') && 
+            !window.location.pathname.includes('/signup') &&
+            !window.location.pathname.includes('/verify-email')) {
+          window.location.href = '/login'
+        }
       } finally {
         isRefreshing = false
       }

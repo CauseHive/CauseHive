@@ -17,7 +17,7 @@ export function CausesPage() {
   const category = params.get('category') ?? ''
 
   const { data: categories, isLoading: categoriesLoading } = useCategories()
-  const { data, isLoading, isError } = useCauses({ 
+  const { data, isLoading, isError, refetch } = useCauses({ 
     page, 
     search: search || undefined, 
     category: category || undefined, 
@@ -67,7 +67,7 @@ export function CausesPage() {
               name="q" 
               defaultValue={search} 
               placeholder="Search causes" 
-              className="rounded-md border px-3 py-2 w-64 bg-white dark:bg-slate-900" 
+              className="rounded-md border border-slate-600 px-3 py-2 w-64 bg-slate-800 text-slate-100" 
             />
             <Button type="submit">Search</Button>
           </form>
@@ -132,11 +132,17 @@ export function CausesPage() {
       )}
 
       {isError && (
-        <div className="text-center py-8">
-          <p className="text-red-600">Failed to load causes. Please try again.</p>
-          <Button onClick={() => window.location.reload()} className="mt-2">
-            Retry
-          </Button>
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="text-center">
+            <h3 className="text-lg font-medium mb-2">Unable to load causes</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">There was an error loading causes from the server. This might be a temporary connectivity issue.</p>
+            <Button
+              onClick={() => refetch()}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              Try Again
+            </Button>
+          </div>
         </div>
       )}
 

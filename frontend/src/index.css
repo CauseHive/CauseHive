@@ -12,9 +12,9 @@
 
 /* nprogress theming */
 #nprogress .bar {
-  background: rgb(59 130 246); /* tailwind blue-500; adjust to your primary */
+  background: rgb(16 185 129); /* tailwind green-500; adjust to your primary */
   height: 2px;
 }
 #nprogress .peg {
-  box-shadow: 0 0 10px rgb(59 130 246), 0 0 5px rgb(59 130 246);
+  box-shadow: 0 0 10px rgb(16 185 129), 0 0 5px rgb(16 185 129);
 }

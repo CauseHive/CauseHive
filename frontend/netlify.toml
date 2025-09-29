@@ -13,13 +13,18 @@
   # Directory containing package.json (this file sits in frontend/ already)
   base = ""
 
+# API redirects to backend
+[[redirects]]
+  from = "/api/*"
+  to = "https://causehive-monolithic-production.up.railway.app/api/:splat"
+  status = 200
+  force = true
+
 # Redirect all non-asset routes to index.html for React Router
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-  force = true
-  conditions = { Country = [ ] }
 
 # Friendly health endpoint (maps to our static file)
 [[redirects]]

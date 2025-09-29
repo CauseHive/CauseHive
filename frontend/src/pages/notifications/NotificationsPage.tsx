@@ -90,7 +90,7 @@ export function NotificationsPage() {
           <Empty title="No notifications" description="You're all caught up." />
         )}
         {data?.results.map(n => (
-          <div key={n.id} className="rounded-lg border p-4 bg-white dark:bg-slate-900">
+          <div key={n.id} className="rounded-lg border border-slate-700 p-4 bg-slate-900">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">

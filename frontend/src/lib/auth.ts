@@ -31,18 +31,44 @@ export const authStore = {
     localStorage.removeItem(USER)
   },
   refreshToken: async (): Promise<string | null> => {
-    const refresh = authStore.getRefreshToken()
-    if (!refresh) return null
-    try {
-      const { data } = await axios.post(`${API_BASE_URL}/user/auth/token/refresh/`, { refresh })
-      const access = data?.access as string | undefined
-      if (access) {
-        localStorage.setItem(ACCESS, access)
-        return access
-      }
-      return null
-    } catch {
+    const refreshToken = authStore.getRefreshToken()
+    if (!refreshToken) {
+      console.warn('No refresh token available')
+      authStore.clear() 
       return null
     }
+
+    try {
+      console.log('Attempting to refresh token...')
+      const { data } = await axios.post(`${API_BASE_URL}/user/auth/token/refresh/`, { refresh: refreshToken })
+      
+      if (data.access) {
+        authStore.setTokens(data.access, refreshToken)
+        // Also store in localStorage for persistence
+        localStorage.setItem(ACCESS, data.access)
+        console.log('Token refreshed successfully')
+        return data.access
+      } else {
+        throw new Error('No access token in refresh response')
+      }
+    } catch (error: unknown) {
+      console.error('Token refresh failed:', error)
+      const err = error as { response?: { status?: number } }
+      
+      // Only clear if it's a real auth failure, not a network issue
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        console.log('Refresh token expired, clearing auth state')
+        authStore.clear()
+      } else {
+        console.log('Network error during token refresh, keeping existing tokens')
+      }
+      
+      return null
+    }
+  },
+  isAuthenticated: () => {
+    const accessToken = authStore.getAccessToken()
+    const user = authStore.getUser()
+    return !!(accessToken && user)
   }
 }

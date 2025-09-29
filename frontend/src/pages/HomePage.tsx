@@ -100,7 +100,7 @@ export function HomePage() {
           return { total_amount: data.total_amount, total_donations: data.total_donations }
         }
         // Fallback (protected): admin donation statistics
-        const { data: adm } = await api.get('/donations/admin/donations/statistics/')
+        const { data: adm } = await api.get('/admin/platform-metrics/')
         return { total_amount: Number(adm?.total_amount ?? 0), total_donations: Number(adm?.total_donations ?? 0) }
       } catch {
         // Try original admin path (non-alias) in case alias missing
@@ -136,88 +136,80 @@ export function HomePage() {
     return Object.values(counts)
   }, [categories, causesForAgg])
   return (
-    <div className="space-y-12">
-      <section className="grid gap-6 md:grid-cols-2 items-center">
-        <div className="space-y-4">
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">Empower Causes. Amplify Impact.</h1>
-          <p className="text-slate-600 dark:text-slate-300">Discover vetted causes across Ghana and donate with confidence using secure mobile money and card payments.</p>
-          <div className="flex gap-3">
-            <Link to="/causes" className="px-4 py-2 rounded-md bg-emerald-600 text-white hover:bg-emerald-700">Explore Causes</Link>
-            <Link to="/how-it-works" className="px-4 py-2 rounded-md border border-slate-300 dark:border-slate-700">How it works</Link>
-          </div>
-        </div>
-        <div className="rounded-xl bg-gradient-to-br from-emerald-500/10 to-blue-600/10 border border-slate-200 dark:border-slate-800 p-10" aria-hidden="true" />
-      </section>
-
-      {/* Value props */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[{
-          icon: ShieldCheck,
-          title: 'Secure payments',
-          desc: 'Pay with trusted mobile money and cards.'
-        }, {
-          icon: HeartHandshake,
-          title: 'Vetted causes',
-          desc: 'Transparent campaigns and real impact.'
-        }, {
-          icon: Zap,
-          title: 'Fast & reliable',
-          desc: 'Snappy experience with real-time updates.'
-        }, {
-          icon: CheckCircle2,
-          title: 'Simple & clear',
-          desc: 'No clutter—just donate and track easily.'
-        }].map((p, i) => (
-          <div key={i} className="rounded-lg border p-4 flex items-start gap-3">
-            <p.icon className="h-5 w-5 text-emerald-600 mt-1" />
-            <div>
-              <div className="font-medium">{p.title}</div>
-              <div className="text-sm text-slate-600 dark:text-slate-300">{p.desc}</div>
+    <div className="space-y-16 py-16">
+      
+      {/* Hero Section */}
+      <section className="py-20 px-8 lg:px-16">
+        <div className="grid gap-8 md:grid-cols-2 items-center max-w-7xl mx-auto">
+          <div className="space-y-4">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+              Empower Causes. <span className="text-emerald-600">Amplify Impact.</span>
+            </h1>
+            <p className="text-lg text-slate-600">
+              Discover vetted causes across Ghana and donate with confidence using secure mobile money and card payments.
+            </p>
+            <div className="flex gap-3">
+              <Link 
+                to="/causes" 
+                className="px-6 py-3 rounded-md bg-emerald-600 text-white hover:bg-emerald-700 font-medium"
+              >
+                Explore Causes
+              </Link>
+              <Link 
+                to="/how-it-works" 
+                className="px-6 py-3 rounded-md border border-slate-300 text-slate-700 hover:border-emerald-300 font-medium"
+              >
+                How it works
+              </Link>
             </div>
           </div>
-        ))}
+          <div className="rounded-xl border border-slate-200 p-10" aria-hidden="true">
+            <div className="w-full h-48 bg-gradient-to-br from-emerald-100 to-gray-100 rounded-lg"></div>
+          </div>
+        </div>
       </section>
+
+      {/* Content Sections */}
+      <div className="max-w-7xl mx-auto space-y-16 px-8 lg:px-16">
+
+        {/* Value props */}
+        <section>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[{
+              icon: ShieldCheck,
+              title: 'Secure payments',
+              desc: 'Pay with trusted mobile money and cards.'
+            }, {
+              icon: HeartHandshake,
+              title: 'Vetted causes',
+              desc: 'Transparent campaigns and real impact.'
+            }, {
+              icon: Zap,
+              title: 'Fast & reliable',
+              desc: 'Snappy experience with real-time updates.'
+            }, {
+              icon: CheckCircle2,
+              title: 'Simple & clear',
+              desc: 'No clutter—just donate and track easily.'
+            }].map((p, i) => (
+              <div key={i} className="rounded-lg border p-4 flex items-start gap-3">
+                <p.icon className="h-5 w-5 text-emerald-600 mt-1" />
+                <div>
+                  <div className="font-medium">{p.title}</div>
+                  <div className="text-sm text-slate-600 dark:text-slate-300">{p.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
       {/* Impact stats */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {platformTotals === undefined ? (
-          <div className="rounded-lg border p-4"><Skeleton className="h-6 w-32" /><Skeleton className="h-4 w-24 mt-2" /></div>
-        ) : platformTotals ? (
-          <div className="rounded-lg border p-4">
-            <div className="text-3xl font-semibold">₵{platformTotals.total_amount.toLocaleString()}</div>
-            <div className="text-sm text-slate-600 dark:text-slate-300">Total raised</div>
-          </div>
-        ) : null}
-        {liveCausesCount === undefined ? (
-          <div className="rounded-lg border p-4"><Skeleton className="h-6 w-32" /><Skeleton className="h-4 w-24 mt-2" /></div>
-        ) : (
-          <div className="rounded-lg border p-4">
-            <div className="text-3xl font-semibold">{liveCausesCount.toLocaleString()}</div>
-            <div className="text-sm text-slate-600 dark:text-slate-300">Live causes</div>
-          </div>
-        )}
-        {categoriesCount === undefined ? (
-          <div className="rounded-lg border p-4"><Skeleton className="h-6 w-32" /><Skeleton className="h-4 w-24 mt-2" /></div>
-        ) : (
-          <div className="rounded-lg border p-4">
-            <div className="text-3xl font-semibold">{categoriesCount.toLocaleString()}</div>
-            <div className="text-sm text-slate-600 dark:text-slate-300">Categories</div>
-          </div>
-        )}
-        {donationsCount === undefined ? (
-          <div className="rounded-lg border p-4"><Skeleton className="h-6 w-32" /><Skeleton className="h-4 w-24 mt-2" /></div>
-        ) : donationsCount !== null ? (
-          <div className="rounded-lg border p-4">
-            <div className="text-3xl font-semibold">{donationsCount.toLocaleString()}</div>
-            <div className="text-sm text-slate-600 dark:text-slate-300">Your donations</div>
-          </div>
-        ) : null}
-      </section>
+ 
 
-      {/* Top categories */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Top categories</h2>
-        <div className="flex gap-3 overflow-x-auto">
+          {/* Top categories */}
+          <section className="space-y-6">
+            <h2 className="text-2xl font-semibold text-slate-100">Browse by Category</h2>
+            <div className="flex gap-4 overflow-x-auto pb-4">
           {/* skeletons */}
           {!categories && !causesForAgg && Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-8 w-32" />
@@ -232,8 +224,8 @@ export function HomePage() {
               .sort((a, b) => (Number(b.cause_count ?? 0) - Number(a.cause_count ?? 0)))
               .slice(0, 8)
               .map((c) => (
-                <Link key={c.id} to={`/causes?category=${c.id}`} className="px-3 py-1 rounded-full border border-slate-300 dark:border-slate-700 whitespace-nowrap">
-                  {c.name} <span className="text-xs text-slate-500">({Number(c.cause_count ?? 0)})</span>
+                <Link key={c.id} to={`/causes?category=${c.id}`} className="px-3 py-1 rounded-full border border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700/70 transition-colors whitespace-nowrap">
+                  {c.name} <span className="text-xs text-slate-400">({Number(c.cause_count ?? 0)})</span>
                 </Link>
               ))
           })()}
@@ -244,38 +236,26 @@ export function HomePage() {
             if (top.length === 0) return null
             return top.map((c, i) => (
               <Link key={i} to={c.id ? `/causes?category=${c.id}` : `/causes?search=${encodeURIComponent(c.name)}`}
-                className="px-3 py-1 rounded-full border border-slate-300 dark:border-slate-700 whitespace-nowrap">
-                {c.name} <span className="text-xs text-slate-500">({Number(c.cause_count ?? 0)})</span>
+                className="px-3 py-1 rounded-full border border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700/70 transition-colors whitespace-nowrap">
+                {c.name} <span className="text-xs text-slate-400">({Number(c.cause_count ?? 0)})</span>
               </Link>
             ))
           })()}
-        </div>
-      </section>
+            </div>
+          </section>
 
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Browse by Category</h2>
-        <div className="flex gap-3 overflow-x-auto">
-          {!categories && Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-8 w-28" />
-          ))}
-          {(categories && categories.length > 0 ? categories : fallbackCategories).map((c) => (
-            <Link key={c.id} to={`/causes?category=${c.id}`} className="px-3 py-1 rounded-full border border-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-900 whitespace-nowrap">{c.name}</Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Featured causes</h2>
-          <Link to="/causes" className="text-sm text-emerald-700">View all</Link>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <section className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-semibold text-slate-100">Featured causes</h2>
+              <Link to="/causes" className="text-sm text-emerald-400 hover:text-emerald-300 font-medium transition-colors">View all</Link>
+            </div>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {!featured && Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="rounded-lg border p-4 space-y-3">
-              <Skeleton className="h-44 w-full" />
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-2 w-full" />
+            <div key={i} className="rounded-lg border border-slate-700 bg-slate-800/50 p-4 space-y-3">
+              <Skeleton className="h-44 w-full bg-slate-700" />
+              <Skeleton className="h-4 w-32 bg-slate-700" />
+              <Skeleton className="h-6 w-3/4 bg-slate-700" />
+              <Skeleton className="h-2 w-full bg-slate-700" />
             </div>
           ))}
           {featured?.map((cause) => {
@@ -291,7 +271,7 @@ export function HomePage() {
               ? Math.max(0, Math.min(100, cause.progress_percentage))
               : (target > 0 ? Math.max(0, Math.min(100, (current/target)*100)) : 0)
             return (
-              <div key={cause.id} className="rounded-lg border overflow-hidden bg-white dark:bg-slate-900">
+              <div key={cause.id} className="rounded-lg border border-slate-700 overflow-hidden bg-slate-800/50 hover:bg-slate-800/70 transition-colors shadow-lg">
                 <Link to={`/causes/${cause.id}`} aria-label={`View cause: ${cause.title ?? 'Cause'}`}>
                   {cause.featured_image && (
                     <img
@@ -326,13 +306,13 @@ export function HomePage() {
                       {endingSoon && <span title="Deadline within 7 days"><Badge variant="warning">ending soon{typeof daysLeft==='number' ? ` (${daysLeft}d)` : ''}</Badge></span>}
                     </div>
                   </div>
-                  <Link to={`/causes/${cause.id}`} className="block font-medium line-clamp-2" aria-label={`Go to cause ${cause.title ?? ''}`}>{cause.title}</Link>
+                  <Link to={`/causes/${cause.id}`} className="block font-medium line-clamp-2 text-slate-100 hover:text-emerald-300 transition-colors" aria-label={`Go to cause ${cause.title ?? ''}`}>{cause.title}</Link>
                   {target > 0 && (
                     <div className="space-y-1" aria-label={`Progress ${Math.round(progress)}%`}>
-                      <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                      <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                         <div className="h-full bg-emerald-500" style={{ width: `${progress}%` }} />
                       </div>
-                      <div className="flex items-center justify-between text-xs text-slate-500">
+                      <div className="flex items-center justify-between text-xs text-slate-400">
                         <span>₵{current.toLocaleString()} raised</span>
                         <span>₵{target.toLocaleString()} target</span>
                       </div>
@@ -342,8 +322,9 @@ export function HomePage() {
               </div>
             )
           })}
-        </div>
-      </section>
+            </div>
+          </section>
+      </div>
     </div>
   )
 }

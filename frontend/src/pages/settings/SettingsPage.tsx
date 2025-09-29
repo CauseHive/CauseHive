@@ -72,7 +72,7 @@ export default function SettingsPage() {
   // Password change mutation
   const passwordMutation = useMutation({
     mutationFn: async (values: PasswordFormValues) => {
-      const response = await api.post('/auth/change-password/', {
+      const response = await api.post('/user/auth/password-reset/', {
         old_password: values.current_password,
         new_password: values.new_password
       })
@@ -95,7 +95,7 @@ export default function SettingsPage() {
   // Account deletion mutation
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      await api.delete('/auth/user/')
+      await api.delete('/user/delete/')
     },
     onSuccess: () => {
       notify({ title: 'Account deleted successfully', variant: 'success' })
@@ -112,7 +112,7 @@ export default function SettingsPage() {
     queryKey: ['notification-settings'],
     queryFn: async () => {
       try {
-        const response = await api.get('/notifications/settings/')
+        const response = await api.get('/notifications/')
         return response.data
       } catch {
         return { email_notifications: true, push_notifications: true }
@@ -123,7 +123,7 @@ export default function SettingsPage() {
   // Notification settings mutation
   const notificationMutation = useMutation({
     mutationFn: async (settings: { email_notifications: boolean; push_notifications: boolean }) => {
-      await api.post('/notifications/settings/', settings)
+      await api.patch('/notifications/settings/', settings)
       return settings
     },
     onSuccess: () => notify({ title: 'Notification settings updated', variant: 'success' })
@@ -208,7 +208,7 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Key className="h-5 w-5 text-blue-600" />
+              <Key className="h-5 w-5 text-slate-400" />
               Password & Security
             </CardTitle>
             <CardDescription>
@@ -277,7 +277,7 @@ export default function SettingsPage() {
                 type="submit" 
                 disabled={passwordMutation.isPending}
                 variant="outline"
-                className="border-blue-200 hover:bg-blue-50"
+                className="border-slate-600 hover:bg-slate-700"
               >
                 {passwordMutation.isPending ? 'Updating…' : 'Update password'}
               </Button>

@@ -1,4 +1,5 @@
 import { BaseService } from './base'
+import { api } from '../api'
 import type { User } from '@/types/api'
 
 export interface LoginCredentials {
@@ -50,14 +51,30 @@ class AuthService extends BaseService {
    * Authenticate user with email and password
    */
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    return this.post<LoginResponse>('/login/', credentials)
+    try {
+      const response = await this.post<LoginResponse>('/login/', credentials)
+      console.log('Login successful:', response)
+      return response
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: unknown }; message?: string }
+      console.error('Login error:', err.response?.data || err.message)
+      throw error
+    }
   }
 
   /**
    * Register a new user account
    */
   async signup(userData: SignupData): Promise<User> {
-    return this.post<User>('/signup/', userData)
+    try {
+      const response = await this.post<User>('/register/', userData)
+      console.log('Signup successful:', response)
+      return response
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: unknown }; message?: string }
+      console.error('Signup error:', err.response?.data || err.message)
+      throw error
+    }
   }
 
   /**
@@ -106,14 +123,33 @@ class AuthService extends BaseService {
    * Get Google OAuth login URL
    */
   async getGoogleAuthUrl(): Promise<{ auth_url: string }> {
-    return this.get<{ auth_url: string }>('/google/')
+    try {
+      // Using correct endpoint from API documentation: GET /api/user/google/url/
+      // Note: This endpoint is outside the basePath, so we use the full path
+      const response = await api.get<{ google_oauth_url: string }>('/user/google/url/')
+      return { auth_url: response.data.google_oauth_url }
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: unknown }; message?: string }
+      console.error('Google Auth URL error:', err.response?.data || err.message)
+      // Return a fallback URL structure if backend endpoint doesn't exist
+      throw new Error('Google OAuth is not configured on the server')
+    }
   }
 
   /**
    * Complete Google OAuth flow
    */
   async completeGoogleAuth(code: string, state?: string): Promise<LoginResponse> {
-    return this.post<LoginResponse>('/google/callback/', { code, state })
+    try {
+      // Using correct endpoint from API documentation: GET /api/user/google/callback/
+      const response = await api.get<LoginResponse>(`/user/google/callback/?code=${code}${state ? `&state=${state}` : ''}`)
+      console.log('Google OAuth completion successful:', response)
+      return response.data
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: unknown }; message?: string }
+      console.error('Google OAuth completion error:', err.response?.data || err.message)
+      throw error
+    }
   }
 }
 
