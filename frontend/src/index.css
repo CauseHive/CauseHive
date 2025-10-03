@@ -6,11 +6,11 @@
 @layer base {
   :root {
     --radius: 12px;
-    --background: 255 255 255;
-    --foreground: 17 24 39;
+    --background: 248 250 252; /* Soft slate background */
+    --foreground: 15 23 42;
     --card: 255 255 255;
-    --card-foreground: 17 24 39;
-    --border: 229 231 235;
+    --card-foreground: 15 23 42;
+    --border: 226 232 240;
     --input: 255 255 255;
     --ring: 16 185 129;
     --primary: 16 185 129;
@@ -29,6 +29,17 @@
   }
   
   html, body, #root { height: 100%; }
+
+  /* Remove focus rings/highlights */
+  *:focus {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+  
+  *:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
 }
 
 /* nprogress theming */

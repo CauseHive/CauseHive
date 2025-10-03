@@ -54,9 +54,9 @@ export function AppLayout() {
     authStore.clear(); navigate('/', { replace: true })
   }
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
       <Toaster>
-      <header className="sticky top-0 z-40 border-b border-slate-800/60 backdrop-blur bg-slate-950/90">
+      <header className="sticky top-0 z-40 border-b border-slate-200 backdrop-blur bg-white/90">
         <div className="container flex items-center justify-between py-3">
           <Link to="/" className="font-semibold tracking-tight text-lg">
             CauseHive
@@ -64,7 +64,7 @@ export function AppLayout() {
           <nav className="flex items-center gap-5 text-sm">
             {user && (
               <>
-                <NavLink to="/notifications" className={({isActive})=> isActive? 'text-primary font-medium relative':'text-slate-600 dark:text-slate-300 relative'}>
+                <NavLink to="/notifications" className={({isActive})=> isActive? 'text-primary font-medium relative':'text-slate-600 relative'}>
                   Notifications
                   {typeof unreadCount === 'number' && unreadCount > 0 && (
                     <span className="absolute -top-2 -right-3 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-600 px-1.5 text-[10px] font-medium text-white">{unreadCount > 99 ? '99+' : unreadCount}</span>
@@ -80,13 +80,13 @@ export function AppLayout() {
                     <div className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-sm">{(user.first_name || user.email).slice(0,1).toUpperCase()}</div>
                   )}
                 </NavLink>
-                <button onClick={signOut} className="text-slate-600 dark:text-slate-300 text-xs">Sign out</button>
+                <button onClick={signOut} className="text-slate-600 text-xs">Sign out</button>
               </>
             )}
             {/* Show Sign in / Register only on the landing page for unauthenticated users */}
             {!user && location.pathname === '/' && (
               <>
-                <Link to="/login" className="text-slate-100 dark:text-slate-300">Sign in</Link>
+                <Link to="/login" className="text-slate-600">Sign in</Link>
                 <Link to="/signup" className="px-3 py-1 rounded bg-emerald-600 text-white">Register</Link>
               </>
             )}
@@ -96,7 +96,7 @@ export function AppLayout() {
       <main className="container flex-1 py-6">
         <Outlet />
       </main>
-      <footer className="mt-auto border-t border-slate-200/40 dark:border-slate-800/60 py-6 text-center text-xs text-slate-500">
+      <footer className="mt-auto border-t border-slate-200 py-6 text-center text-xs text-slate-500">
         <div className="container flex flex-col md:flex-row items-center justify-between gap-3">
           <div>© {new Date().getFullYear()} CauseHive</div>
           <nav className="flex items-center gap-4">

@@ -33,13 +33,13 @@ export default {
           DEFAULT: '#64748b',
           foreground: '#374151'
         },
-        background: '#ffffff',
-        foreground: '#111827',
+        background: '#f8fafc', // Soft slate background
+        foreground: '#0f172a',
         card: {
           DEFAULT: '#ffffff',
-          foreground: '#111827'
+          foreground: '#0f172a'
         },
-        border: '#e5e7eb',
+        border: '#e2e8f0',
         input: '#ffffff',
         ring: '#10b981'
       },

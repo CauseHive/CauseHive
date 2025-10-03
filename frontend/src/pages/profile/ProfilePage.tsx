@@ -370,7 +370,7 @@ export function ProfilePage() {
                     onError: () => mark('bio','idle') 
                   }) 
                 }} 
-                className="w-full h-40 resize-none rounded-lg border bg-white border-slate-200 dark:border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent" 
+                className="w-full h-40 resize-none rounded-lg border bg-white border-slate-200 dark:border-slate-700 px-3 py-2 text-sm focus:outline-none" 
                 placeholder="Tell supporters about yourself, your passions, and what drives you to support causes..."
               />
               <p className="text-xs text-slate-500">Changes are saved automatically when you finish editing.</p>
@@ -396,7 +396,7 @@ export function ProfilePage() {
               <Label htmlFor="payment_method">Payment Method</Label>
               <select 
                 id="payment_method"
-                className="w-full rounded-lg border bg-white border-slate-200 dark:border-slate-700 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                className="w-full rounded-lg border bg-white border-slate-200 dark:border-slate-700 px-3 py-2 text-sm focus:outline-none" 
                 value={currentMethod} 
                 onChange={(e) => handleWithdrawalChange('payment_method', e.target.value as WithdrawalAddress['payment_method'])}
               >

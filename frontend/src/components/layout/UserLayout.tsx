@@ -92,12 +92,12 @@ export default function UserLayout() {
             <NavLink key={item.to} to={item.to} end={item.end}
               className={({isActive})=>[
                 'group flex items-center rounded-lg py-2.5 text-sm font-medium transition-all duration-200 relative overflow-hidden',
-                collapsed ? 'justify-center px-2' : 'gap-3 px-3',
+                collapsed ? 'justify-center px-2 h-10 w-10' : 'gap-3 px-3',
                 isActive 
                   ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/30' 
                   : 'hover:bg-slate-50 dark:hover:bg-slate-900/50 text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:shadow-sm'
               ].join(' ')}>
-              <span className="text-inherit flex items-center justify-center transition-transform group-hover:scale-110" title={collapsed ? item.label : ''}>{item.icon}</span>
+              <span className={`${collapsed ? 'flex items-center justify-center w-full h-full' : ''} text-inherit flex items-center justify-center transition-transform group-hover:scale-110`} title={collapsed ? item.label : ''}>{item.icon}</span>
               <span
                 className={(collapsed? 'opacity-0 translate-x-2 pointer-events-none':'opacity-100 translate-x-0') + ' transition-all duration-300 ease-out truncate'}
               >{item.label}</span>
@@ -112,11 +112,11 @@ export default function UserLayout() {
           <button
             onClick={()=> { authStore.clear(); navigate('/', { replace: true }) }}
             className={`w-full mb-4 flex items-center rounded-lg py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group ${
-              collapsed ? 'justify-center px-2' : 'gap-3 px-3'
+              collapsed ? 'justify-center px-2 h-10 w-10' : 'gap-3 px-3'
             }`}
             aria-label="Sign out"
           >
-            <span className="transition-transform group-hover:scale-110" title={collapsed ? 'Logout' : ''}>{icons.logout}</span>
+            <span className={`${collapsed ? 'flex items-center justify-center w-full h-full' : ''} transition-transform group-hover:scale-110`} title={collapsed ? 'Logout' : ''}>{icons.logout}</span>
             <span className={(collapsed? 'opacity-0 translate-x-2 pointer-events-none':'opacity-100 translate-x-0') + ' transition-all duration-300 ease-out truncate'}>Logout</span>
           </button>
         </div>
