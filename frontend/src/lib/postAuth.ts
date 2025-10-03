@@ -46,9 +46,14 @@ export function postAuth({
   redirectPath = '/app',
   replace = true
 }: PostAuthParams) {
-  if (!access) return
+  console.log('postAuth called with:', { hasAccess: !!access, hasRefresh: !!refresh, hasUser: !!user, user })
+  if (!access) {
+    console.error('postAuth: No access token provided!')
+    return
+  }
   authStore.setTokens(access, refresh)
   if (user) authStore.setUser(user)
+  console.log('postAuth: Tokens stored, navigating to:', redirectPath)
   if (navigate) navigate(redirectPath, { replace })
   if (notify) {
     notify({

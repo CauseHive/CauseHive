@@ -17,8 +17,10 @@ export const authStore = {
   getAccessToken: () => localStorage.getItem(ACCESS),
   getRefreshToken: () => localStorage.getItem(REFRESH),
   setTokens: (access: string, refresh?: string) => {
+    console.log('authStore.setTokens called with:', { hasAccess: !!access, hasRefresh: !!refresh })
     localStorage.setItem(ACCESS, access)
     if (refresh) localStorage.setItem(REFRESH, refresh)
+    console.log('authStore.setTokens: tokens stored in localStorage')
   },
   setUser: (user: User) => localStorage.setItem(USER, JSON.stringify(user)),
   getUser: (): User | null => {

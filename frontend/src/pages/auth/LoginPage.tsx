@@ -33,7 +33,9 @@ export function LoginPage() {
   // If already authenticated, never show the login form again – go straight to dashboard
   useEffect(() => {
     const token = authStore.getAccessToken()
+    console.log('LoginPage useEffect: checking auth, token exists:', !!token)
     if (token) {
+      console.log('LoginPage useEffect: user is authenticated, navigating to /app')
       navigate('/app', { replace: true })
     }
   }, [navigate])

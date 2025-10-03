@@ -29,6 +29,7 @@ export function useAuth() {
   const loginMutation = useMutation({
     mutationFn: (credentials: LoginCredentials) => authService.login(credentials),
     onSuccess: (data) => {
+      console.log('useAuth login onSuccess called with data:', data)
       postAuth({
         access: data.access,
         refresh: data.refresh,
