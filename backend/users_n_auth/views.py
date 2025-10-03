@@ -280,7 +280,8 @@ class GoogleLogin(SocialLoginView):
             access_token = refresh.access_token
             
             # Redirect to API profile page with access token
-            api_url = f"{settings.BACKEND_URL}/api/user/profile/?access_token={access_token}"
+            # api_url = f"{settings.BACKEND_URL}/api/user/profile/?access_token={access_token}"
+            api_url = f"{settings.FRONTEND_URL}/app/profile/?access_token={access_token}"
             return HttpResponseRedirect(api_url)
         
         return response
@@ -400,7 +401,8 @@ def google_oauth_callback(request):
         access_token = refresh.access_token
         
         # Redirect to API profile page with access token
-        api_url = f"{settings.BACKEND_URL}/api/user/profile/?access_token={access_token}"
+        # api_url = f"{settings.BACKEND_URL}/api/user/profile/?access_token={access_token}"
+        api_url = f"{settings.FRONTEND_URL}/app/profile/?access_token={access_token}"
         return HttpResponseRedirect(api_url)
         
     except Exception as e:
