@@ -53,7 +53,18 @@ class AuthService extends BaseService {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
     try {
       const response = await this.post<LoginResponse>('/login/', credentials)
-      console.log('Login successful:', response)
+      // Log non-sensitive metadata about the login response to help debug shape issues
+      try {
+        // eslint-disable-next-line no-console
+        const resp = response as unknown as Record<string, unknown>
+        console.debug('Login successful - response keys:', Object.keys(resp || {}), {
+          hasAccess: !!resp['access'],
+          hasRefresh: !!resp['refresh'],
+          hasUser: !!resp['user']
+        })
+      } catch {
+        // ignore
+      }
       return response
     } catch (error: unknown) {
       const err = error as { response?: { data?: unknown }; message?: string }

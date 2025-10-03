@@ -16,6 +16,13 @@ api.interceptors.request.use((config) => {
     config.headers = config.headers ?? {}
     config.headers.Authorization = `Bearer ${token}`
   }
+  // Debug: log outgoing request metadata (do not print token contents)
+  try {
+    // eslint-disable-next-line no-console
+    console.debug('API Request:', { method: config.method?.toUpperCase(), url: config.url, hasToken: !!token })
+  } catch {
+    // ignore
+  }
   return config
 })
 
@@ -27,13 +34,19 @@ api.interceptors.response.use(
   async (error) => {
     const original = error.config
     
-    // Log API errors for debugging
-    console.error('API Error:', {
-      method: error.config?.method?.toUpperCase(),
-      url: error.config?.url,
-      status: error.response?.status,
-      data: error.response?.data
-    })
+    // Log API errors for debugging in a consistent format
+    try {
+      // eslint-disable-next-line no-console
+      console.error('API Error:', {
+        method: error.config?.method?.toUpperCase(),
+        url: error.config?.url,
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      })
+    } catch {
+      // ignore
+    }
     
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true
