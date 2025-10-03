@@ -56,13 +56,13 @@ export default function UserLayout() {
     <div className="flex min-h-screen w-full">
       {/* Sidebar */}
       <aside
-        className={(collapsed? 'w-14':'w-60') + ' group/sidebar transition-all duration-300 border-r border-slate-800/60 flex flex-col bg-slate-950 fixed h-screen z-30 shadow-lg left-0 top-7'}
+        className={(collapsed? 'w-14':'w-60') + ' group/sidebar transition-all duration-300 border-r border-slate-200/60 flex flex-col bg-slate-50 fixed h-screen z-30 shadow-lg left-0 top-7'}
         onMouseEnter={() => { if (!isMobile) setCollapsed(false) }}
         onMouseLeave={() => { if (!isMobile) setCollapsed(true) }}
       >
         <div className="flex items-center justify-between p-3 border-b border-slate-200/40 dark:border-slate-800/40">
           {!collapsed && (
-            <div className="font-medium text-sm truncate max-w-[8rem] text-slate-900 dark:text-slate-100">
+            <div className="font-medium text-sm truncate max-w-[8rem] text-slate-900">
               {user?.first_name ? `${user.first_name} ${user.last_name ?? ''}`.trim() : user?.email}
             </div>
           )}
@@ -71,7 +71,7 @@ export default function UserLayout() {
             <button
               onClick={()=> setCollapsed(c=> !c)}
               aria-label="Toggle sidebar"
-              className="text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-800 transition-colors shadow-sm hover:shadow-md"
+              className="text-slate-700 hover:text-emerald-600 p-2 rounded-lg border border-slate-200 hover:border-emerald-200 transition-colors shadow-sm hover:shadow-md"
             >
               {icons.menu}
             </button>
@@ -95,7 +95,7 @@ export default function UserLayout() {
                 collapsed ? 'justify-center px-2 h-10 w-10' : 'gap-3 px-3',
                 isActive 
                   ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-500/30' 
-                  : 'hover:bg-slate-50 dark:hover:bg-slate-900/50 text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 hover:shadow-sm'
+                  : 'hover:bg-slate-100 text-slate-900 hover:text-emerald-700 hover:shadow-sm'
               ].join(' ')}>
               <span className={`${collapsed ? 'flex items-center justify-center w-full h-full' : ''} text-inherit flex items-center justify-center transition-transform group-hover:scale-110`} title={collapsed ? item.label : ''}>{item.icon}</span>
               <span
@@ -108,10 +108,10 @@ export default function UserLayout() {
           ))}
         </nav>
         {/* Logout button */}
-        <div className="p-3 border-t border-slate-200/60 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/20">
+        <div className="p-3 border-t border-slate-200/60 bg-slate-100/50">
           <button
             onClick={()=> { authStore.clear(); navigate('/', { replace: true }) }}
-            className={`w-full mb-4 flex items-center rounded-lg py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 group ${
+            className={`w-full mb-4 flex items-center rounded-lg py-2.5 text-sm font-medium text-slate-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200 group ${
               collapsed ? 'justify-center px-2 h-10 w-10' : 'gap-3 px-3'
             }`}
             aria-label="Sign out"

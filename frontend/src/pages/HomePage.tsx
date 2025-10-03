@@ -148,10 +148,12 @@ export function HomePage() {
         <div className="grid gap-8 md:grid-cols-2 items-center max-w-7xl mx-auto">
           <div className="space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-              Empower Causes. <span className="text-emerald-600">Amplify Impact.</span>
+              Building Ghana's Future, <span className="text-emerald-600">One Donation at a Time</span>
             </h1>
-            <p className="text-lg text-gray-300">
-              Discover vetted causes across Ghana and donate with confidence using secure mobile money and card payments.
+            <p className="text-lg text-gray-600">
+              Join Ghana's premier crowdfunding platform connecting generous hearts with transformative causes.
+              From rural education initiatives to urban healthcare projects, support initiatives that strengthen
+              our communities and build a prosperous Ghana for generations to come.
             </p>
             <div className="flex gap-3">
               <Link 
@@ -182,20 +184,20 @@ export function HomePage() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[{
               icon: ShieldCheck,
-              title: 'Secure payments',
-              desc: 'Pay with trusted mobile money and cards.'
+              title: 'Secure & Trusted',
+              desc: 'Bank-grade security with licensed payment processors. Your donations reach their intended causes.'
             }, {
               icon: HeartHandshake,
-              title: 'Vetted causes',
-              desc: 'Transparent campaigns and real impact.'
+              title: 'Ghanaian Impact',
+              desc: 'Support causes that address real challenges in our communities, from Accra to rural villages.'
             }, {
               icon: Zap,
-              title: 'Fast & reliable',
-              desc: 'Snappy experience with real-time updates.'
+              title: 'Mobile Money Ready',
+              desc: 'Instant donations via MTN Mobile Money, Vodafone Cash, and AirtelTigo Money - no bank account needed.'
             }, {
               icon: CheckCircle2,
-              title: 'Simple & clear',
-              desc: 'No clutter—just donate and track easily.'
+              title: 'Transparent Tracking',
+              desc: 'Real-time updates, photos, and stories showing exactly how your contribution creates change.'
             }].map((p, i) => (
               <div key={i} className="rounded-lg border border-gray-300 p-4 flex items-start gap-3">
                 <p.icon className="h-5 w-5 text-emerald-500 mt-1" />
