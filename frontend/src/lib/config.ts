@@ -70,5 +70,9 @@ export async function loadRuntimeConfig(): Promise<void> {
 			window.__RUNTIME_CONFIG__ = json
 		}
 	// eslint-disable-next-line no-empty
-	} catch {}
+	} catch (err) {
+		// Log but do not throw — runtime config is optional
+		// eslint-disable-next-line no-console
+		console.warn('Failed to load runtime config from /config.json', err)
+	}
 }

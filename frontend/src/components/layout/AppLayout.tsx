@@ -47,8 +47,9 @@ export function AppLayout() {
     try {
       const refresh = localStorage.getItem('ch_refresh')
       await api.post('/user/auth/logout/', refresh ? { refresh } : undefined)
-    } catch {
-      // ignore logout failure
+    } catch (err) {
+      // Log logout failure for observability but continue to clear local state
+      console.warn('Logout request failed; clearing local auth state anyway', err)
     }
     authStore.clear(); navigate('/', { replace: true })
   }
@@ -85,7 +86,7 @@ export function AppLayout() {
             {/* Show Sign in / Register only on the landing page for unauthenticated users */}
             {!user && location.pathname === '/' && (
               <>
-                <Link to="/login" className="text-slate-600 dark:text-slate-300">Sign in</Link>
+                <Link to="/login" className="text-slate-100 dark:text-slate-300">Sign in</Link>
                 <Link to="/signup" className="px-3 py-1 rounded bg-emerald-600 text-white">Register</Link>
               </>
             )}

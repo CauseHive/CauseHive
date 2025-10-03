@@ -52,13 +52,18 @@ export function CauseDetailsPage() {
 
   const addToCart = useMutation({
     mutationFn: async () => {
-      // Attempt to include current cart_id if available to keep continuity for anonymous users
-      let cart_id: string | undefined
+      // Try to reuse existing cart id if available
+      let cartId: string | undefined
       try {
         const { data: current } = await api.get('/cart/')
-        if (typeof current?.cart_id === 'string') cart_id = current.cart_id
-      } catch { /* ignore */ }
-      await api.post('/cart/add/', { cause_id: id, amount, ...(cart_id ? { cart_id } : {}) })
+        if (typeof current?.cart_id === 'string') cartId = current.cart_id
+      } catch (err) {
+        // Log the failure but continue — we'll create a new cart when necessary
+        console.warn('Failed to get current cart id; will create a new cart', err)
+        cartId = undefined
+      }
+      const payload = { cause_id: id, amount, ...(cartId ? { cart_id: cartId } : {}) }
+      await api.post('/cart/add/', payload)
     },
     onSuccess: () => notify({ title: 'Added to cart', variant: 'success' }),
     onError: () => notify({ title: 'Failed to add to cart', variant: 'error' })

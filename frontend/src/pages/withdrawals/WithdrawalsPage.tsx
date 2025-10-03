@@ -79,7 +79,7 @@ export function WithdrawalsPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Withdrawals</h1>
 
-      <div className="rounded-lg border border-slate-700 p-4 space-y-3 bg-slate-900">
+      <div className="rounded-lg border border-gray-200 p-4 space-y-3 bg-white">
         <div className="grid sm:grid-cols-2 gap-3">
           <label className="text-sm">Amount (GHS)
             <Input type="number" min={1} value={amount} onChange={(e)=> setAmount(Number(e.target.value))} />
@@ -147,12 +147,12 @@ export function WithdrawalsPage() {
           {Array.isArray(data?.results) && data?.results.map(w => (
             <div key={w.id} className="p-4 flex items-center justify-between gap-3">
               <div>
-                <div className="font-medium">₵{w.amount.toFixed(2)} <span className="ml-2 text-xs uppercase text-slate-500">{w.withdrawal_method.replace('_',' ')}</span></div>
-                <div className="text-xs text-slate-500 mt-1">Requested {new Date(w.created_at).toLocaleString()}</div>
+                <div className="font-medium">₵{w.amount.toFixed(2)} <span className="ml-2 text-xs uppercase text-gray-500">{w.withdrawal_method.replace('_',' ')}</span></div>
+                <div className="text-xs text-gray-500 mt-1">Requested {new Date(w.created_at).toLocaleString()}</div>
               </div>
               <div className="text-right">
                 <div className={`text-sm font-medium ${w.status==='completed'?'text-emerald-600': w.status==='pending'?'text-amber-600':'text-red-600'}`}>{w.status}</div>
-                {typeof w.net_amount==='number' && <div className="text-xs text-slate-500">Net ₵{w.net_amount.toFixed(2)}</div>}
+                {typeof w.net_amount==='number' && <div className="text-xs text-gray-500">Net ₵{w.net_amount.toFixed(2)}</div>}
               </div>
             </div>
           ))}

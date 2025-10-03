@@ -8,8 +8,9 @@ export async function prefetchRoutes(_: string[]) {
   for (const load of preloaders) {
     try {
       await load()
-    } catch {
-      // Ignore prefetch errors to avoid impacting navigation
+    } catch (err) {
+      // Ignore prefetch errors to avoid impacting navigation, but log for diagnostics
+      console.warn('Route prefetch failed', load, err)
     }
   }
 }

@@ -3,15 +3,13 @@ import { isRouteErrorResponse, useRouteError } from 'react-router-dom'
 
 export function RouteErrorBoundary() {
   const error = useRouteError()
-  let title = 'Something went wrong'
-  let details: string | undefined
-
-  if (isRouteErrorResponse(error)) {
-    title = `Error ${error.status}`
-    details = error.statusText
-  } else if (error instanceof Error) {
-    details = error.message
-  }
+  const { title, details } = (() => {
+    if (isRouteErrorResponse(error)) {
+      return { title: `Error ${error.status}`, details: error.statusText }
+    }
+    if (error instanceof Error) return { title: 'Something went wrong', details: error.message }
+    return { title: 'Something went wrong', details: undefined }
+  })()
 
   return (
     <div className="p-6">

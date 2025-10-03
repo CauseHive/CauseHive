@@ -24,9 +24,10 @@ export function ProtectedRoute({ children }: Props) {
       try {
         const refreshed = await authStore.refreshToken()
         setIsAuthenticated(!!refreshed || !!token)
-      } catch {
+      } catch (err) {
         // If refresh fails, but we have a token, still try to use it
-        // The API interceptor will handle invalid tokens
+        // The API interceptor will handle invalid tokens. Log for diagnostics.
+        console.warn('Token refresh during ProtectedRoute validation failed', err)
         setIsAuthenticated(!!token)
       }
       

@@ -46,7 +46,8 @@ export function SignupPage() {
       try {
         const result = await authService.getGoogleAuthUrl()
         return result.auth_url
-      } catch {
+      } catch (err) {
+        console.warn('Failed to fetch Google OAuth URL for signup', err)
         return ''
       }
     },

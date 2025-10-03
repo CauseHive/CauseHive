@@ -79,36 +79,21 @@ export function LoginPage() {
     }
   }
 
-  // Google OAuth mutation with enhanced error handling
+  // Google OAuth mutation with compact error handling
   const googleAuthMutation = useMutation({
-    mutationFn: () => {
-      console.log('Initiating Google OAuth from login page...')
-      return authService.getGoogleAuthUrl()
-    },
+    mutationFn: () => authService.getGoogleAuthUrl(),
     onSuccess: (data) => {
-      console.log('Got Google OAuth URL, redirecting...', data.auth_url)
-      if (data.auth_url) {
-        window.location.href = data.auth_url
-      } else {
-        throw new Error('No auth URL received from server')
-      }
+      const url = data?.auth_url
+      if (url) window.location.href = url
+      else notify({ title: 'Google Sign-in Error', description: 'No auth URL received from server', variant: 'error' })
     },
     onError: (error: unknown) => {
-      console.error('Google OAuth initiation failed:', error)
       const err = error as { response?: { status?: number }; message?: string }
-      
-      let errorMessage = 'Failed to start Google sign-in'
-      if (err.response?.status === 404) {
-        errorMessage = 'Google OAuth is not configured on this server. Please use email/password sign-in.'
-      } else if (err.message) {
-        errorMessage = err.message
-      }
-      
-      notify({
-        title: 'Google Sign-in Error',
-        description: errorMessage,
-        variant: 'error'
-      })
+      const fallback = 'Failed to start Google sign-in'
+      const errorMessage = err.response?.status === 404
+        ? 'Google OAuth is not configured on this server. Please use email/password sign-in.'
+        : (err.message || fallback)
+      notify({ title: 'Google Sign-in Error', description: errorMessage, variant: 'error' })
     }
   })
 

@@ -6,7 +6,28 @@
 @layer base {
   :root {
     --radius: 12px;
+    --background: 255 255 255;
+    --foreground: 17 24 39;
+    --card: 255 255 255;
+    --card-foreground: 17 24 39;
+    --border: 229 231 235;
+    --input: 255 255 255;
+    --ring: 16 185 129;
+    --primary: 16 185 129;
+    --primary-foreground: 255 255 255;
+    --muted: 100 116 139;
+    --muted-foreground: 55 65 81;
   }
+  
+  * {
+    border-color: hsl(var(--border));
+  }
+  
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+  
   html, body, #root { height: 100%; }
 }
 

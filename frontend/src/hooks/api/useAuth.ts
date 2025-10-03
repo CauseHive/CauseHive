@@ -124,7 +124,8 @@ export function useAuth() {
       try {
         await authService.logout(refresh || undefined)
       } catch {
-        // Ignore logout errors - clear local state anyway
+        // Log logout failure for diagnostics, but continue to clear local state
+        console.warn('Logout request failed in useAuth.logout()')
       }
     },
     onSuccess: () => {

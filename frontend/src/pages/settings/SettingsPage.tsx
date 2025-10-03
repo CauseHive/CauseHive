@@ -114,7 +114,8 @@ export default function SettingsPage() {
       try {
         const response = await api.get('/notifications/')
         return response.data
-      } catch {
+      } catch (err) {
+        console.warn('Failed to fetch notification settings; using defaults', err)
         return { email_notifications: true, push_notifications: true }
       }
     }
@@ -134,8 +135,8 @@ export default function SettingsPage() {
   return (
     <div className="max-w-4xl space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Account Settings</h1>
-        <p className="text-slate-600 dark:text-slate-400 mt-2">Manage your account preferences and security settings</p>
+        <h1 className="text-3xl font-bold text-gray-900">Account Settings</h1>
+        <p className="text-gray-600 mt-2">Manage your account preferences and security settings</p>
       </div>
 
       <div className="grid gap-6">
@@ -189,9 +190,9 @@ export default function SettingsPage() {
                   type="email" 
                   disabled 
                   {...register('email')}
-                  className="bg-slate-50 dark:bg-slate-900/40"
+                  className="bg-gray-50"
                 />
-                <p className="text-sm text-slate-500">Email cannot be changed. Contact support if needed.</p>
+                <p className="text-sm text-gray-500">Email cannot be changed. Contact support if needed.</p>
               </div>
               <Button 
                 type="submit" 
@@ -208,7 +209,7 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Key className="h-5 w-5 text-slate-400" />
+              <Key className="h-5 w-5 text-gray-400" />
               Password & Security
             </CardTitle>
             <CardDescription>
@@ -229,7 +230,7 @@ export default function SettingsPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -277,7 +278,7 @@ export default function SettingsPage() {
                 type="submit" 
                 disabled={passwordMutation.isPending}
                 variant="outline"
-                className="border-slate-600 hover:bg-slate-700"
+                className="border-gray-300 hover:bg-gray-50"
               >
                 {passwordMutation.isPending ? 'Updating…' : 'Update password'}
               </Button>
@@ -301,7 +302,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
                   <h4 className="font-medium">Email notifications</h4>
-                  <p className="text-sm text-slate-600">Receive updates about your causes and donations via email</p>
+                  <p className="text-sm text-gray-600">Receive updates about your causes and donations via email</p>
                 </div>
                 <Button
                   variant={notificationSettings?.email_notifications ? "default" : "outline"}
@@ -322,7 +323,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
                   <h4 className="font-medium">Push notifications</h4>
-                  <p className="text-sm text-slate-600">Get instant updates on your device</p>
+                  <p className="text-sm text-gray-600">Get instant updates on your device</p>
                 </div>
                 <Button
                   variant={notificationSettings?.push_notifications ? "default" : "outline"}

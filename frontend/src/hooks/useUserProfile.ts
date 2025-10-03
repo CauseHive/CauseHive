@@ -60,8 +60,9 @@ export function useUserProfile() {
           user: userResponse.data,
           profile: profileResponse.data
         }
-      } catch {
+      } catch (err) {
         // If user endpoint fails, try to get basic user info from auth store
+        console.warn('Failed to load combined user/profile data; using cached fallback', err)
         const user = JSON.parse(localStorage.getItem('user') || '{}')
         return {
           user: user as CombinedUser,

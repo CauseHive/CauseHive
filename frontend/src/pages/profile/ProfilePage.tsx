@@ -65,9 +65,13 @@ export function ProfilePage() {
     if (value === 'saved') setTimeout(() => setFieldStatus(s2 => s2[field] === 'saved' ? { ...s2, [field]: 'idle' } : s2), 1800)
   }
 
+  // simple stable debounce factory (per-instance)
   function debounce<F extends (...p: Parameters<F>) => void>(fn: F, delay = 600) {
-    let timer: ReturnType<typeof setTimeout>
-    return (...args: Parameters<F>) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay) }
+    let timer: ReturnType<typeof setTimeout> | null = null
+    return (...args: Parameters<F>) => {
+      if (timer) clearTimeout(timer)
+      timer = setTimeout(() => { fn(...args); timer = null }, delay)
+    }
   }
   interface UserPatch { first_name?: string; last_name?: string }
   interface ProfilePatch { [k: string]: unknown }
@@ -94,7 +98,7 @@ export function ProfilePage() {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center space-y-4">
             <Loader2 className="h-8 w-8 animate-spin mx-auto text-emerald-600" />
-            <p className="text-slate-600 dark:text-slate-400">Loading your profile…</p>
+            <p className="text-gray-600">Loading your profile…</p>
           </div>
         </div>
       </div>
@@ -111,8 +115,8 @@ export function ProfilePage() {
                 <User className="h-8 w-8 text-red-600 dark:text-red-400" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Unable to load profile</h3>
-                <p className="text-slate-600 dark:text-slate-400">There was an error loading your profile information. Please try refreshing the page.</p>
+                <h3 className="text-lg font-semibold text-gray-900">Unable to load profile</h3>
+                <p className="text-gray-600">There was an error loading your profile information. Please try refreshing the page.</p>
               </div>
               <Button 
                 onClick={() => window.location.reload()} 
@@ -128,8 +132,7 @@ export function ProfilePage() {
   }
 
   function handleWithdrawalChange<K extends keyof WithdrawalAddress>(key: K, value: WithdrawalAddress[K]) {
-    if (!withdrawal) return
-    const next = { ...withdrawal, [key]: value }
+    const next = { ...(withdrawal ?? { payment_method: 'bank_transfer' }), [key]: value }
     setWithdrawal(next)
     mark('withdrawal_address','saving')
     debouncedProfilePatch({ withdrawal_address: next }, 'withdrawal_address')

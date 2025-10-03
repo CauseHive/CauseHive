@@ -83,8 +83,9 @@ export function HomePage() {
       try {
         const { data } = await api.get('/donations/', { params: { page_size: 1 } })
         return Number(data?.count ?? 0)
-      } catch {
-        // Not authenticated or endpoint not public; hide this metric
+      } catch (err) {
+        // Not authenticated or endpoint not public; hide this metric but log for visibility
+        console.warn('Failed to fetch donations count (possibly unauthenticated):', err)
         return null
       }
     }
@@ -102,14 +103,18 @@ export function HomePage() {
         // Fallback (protected): admin donation statistics
         const { data: adm } = await api.get('/admin/platform-metrics/')
         return { total_amount: Number(adm?.total_amount ?? 0), total_donations: Number(adm?.total_donations ?? 0) }
-      } catch {
+      } catch (err) {
         // Try original admin path (non-alias) in case alias missing
+        console.warn('Platform totals fetch failed; attempting fallback', err)
         try {
           const { data: orig } = await api.get('/admin/platform-metrics/')
           if (typeof orig?.total_amount === 'number' && typeof orig?.total_donations === 'number') {
             return { total_amount: orig.total_amount, total_donations: orig.total_donations }
           }
-        } catch { /* swallow */ }
+        } catch (fallbackErr) {
+          // Swallowing here is intentional, but surface a console warning for visibility
+          console.warn('Fallback platform metrics fetch failed', fallbackErr)
+        }
         return null
       }
     }
@@ -145,7 +150,7 @@ export function HomePage() {
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
               Empower Causes. <span className="text-emerald-600">Amplify Impact.</span>
             </h1>
-            <p className="text-lg text-slate-600">
+            <p className="text-lg text-gray-300">
               Discover vetted causes across Ghana and donate with confidence using secure mobile money and card payments.
             </p>
             <div className="flex gap-3">
@@ -157,13 +162,13 @@ export function HomePage() {
               </Link>
               <Link 
                 to="/how-it-works" 
-                className="px-6 py-3 rounded-md border border-slate-300 text-slate-700 hover:border-emerald-300 font-medium"
+                className="px-6 py-3 rounded-md border border-gray-300 text-gray-400 hover:border-emerald-300 font-medium"
               >
                 How it works
               </Link>
             </div>
           </div>
-          <div className="rounded-xl border border-slate-200 p-10" aria-hidden="true">
+          <div className="rounded-xl border border-gray-200 p-10" aria-hidden="true">
             <div className="w-full h-48 bg-gradient-to-br from-emerald-100 to-gray-100 rounded-lg"></div>
           </div>
         </div>
@@ -192,11 +197,11 @@ export function HomePage() {
               title: 'Simple & clear',
               desc: 'No clutter—just donate and track easily.'
             }].map((p, i) => (
-              <div key={i} className="rounded-lg border p-4 flex items-start gap-3">
-                <p.icon className="h-5 w-5 text-emerald-600 mt-1" />
+              <div key={i} className="rounded-lg border border-gray-300 p-4 flex items-start gap-3">
+                <p.icon className="h-5 w-5 text-emerald-500 mt-1" />
                 <div>
                   <div className="font-medium">{p.title}</div>
-                  <div className="text-sm text-slate-600 dark:text-slate-300">{p.desc}</div>
+                  <div className="text-sm text-gray-100">{p.desc}</div>
                 </div>
               </div>
             ))}
@@ -208,7 +213,7 @@ export function HomePage() {
 
           {/* Top categories */}
           <section className="space-y-6">
-            <h2 className="text-2xl font-semibold text-slate-100">Browse by Category</h2>
+            <h2 className="text-2xl font-semibold text-gray-100">Browse by Category</h2>
             <div className="flex gap-4 overflow-x-auto pb-4">
           {/* skeletons */}
           {!categories && !causesForAgg && Array.from({ length: 6 }).map((_, i) => (
@@ -224,8 +229,8 @@ export function HomePage() {
               .sort((a, b) => (Number(b.cause_count ?? 0) - Number(a.cause_count ?? 0)))
               .slice(0, 8)
               .map((c) => (
-                <Link key={c.id} to={`/causes?category=${c.id}`} className="px-3 py-1 rounded-full border border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700/70 transition-colors whitespace-nowrap">
-                  {c.name} <span className="text-xs text-slate-400">({Number(c.cause_count ?? 0)})</span>
+                <Link key={c.id} to={`/causes?category=${c.id}`} className="px-3 py-1 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-green-50 hover:border-green-300 transition-colors whitespace-nowrap">
+                  {c.name} <span className="text-xs text-gray-500">({Number(c.cause_count ?? 0)})</span>
                 </Link>
               ))
           })()}
@@ -236,8 +241,8 @@ export function HomePage() {
             if (top.length === 0) return null
             return top.map((c, i) => (
               <Link key={i} to={c.id ? `/causes?category=${c.id}` : `/causes?search=${encodeURIComponent(c.name)}`}
-                className="px-3 py-1 rounded-full border border-slate-600 bg-slate-800/50 text-slate-200 hover:bg-slate-700/70 transition-colors whitespace-nowrap">
-                {c.name} <span className="text-xs text-slate-400">({Number(c.cause_count ?? 0)})</span>
+                className="px-3 py-1 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-green-50 hover:border-green-300 transition-colors whitespace-nowrap">
+                {c.name} <span className="text-xs text-gray-500">({Number(c.cause_count ?? 0)})</span>
               </Link>
             ))
           })()}
@@ -246,16 +251,16 @@ export function HomePage() {
 
           <section className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold text-slate-100">Featured causes</h2>
+              <h2 className="text-2xl font-semibold text-gray-100">Featured causes</h2>
               <Link to="/causes" className="text-sm text-emerald-400 hover:text-emerald-300 font-medium transition-colors">View all</Link>
             </div>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {!featured && Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="rounded-lg border border-slate-700 bg-slate-800/50 p-4 space-y-3">
-              <Skeleton className="h-44 w-full bg-slate-700" />
-              <Skeleton className="h-4 w-32 bg-slate-700" />
-              <Skeleton className="h-6 w-3/4 bg-slate-700" />
-              <Skeleton className="h-2 w-full bg-slate-700" />
+            <div key={i} className="rounded-lg border border-gray-200 bg-white p-4 space-y-3">
+              <Skeleton className="h-44 w-full bg-gray-200" />
+              <Skeleton className="h-4 w-32 bg-gray-200" />
+              <Skeleton className="h-6 w-3/4 bg-gray-200" />
+              <Skeleton className="h-2 w-full bg-gray-200" />
             </div>
           ))}
           {featured?.map((cause) => {
@@ -306,13 +311,13 @@ export function HomePage() {
                       {endingSoon && <span title="Deadline within 7 days"><Badge variant="warning">ending soon{typeof daysLeft==='number' ? ` (${daysLeft}d)` : ''}</Badge></span>}
                     </div>
                   </div>
-                  <Link to={`/causes/${cause.id}`} className="block font-medium line-clamp-2 text-slate-100 hover:text-emerald-300 transition-colors" aria-label={`Go to cause ${cause.title ?? ''}`}>{cause.title}</Link>
+                  <Link to={`/causes/${cause.id}`} className="block font-medium line-clamp-2 text-gray-900 hover:text-green-600 transition-colors" aria-label={`Go to cause ${cause.title ?? ''}`}>{cause.title}</Link>
                   {target > 0 && (
                     <div className="space-y-1" aria-label={`Progress ${Math.round(progress)}%`}>
                       <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                         <div className="h-full bg-emerald-500" style={{ width: `${progress}%` }} />
                       </div>
-                      <div className="flex items-center justify-between text-xs text-slate-400">
+                      <div className="flex items-center justify-between text-xs text-gray-600">
                         <span>₵{current.toLocaleString()} raised</span>
                         <span>₵{target.toLocaleString()} target</span>
                       </div>
