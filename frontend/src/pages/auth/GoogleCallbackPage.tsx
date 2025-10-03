@@ -21,8 +21,17 @@ export default function GoogleCallbackPage() {
       setStatus('success')
       // persist tokens and user once via authStore
       authStore.setTokens(data.access, data.refresh)
-      authStore.setUser(data.user)
-      notify({ title: 'Welcome to CauseHive!', description: `Signed in as ${data.user.email}.`, variant: 'success' })
+      
+      // Handle both nested user object and flat user data structures
+      const user = data.user || {
+        id: '',
+        email: data.email || '',
+        first_name: data.first_name || '',
+        last_name: data.last_name || ''
+      }
+      
+      authStore.setUser(user)
+      notify({ title: 'Welcome to CauseHive!', description: `Signed in as ${user.email}.`, variant: 'success' })
       setTimeout(() => navigate('/app', { replace: true }), 1200)
     },
     onError: (error: unknown) => {

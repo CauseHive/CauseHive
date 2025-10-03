@@ -18,7 +18,10 @@ export interface SignupData {
 export interface LoginResponse {
   access: string
   refresh: string
-  user: User
+  email: string
+  first_name: string
+  last_name: string
+  user?: User // Keep optional for backward compatibility
 }
 
 export interface RefreshTokenRequest {
@@ -66,12 +69,8 @@ class AuthService extends BaseService {
       }
       return response
     } catch (error: unknown) {
-      const err = error as { response?: { data?: unknown; status?: number }; message?: string }
-      console.error('Login error details:', {
-        message: err.message,
-        status: err.response?.status,
-        data: err.response?.data
-      })
+      const err = error as { response?: { data?: unknown }; message?: string }
+      console.error('Login error:', err.response?.data || err.message)
       throw error
     }
   }
