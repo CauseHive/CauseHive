@@ -30,7 +30,7 @@ export default {
           foreground: '#7a3f00',
         },
         muted: '#64748b',
-        background: '#0b0f14',
+        background: '#273546ff',
         card: '#0f172a',
         border: '#1f2937'
       },
