@@ -34,9 +34,8 @@ export interface PasswordResetRequest {
 }
 
 export interface PasswordResetConfirm {
-  uidb64: string
   token: string
-  new_password: string
+  password: string
   confirm_password: string
 }
 
@@ -76,9 +75,9 @@ class AuthService extends BaseService {
   /**
    * Register a new user account
    */
-  async signup(userData: SignupData): Promise<User> {
+  async signup(userData: SignupData): Promise<{ message: string; user: User }> {
     try {
-      const response = await this.post<User>('/register/', userData)
+      const response = await this.post<{ message: string; user: User }>('/signup/', userData)
       console.log('Signup successful:', response)
       return response
     } catch (error: unknown) {
@@ -98,47 +97,46 @@ class AuthService extends BaseService {
   /**
    * Logout user (invalidate tokens on server)
    */
-  async logout(refreshToken?: string): Promise<void> {
-    return this.post<void>('/logout/', refreshToken ? { refresh: refreshToken } : undefined)
+  async logout(): Promise<{ message: string }> {
+    return this.post<{ message: string }>('/logout/')
   }
 
   /**
    * Request password reset email
    */
-  async requestPasswordReset(email: string): Promise<void> {
-    return this.post<void>('/password-reset/', { email })
+  async requestPasswordReset(email: string): Promise<{ message: string }> {
+    return this.post<{ message: string }>('/password-reset/', { email })
   }
 
   /**
    * Confirm password reset with token
    */
-  async confirmPasswordReset(resetData: PasswordResetConfirm): Promise<void> {
-    return this.post<void>('/password-reset-confirm/', resetData)
+  async confirmPasswordReset(resetData: PasswordResetConfirm): Promise<{ message: string }> {
+    return this.post<{ message: string }>('/password-reset-confirm/', resetData)
   }
 
   /**
    * Verify email address
    */
-  async verifyEmail(uidb64: string, token: string): Promise<void> {
-    return this.post<void>('/verify-email/', { uidb64, token })
+  async verifyEmail(uid: string, token: string): Promise<{ message: string; user: User }> {
+    return this.get<{ message: string; user: User }>(`/verify/${uid}/${token}/`)
   }
 
   /**
    * Resend email verification
    */
-  async resendEmailVerification(email: string): Promise<void> {
-    return this.post<void>('/resend-verification/', { email })
+  async resendEmailVerification(email: string): Promise<{ message: string }> {
+    return this.post<{ message: string }>('/resend-verification/', { email })
   }
 
   /**
    * Get Google OAuth login URL
    */
-  async getGoogleAuthUrl(): Promise<{ auth_url: string }> {
+  async getGoogleAuthUrl(): Promise<{ google_oauth_url: string; message: string }> {
     try {
       // Using correct endpoint from API documentation: GET /api/user/google/url/
-      // Note: This endpoint is outside the basePath, so we use the full path
-      const response = await api.get<{ google_oauth_url: string }>('/user/google/url/')
-      return { auth_url: response.data.google_oauth_url }
+      const response = await api.get<{ google_oauth_url: string; message: string }>('/user/google/url/')
+      return response.data
     } catch (error: unknown) {
       const err = error as { response?: { data?: unknown }; message?: string }
       console.error('Google Auth URL error:', err.response?.data || err.message)

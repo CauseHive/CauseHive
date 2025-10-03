@@ -1,19 +1,69 @@
 import { BaseService, type QueryParams } from './base'
-import type { Pagination, Donation } from '@/types/api'
 
 export interface DonationFilters extends QueryParams {
-  status?: 'pending' | 'completed' | 'failed'
   cause_id?: string
-  date_from?: string
-  date_to?: string
+  status?: 'pending' | 'completed' | 'failed'
+  search?: string
+  ordering?: string
 }
 
 export interface CreateDonationData {
   cause_id: string
   amount: number
-  currency?: string
-  anonymous?: boolean
-  message?: string
+}
+
+export interface DonationResponse {
+  id: string
+  amount: number
+  currency: string
+  status: string
+  donated_at: string
+  transaction_id: string | null
+  cause: {
+    id: string
+    title: string
+    creator: {
+      id: string
+      full_name: string
+    }
+  }
+  donor: {
+    id: string
+    full_name: string
+    email: string
+  }
+  recipient: {
+    id: string
+    full_name: string
+  }
+}
+
+export interface DonationListResponse {
+  count: number
+  next: string | null
+  previous: string | null
+  results: DonationResponse[]
+}
+
+export interface DonationStatisticsResponse {
+  total_donations: number
+  total_amount: number
+  average_donation: number
+  this_month: {
+    count: number
+    amount: number
+  }
+  by_status: {
+    completed: number
+    pending: number
+    failed: number
+  }
+  top_causes: Array<{
+    cause_id: string
+    title: string
+    donation_count: number
+    total_amount: number
+  }>
 }
 
 /**
@@ -26,8 +76,8 @@ class DonationsService extends BaseService {
   /**
    * Get user's donation history with filtering
    */
-  async getMyDonations(params?: DonationFilters): Promise<Pagination<Donation>> {
-    return this.getPaginated<Donation>('/', {
+  async getMyDonations(params?: DonationFilters): Promise<DonationListResponse> {
+    return this.getPaginated<DonationResponse>('/', {
       ...params,
       ordering: params?.ordering || '-donated_at'
     })
@@ -36,59 +86,22 @@ class DonationsService extends BaseService {
   /**
    * Get donation by ID
    */
-  async getById(id: string): Promise<Donation> {
-    return this.get<Donation>(`/${id}/`)
+  async getById(id: string): Promise<DonationResponse> {
+    return this.get<DonationResponse>(`/${id}/`)
   }
 
   /**
-   * Create a new donation (typically used for direct donations)
+   * Create a new donation
    */
-  async create(data: CreateDonationData): Promise<Donation> {
-    return this.post<Donation>('/', data)
-  }
-
-  /**
-   * Get donations for a specific cause (admin/organizer view)
-   */
-  async getByCause(causeId: string, params?: Omit<DonationFilters, 'cause_id'>): Promise<Pagination<Donation>> {
-    return this.getPaginated<Donation>('/', { ...params, cause_id: causeId })
+  async create(data: CreateDonationData): Promise<DonationResponse> {
+    return this.post<DonationResponse>('/', data)
   }
 
   /**
    * Get donation statistics for user
    */
-  async getMyStats(): Promise<{
-    total_donated: number
-    donation_count: number
-    causes_supported: number
-    monthly_donations: Array<{ month: string; amount: number; count: number }>
-  }> {
-    return this.get<any>('/stats/')
-  }
-
-  /**
-   * Get donation receipt/details for download
-   */
-  async getReceipt(id: string): Promise<{
-    donation: Donation
-    receipt_url?: string
-    tax_deductible?: boolean
-  }> {
-    return this.get<any>(`/${id}/receipt/`)
-  }
-
-  /**
-   * Cancel a pending donation
-   */
-  async cancel(id: string): Promise<void> {
-    return this.post<void>(`/${id}/cancel/`)
-  }
-
-  /**
-   * Resend donation confirmation email
-   */
-  async resendConfirmation(id: string): Promise<void> {
-    return this.post<void>(`/${id}/resend-confirmation/`)
+  async getStatistics(): Promise<DonationStatisticsResponse> {
+    return this.get<DonationStatisticsResponse>('/statistics/')
   }
 }
 

@@ -63,7 +63,9 @@ export function useMyCauses(filters?: Omit<CauseFilters, 'organizer_id'>) {
   const query = useQuery({
     queryKey: ['my-causes', filters],
     queryFn: async () => {
-      const data = await causesService.getMyCauses(filters)
+      // Note: Backend doesn't have a specific endpoint for user's causes
+      // This would need to be implemented on the backend or filtered client-side
+      const data = await causesService.getAll({ ...filters, status: 'draft' })
       return mapPagination(data, mapCauseListItem)
     }
   })
@@ -198,8 +200,8 @@ export function useCategories() {
   const query = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const categories = await categoriesService.getAll()
-      return categories.map(mapCategory)
+      const response = await categoriesService.getAll()
+      return response.results.map(mapCategory)
     },
     staleTime: 10 * 60 * 1000 // 10 minutes - categories don't change often
   })

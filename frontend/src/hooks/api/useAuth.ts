@@ -120,9 +120,8 @@ export function useAuth() {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const refresh = authStore.getRefreshToken()
       try {
-        await authService.logout(refresh || undefined)
+        await authService.logout()
       } catch {
         // Log logout failure for diagnostics, but continue to clear local state
         console.warn('Logout request failed in useAuth.logout()')

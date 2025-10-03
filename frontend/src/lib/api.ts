@@ -36,12 +36,21 @@ api.interceptors.response.use(
     
     // Log API errors for debugging in a consistent format
     try {
+      // Safely stringify response data for clearer console output; trim very long payloads
+      const rawData = error.response?.data
+      let dataStr = ''
+      try {
+        dataStr = typeof rawData === 'string' ? rawData : JSON.stringify(rawData)
+      } catch {
+        dataStr = String(rawData)
+      }
+      if (dataStr.length > 1200) dataStr = dataStr.slice(0, 1200) + '... (truncated)'
       // eslint-disable-next-line no-console
       console.error('API Error:', {
         method: error.config?.method?.toUpperCase(),
         url: error.config?.url,
         status: error.response?.status,
-        data: error.response?.data,
+        data: dataStr,
         message: error.message
       })
     } catch {

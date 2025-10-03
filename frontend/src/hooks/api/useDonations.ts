@@ -62,7 +62,7 @@ export function useDonationStats() {
 
   const query = useQuery({
     queryKey: ['donation-stats'],
-    queryFn: () => donationsService.getMyStats(),
+    queryFn: () => donationsService.getStatistics(),
     staleTime: 5 * 60 * 1000 // 5 minutes
   })
 
@@ -87,7 +87,7 @@ export function useDonationMutations() {
 
   const createMutation = useMutation({
     mutationFn: (data: CreateDonationData) => donationsService.create(data),
-    onSuccess: (newDonation) => {
+    onSuccess: (_newDonation) => {
       queryClient.invalidateQueries({ queryKey: ['donations'] })
       queryClient.invalidateQueries({ queryKey: ['donation-stats'] })
       queryClient.invalidateQueries({ queryKey: ['causes'] }) // Refresh cause amounts
@@ -97,8 +97,8 @@ export function useDonationMutations() {
         variant: 'success'
       })
     },
-    onError: (error: any) => {
-      const message = error.response?.data?.message || 'Failed to process donation'
+    onError: (error: unknown) => {
+      const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to process donation'
       notify({
         title: 'Donation failed',
         description: message,
@@ -107,51 +107,51 @@ export function useDonationMutations() {
     }
   })
 
-  const cancelMutation = useMutation({
-    mutationFn: (id: string) => donationsService.cancel(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['donations'] })
-      queryClient.invalidateQueries({ queryKey: ['donation-stats'] })
-      notify({
-        title: 'Donation cancelled',
-        description: 'Your donation has been cancelled successfully.',
-        variant: 'success'
-      })
-    },
-    onError: (error: any) => {
-      const message = error.response?.data?.message || 'Failed to cancel donation'
-      notify({
-        title: 'Cancellation failed',
-        description: message,
-        variant: 'error'
-      })
-    }
-  })
+  // const cancelMutation = useMutation({
+  //   mutationFn: (id: string) => donationsService.cancel(id),
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ['donations'] })
+  //     queryClient.invalidateQueries({ queryKey: ['donation-stats'] })
+  //     notify({
+  //       title: 'Donation cancelled',
+  //       description: 'Your donation has been cancelled successfully.',
+  //       variant: 'success'
+  //     })
+  //   },
+  //   onError: (error: any) => {
+  //     const message = error.response?.data?.message || 'Failed to cancel donation'
+  //     notify({
+  //       title: 'Cancellation failed',
+  //       description: message,
+  //       variant: 'error'
+  //     })
+  //   }
+  // })
 
-  const resendConfirmationMutation = useMutation({
-    mutationFn: (id: string) => donationsService.resendConfirmation(id),
-    onSuccess: () => {
-      notify({
-        title: 'Confirmation sent',
-        description: 'Donation confirmation email has been resent.',
-        variant: 'success'
-      })
-    },
-    onError: () => {
-      notify({
-        title: 'Failed to resend',
-        description: 'Unable to resend confirmation email.',
-        variant: 'error'
-      })
-    }
-  })
+  // const resendConfirmationMutation = useMutation({
+  //   mutationFn: (id: string) => donationsService.resendConfirmation(id),
+  //   onSuccess: () => {
+  //     notify({
+  //       title: 'Confirmation sent',
+  //       description: 'Donation confirmation email has been resent.',
+  //       variant: 'success'
+  //     })
+  //   },
+  //   onError: () => {
+  //     notify({
+  //       title: 'Failed to resend',
+  //       description: 'Unable to resend confirmation email.',
+  //       variant: 'error'
+  //     })
+  //   }
+  // })
 
   return {
     createDonation: createMutation.mutate,
-    cancelDonation: cancelMutation.mutate,
-    resendConfirmation: resendConfirmationMutation.mutate,
+    // cancelDonation: cancelMutation.mutate,
+    // resendConfirmation: resendConfirmationMutation.mutate,
     isCreating: createMutation.isPending,
-    isCancelling: cancelMutation.isPending,
-    isResending: resendConfirmationMutation.isPending,
+    // isCancelling: cancelMutation.isPending,
+    // isResending: resendConfirmationMutation.isPending,
   }
 }

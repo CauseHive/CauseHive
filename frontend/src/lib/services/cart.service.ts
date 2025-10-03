@@ -1,9 +1,25 @@
 import { BaseService } from './base'
-import type { CartItem, CartSummary } from '@/types/api'
 
 export interface AddToCartData {
   cause_id: string
   amount: number
+}
+
+export interface CartItemResponse {
+  id: string
+  cause: {
+    id: string
+    title: string
+    featured_image: string
+  }
+  amount: number
+  created_at: string
+}
+
+export interface CartSummaryResponse {
+  items: CartItemResponse[]
+  total_amount: number
+  item_count: number
 }
 
 /**
@@ -13,45 +29,38 @@ class CartService extends BaseService {
   protected basePath = '/cart'
 
   /**
-   * Get current user's cart
+   * Add item to cart
    */
-  async getCart(): Promise<CartSummary> {
-    return this.get<CartSummary>('/')
+  async addItem(data: AddToCartData): Promise<{ message: string; cart_item: CartItemResponse }> {
+    return this.post<{ message: string; cart_item: CartItemResponse }>('/add/', data)
   }
 
   /**
-   * Add item to cart
+   * Get current user's cart
    */
-  async addItem(data: AddToCartData): Promise<CartItem> {
-    return this.post<CartItem>('/add/', data)
+  async getCart(): Promise<CartSummaryResponse> {
+    return this.get<CartSummaryResponse>('/')
   }
 
   /**
    * Update cart item amount
    */
-  async updateItem(itemId: string, amount: number): Promise<CartItem> {
-    return this.patch<CartItem>(`/items/${itemId}/`, { amount })
+  async updateItem(itemId: string, amount: number): Promise<{ message: string; cart_item: CartItemResponse }> {
+    return this.patch<{ message: string; cart_item: CartItemResponse }>(`/${itemId}/`, { amount })
   }
 
   /**
    * Remove item from cart
    */
-  async removeItem(itemId: string): Promise<void> {
-    return this.delete<void>(`/items/${itemId}/`)
+  async removeItem(itemId: string): Promise<{ message: string }> {
+    return this.delete<{ message: string }>(`/${itemId}/`)
   }
 
   /**
    * Clear entire cart
    */
-  async clearCart(): Promise<void> {
-    return this.delete<void>('/clear/')
-  }
-
-  /**
-   * Get cart item count (for navigation badge)
-   */
-  async getItemCount(): Promise<{ count: number }> {
-    return this.get<{ count: number }>('/count/')
+  async clearCart(): Promise<{ message: string }> {
+    return this.delete<{ message: string }>('/clear/')
   }
 }
 

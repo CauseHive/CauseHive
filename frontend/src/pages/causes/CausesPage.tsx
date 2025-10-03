@@ -73,7 +73,7 @@ export function CausesPage() {
           </form>
           <Link 
             to="/app/cart" 
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 hover:text-emerald-600 border border-slate-200 hover:border-emerald-200 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-200 hover:text-emerald-600 border border-slate-200 hover:border-emerald-200 rounded-lg transition-colors"
           >
             <ShoppingCart className="h-4 w-4" />
             Cart
@@ -97,7 +97,7 @@ export function CausesPage() {
           All
         </button>
         {categoriesLoading && Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-8 w-24 rounded-full" />
+          <Skeleton key={i} className="h-8 w-24 border-gray-50 rounded-full" />
         ))}
         {derivedCategories.map(c => (
           <button 

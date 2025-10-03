@@ -1,29 +1,80 @@
 import { BaseService } from './base'
-import type { PaymentInitResponse } from '@/types/api'
 
 export interface InitiatePaymentData {
+  donation_id: string
   amount: number
-  currency?: string
+  email: string
   callback_url: string
-  metadata?: Record<string, any>
-  cart_id?: string
-  cause_id?: string
 }
 
-export interface PaymentVerificationData {
-  reference: string
+export interface PaymentInitResponse {
+  status: boolean
+  message: string
+  data: {
+    authorization_url: string
+    access_code: string
+    reference: string
+  }
 }
 
-export interface PaymentTransaction {
-  id: string
-  reference: string
-  amount: number
-  currency: string
-  status: 'pending' | 'success' | 'failed'
-  gateway: string
-  created_at: string
-  updated_at: string
-  metadata?: Record<string, any>
+export interface PaymentVerificationResponse {
+  status: boolean
+  message: string
+  data: {
+    reference: string
+    amount: number
+    status: string
+    donation_id: string
+    transaction_date: string
+  }
+}
+
+export interface BankResponse {
+  status: string
+  data: Array<{
+    id: number
+    name: string
+    code: string
+    longcode: string
+    gateway: string
+    pay_with_bank: boolean
+    active: boolean
+    is_deleted: boolean
+    country: string
+    currency: string
+    type: string
+  }>
+}
+
+export interface MobileMoneyResponse {
+  status: string
+  data: Array<{
+    id: number
+    name: string
+    code: string
+    longcode: string
+    gateway: string
+    pay_with_bank: boolean
+    active: boolean
+    is_deleted: boolean
+    country: string
+    currency: string
+    type: string
+  }>
+}
+
+export interface AccountValidationData {
+  bank_code: string
+  account_number: string
+}
+
+export interface AccountValidationResponse {
+  status: string
+  data: {
+    account_name: string
+    account_number: string
+    bank_id: number
+  }
 }
 
 /**
@@ -36,56 +87,35 @@ class PaymentsService extends BaseService {
    * Initiate a payment transaction
    */
   async initiate(data: InitiatePaymentData): Promise<PaymentInitResponse> {
-    return this.post<PaymentInitResponse>('/initiate/', data)
+    return this.post<PaymentInitResponse>('/initialize/', data)
   }
 
   /**
    * Verify payment status
    */
-  async verify(data: PaymentVerificationData): Promise<PaymentTransaction> {
-    return this.post<PaymentTransaction>('/verify/', data)
+  async verify(reference: string): Promise<PaymentVerificationResponse> {
+    return this.get<PaymentVerificationResponse>(`/verify/${reference}/`)
   }
 
   /**
-   * Get payment transaction by ID
+   * Get list of supported banks
    */
-  async getTransaction(id: string): Promise<PaymentTransaction> {
-    return this.get<PaymentTransaction>(`/transactions/${id}/`)
+  async getBanks(): Promise<BankResponse> {
+    return this.get<BankResponse>('/banks/')
   }
 
   /**
-   * Get user's payment history
+   * Get list of mobile money providers
    */
-  async getPaymentHistory(params?: {
-    page?: number
-    status?: string
-    date_from?: string
-    date_to?: string
-  }): Promise<{ results: PaymentTransaction[], count: number }> {
-    return this.get<any>('/transactions/', params)
+  async getMobileMoneyProviders(): Promise<MobileMoneyResponse> {
+    return this.get<MobileMoneyResponse>('/mobile-money/')
   }
 
   /**
-   * Handle payment callback from Paystack
+   * Validate bank account details
    */
-  async handleCallback(reference: string): Promise<{
-    status: 'success' | 'failed'
-    message: string
-    donation_ids?: string[]
-  }> {
-    return this.post<any>('/callback/', { reference })
-  }
-
-  /**
-   * Get supported payment methods
-   */
-  async getPaymentMethods(): Promise<Array<{
-    name: string
-    code: string
-    active: boolean
-    available_for: string[]
-  }>> {
-    return this.get<any>('/methods/')
+  async validateAccount(data: AccountValidationData): Promise<AccountValidationResponse> {
+    return this.post<AccountValidationResponse>('/validate-account/', data)
   }
 }
 

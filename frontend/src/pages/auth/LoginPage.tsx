@@ -83,7 +83,7 @@ export function LoginPage() {
   const googleAuthMutation = useMutation({
     mutationFn: () => authService.getGoogleAuthUrl(),
     onSuccess: (data) => {
-      const url = data?.auth_url
+      const url = data?.google_oauth_url
       if (url) window.location.href = url
       else notify({ title: 'Google Sign-in Error', description: 'No auth URL received from server', variant: 'error' })
     },

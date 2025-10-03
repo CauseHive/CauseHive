@@ -1,24 +1,44 @@
 import { BaseService } from './base'
-import type { User, Profile } from '@/types/api'
 
 export interface UpdateProfileData {
-  first_name?: string
-  last_name?: string
+  full_name?: string
   bio?: string
   phone_number?: string
   address?: string
   profile_picture?: File
+  withdrawal_address?: {
+    payment_method: string
+    phone_number?: string
+    provider?: string
+  }
+  withdrawal_wallet?: string
 }
 
 export interface UserProfileResponse {
-  user: User
-  profile: Profile
+  id: string
+  full_name: string
+  bio: string
+  profile_picture: string
+  phone_number: string
+  address: string
+  withdrawal_address: {
+    payment_method: string
+    phone_number?: string
+    provider?: string
+  }
+  withdrawal_wallet: string
+  updated_at: string
+  user: string
 }
 
-export interface ChangePasswordData {
-  current_password: string
-  new_password: string
-  confirm_password: string
+export interface UserDetailsResponse {
+  id: string
+  email: string
+  first_name: string
+  last_name: string
+  is_active: boolean
+  date_joined: string
+  last_login: string
 }
 
 /**
@@ -43,62 +63,17 @@ class UserService extends BaseService {
   }
 
   /**
-   * Change user password
+   * Get user details
    */
-  async changePassword(data: ChangePasswordData): Promise<void> {
-    return this.post<void>('/change-password/', data)
-  }
-
-  /**
-   * Deactivate user account
-   */
-  async deactivateAccount(): Promise<void> {
-    return this.post<void>('/deactivate/')
+  async getDetails(): Promise<UserDetailsResponse> {
+    return this.get<UserDetailsResponse>('/details/')
   }
 
   /**
    * Delete user account permanently
    */
-  async deleteAccount(password: string): Promise<void> {
-    return this.post<void>('/delete-account/', { password })
-  }
-
-  /**
-   * Get user's account settings/preferences
-   */
-  async getSettings(): Promise<{
-    email_notifications: boolean
-    marketing_emails: boolean
-    two_factor_enabled: boolean
-    privacy_settings: {
-      profile_visibility: 'public' | 'private'
-      show_donation_history: boolean
-    }
-  }> {
-    return this.get<any>('/settings/')
-  }
-
-  /**
-   * Update user account settings
-   */
-  async updateSettings(settings: any): Promise<void> {
-    return this.patch<void>('/settings/', settings)
-  }
-
-  /**
-   * Upload profile picture
-   */
-  async uploadProfilePicture(file: File): Promise<{ profile_picture: string }> {
-    const formData = new FormData()
-    formData.append('profile_picture', file)
-    return this.post<any>('/profile-picture/', formData)
-  }
-
-  /**
-   * Remove profile picture
-   */
-  async removeProfilePicture(): Promise<void> {
-    return this.delete<void>('/profile-picture/')
+  async deleteAccount(password: string): Promise<{ message: string }> {
+    return this.post<{ message: string }>('/delete/', { password })
   }
 
   /**
@@ -106,12 +81,14 @@ class UserService extends BaseService {
    */
   private createFormData(data: UpdateProfileData): FormData {
     const formData = new FormData()
-    
+
     Object.entries(data).forEach(([key, value]) => {
       if (value === undefined || value === null) return
 
       if (key === 'profile_picture' && value instanceof File) {
         formData.append(key, value)
+      } else if (key === 'withdrawal_address' && typeof value === 'object') {
+        formData.append(key, JSON.stringify(value))
       } else if (typeof value === 'string') {
         formData.append(key, value)
       }

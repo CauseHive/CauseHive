@@ -9,8 +9,9 @@ export { causesService, categoriesService, type CauseFilters, type CreateCauseDa
 export { donationsService, type DonationFilters, type CreateDonationData } from './donations.service'
 export { userService, type UpdateProfileData, type UserProfileResponse } from './user.service'
 export { cartService, type AddToCartData } from './cart.service'
-export { paymentsService, type InitiatePaymentData, type PaymentTransaction } from './payments.service'
+export { paymentsService, type InitiatePaymentData } from './payments.service'
 export { notificationsService, type NotificationFilters } from './notifications.service'
+export { withdrawalsService, type CreateWithdrawalData } from './withdrawals.service'
 
 // Import all service instances
 import { authService } from './auth.service'
@@ -20,6 +21,7 @@ import { userService } from './user.service'
 import { cartService } from './cart.service'
 import { paymentsService } from './payments.service'
 import { notificationsService } from './notifications.service'
+import { withdrawalsService } from './withdrawals.service'
 
 // Export all services as a single object for easy access
 export const apiServices = {
@@ -31,4 +33,5 @@ export const apiServices = {
   cart: cartService,
   payments: paymentsService,
   notifications: notificationsService,
+  withdrawals: withdrawalsService,
 }

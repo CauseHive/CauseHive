@@ -45,7 +45,7 @@ export function SignupPage() {
     queryFn: async () => {
       try {
         const result = await authService.getGoogleAuthUrl()
-        return result.auth_url
+        return result.google_oauth_url
       } catch (err) {
         console.warn('Failed to fetch Google OAuth URL for signup', err)
         return ''
