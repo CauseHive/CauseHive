@@ -268,7 +268,7 @@ class LogoutView(APIView):
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
     client_class = OAuth2Client
-    callback_url = "http://127.0.0.1:9000/api/user/google/callback/"
+    callback_url = f"{settings.BACKEND_URL}/api/user/google/callback/"
     
     def get_response(self):
         response = super().get_response()
