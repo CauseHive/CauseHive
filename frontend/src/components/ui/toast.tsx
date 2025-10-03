@@ -43,15 +43,15 @@ export function Toaster({ children }: { children: React.ReactNode }) {
         <ToastPrimitives.Root
           open={open}
           onOpenChange={setOpen}
-          className={cn('fixed bottom-4 right-4 z-[100] w-80 rounded-lg border bg-white p-4 shadow-lg dark:bg-slate-950',
+          className={cn('fixed bottom-4 right-4 z-[100] w-80 rounded-lg border bg-white p-4 shadow-lg',
             state.variant === 'success' && 'border-emerald-600',
             state.variant === 'error' && 'border-red-600')}
           aria-live="polite"
           role="status"
         >
           {state.title && <ToastPrimitives.Title className="text-sm font-medium">{state.title}</ToastPrimitives.Title>}
-          {state.description && <ToastPrimitives.Description className="text-sm text-slate-600 dark:text-slate-300">{state.description}</ToastPrimitives.Description>}
-          <ToastPrimitives.Close className="absolute right-2 top-2 rounded-md px-2 py-1 text-xs text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-900">Close</ToastPrimitives.Close>
+          {state.description && <ToastPrimitives.Description className="text-sm text-slate-600">{state.description}</ToastPrimitives.Description>}
+          <ToastPrimitives.Close className="absolute right-2 top-2 rounded-md px-2 py-1 text-xs text-slate-600 hover:bg-slate-100">Close</ToastPrimitives.Close>
         </ToastPrimitives.Root>
         <ToastPrimitives.Viewport className="fixed bottom-0 right-0 z-[100] m-0 flex max-h-screen w-80 flex-col gap-2 p-4 outline-none" />
       </ToastPrimitives.Provider>

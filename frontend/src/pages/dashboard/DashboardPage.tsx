@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { api } from '@/lib/api'
-import { ShoppingCart } from 'lucide-react'
+import { ShoppingCart, Award, Activity } from 'lucide-react'
 
 type Donation = {
   amount?: string | number
@@ -36,23 +36,39 @@ export default function DashboardPage() {
   })
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
-      {/* Welcome Header */}
-      <div className="bg-white rounded-lg border p-6 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">Welcome back</h1>
-            <p className="text-sm text-gray-600">Here's a quick overview of your activity.</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50">
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
+
+        {/* Welcome Header */}
+        <div className="relative overflow-hidden bg-white rounded-2xl shadow-lg border border-gray-200">
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/5 to-blue-600/5"></div>
+          <div className="relative p-8">
+            <div className="flex items-center justify-between">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold text-gray-900">Welcome back! 👋</h1>
+                <p className="text-lg text-gray-600">Here's your impact dashboard and latest activity.</p>
+                <div className="flex items-center gap-4 mt-4">
+                  <div className="flex items-center gap-2 text-sm text-emerald-600">
+                    <Activity className="w-4 h-4" />
+                    <span>Active this month</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-blue-600">
+                    <Award className="w-4 h-4" />
+                    <span>Top donor</span>
+                  </div>
+                </div>
+              </div>
+              <Link
+                to="/app/cart"
+                className="group relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                <span>View Cart</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-700 to-emerald-800 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+              </Link>
+            </div>
           </div>
-          <Link 
-            to="/app/cart" 
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-green-600 border hover:border-green-300 rounded-lg transition-colors"
-          >
-            <ShoppingCart className="h-4 w-4" />
-            Cart
-          </Link>
         </div>
-      </div>
       
       {/* Quick Stats */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -112,6 +128,7 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }
