@@ -29,18 +29,29 @@ export function useAuth() {
   const loginMutation = useMutation({
     mutationFn: (credentials: LoginCredentials) => authService.login(credentials),
     onSuccess: (data) => {
-      console.log('useAuth login onSuccess called with data:', data)
-      postAuth({
-        access: data.access,
-        refresh: data.refresh,
-        user: data.user,
-        navigate,
-        notify,
-        welcomeTitle: 'Welcome back',
-        welcomeDescription: data.user.first_name ? `Welcome back, ${data.user.first_name}!` : undefined
-      })
-      // Invalidate all queries to refresh user-specific data
-      queryClient.invalidateQueries()
+      console.log('useAuth login onSuccess called with data:', JSON.stringify(data, null, 2))
+      try {
+        console.log('useAuth login: calling postAuth with tokens')
+        postAuth({
+          access: data.access,
+          refresh: data.refresh,
+          user: data.user,
+          navigate,
+          notify,
+          welcomeTitle: 'Welcome back',
+          welcomeDescription: data.user.first_name ? `Welcome back, ${data.user.first_name}!` : undefined
+        })
+        console.log('useAuth login: postAuth completed successfully')
+        // Invalidate all queries to refresh user-specific data
+        queryClient.invalidateQueries()
+      } catch (error) {
+        console.error('useAuth login: Error in onSuccess callback:', error)
+        notify({ 
+          title: 'Login Error', 
+          description: 'Authentication succeeded but failed to complete login process.', 
+          variant: 'error' 
+        })
+      }
     },
     onError: (error: unknown) => {
       const errorData = (error as ApiError)?.response?.data

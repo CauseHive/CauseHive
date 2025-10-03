@@ -66,8 +66,12 @@ class AuthService extends BaseService {
       }
       return response
     } catch (error: unknown) {
-      const err = error as { response?: { data?: unknown }; message?: string }
-      console.error('Login error:', err.response?.data || err.message)
+      const err = error as { response?: { data?: unknown; status?: number }; message?: string }
+      console.error('Login error details:', {
+        message: err.message,
+        status: err.response?.status,
+        data: err.response?.data
+      })
       throw error
     }
   }
