@@ -48,6 +48,7 @@ export interface CauseDetailResponse {
     full_name: string
     profile_picture: string
   }
+  organizer_id?: string // Backend returns this as UUID when creator object is not available
   created_at: string
   updated_at: string
   deadline: string
@@ -75,14 +76,14 @@ class CausesService extends BaseService implements CrudService<CauseListItem, Cr
    * Get paginated list of causes with filtering
    */
   async getAll(params?: CauseFilters): Promise<CauseListResponse> {
-    return this.getPaginated<CauseListItem>('/', params)
+    return this.get<CauseListResponse>('/list/', params)
   }
 
   /**
    * Get cause details by ID
    */
   async getById(id: string): Promise<CauseDetailResponse> {
-    return this.get<CauseDetailResponse>(`/${id}/`)
+    return this.get<CauseDetailResponse>(`/details/${id}/`)
   }
 
   /**

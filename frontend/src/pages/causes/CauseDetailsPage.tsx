@@ -1,73 +1,11 @@
-import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation } from '@tanstack/react-query'
-import { api } from '@/lib/api'
-import type { CauseDetails, PaymentInitResponse } from '@/types/api'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { useParams } from 'react-router-dom'
+import { useCause } from '@/hooks/api'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useToast } from '@/components/ui/toast'
 
 export function CauseDetailsPage() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
-  const [amount, setAmount] = useState<number>(50)
-  const { notify } = useToast()
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ['cause', id],
-    queryFn: async () => {
-      const { data } = await api.get<CauseDetails>(`/causes/${id}/`)
-      return data
-    }
-  })
-
-  const donate = useMutation({
-    mutationFn: async () => {
-      // 1) Create donation
-      const { data: donation } = await api.post('/donations/', { cause_id: id, amount })
-      // 2) Initialize payment
-      const { data: pay } = await api.post<PaymentInitResponse>('/payments/initialize/', {
-        donation_id: donation.id,
-        amount,
-        email: donation.donor?.email,
-        callback_url: window.location.origin + '/payment/callback'
-      })
-      return pay
-    },
-    onSuccess: (res) => {
-      const url = res.data?.authorization_url
-      if (res.status && url) {
-        window.location.href = url
-      } else {
-        notify({ title: 'Payment initialization incomplete' })
-      }
-    },
-    onError: (e: unknown) => {
-      const err = e as { response?: { data?: { error?: string }, status?: number } } | undefined
-      notify({ title: 'Payment init failed', description: err?.response?.data?.error || 'Try again', variant: 'error' })
-      if (!err?.response?.status) navigate('/login')
-    }
-  })
-
-  const addToCart = useMutation({
-    mutationFn: async () => {
-      // Try to reuse existing cart id if available
-      let cartId: string | undefined
-      try {
-        const { data: current } = await api.get('/cart/')
-        if (typeof current?.cart_id === 'string') cartId = current.cart_id
-      } catch (err) {
-        // Log the failure but continue — we'll create a new cart when necessary
-        console.warn('Failed to get current cart id; will create a new cart', err)
-        cartId = undefined
-      }
-      const payload = { cause_id: id, amount, ...(cartId ? { cart_id: cartId } : {}) }
-      await api.post('/cart/add/', payload)
-    },
-    onSuccess: () => notify({ title: 'Added to cart', variant: 'success' }),
-    onError: () => notify({ title: 'Failed to add to cart', variant: 'error' })
-  })
+  const { data, isLoading, isError } = useCause(id!)
 
   if (isLoading) return (
     <div className="grid md:grid-cols-3 gap-6">
@@ -90,6 +28,7 @@ export function CauseDetailsPage() {
       </aside>
     </div>
   )
+
   if (isError || !data) return <div className="text-red-600">Could not load cause.</div>
 
   return (
@@ -104,20 +43,75 @@ export function CauseDetailsPage() {
         )}
         <h1 className="text-2xl font-semibold">{data.title}</h1>
         <p className="text-slate-700 dark:text-slate-300 whitespace-pre-line">{data.description}</p>
+        
+        {/* Display updates if available */}
+        {data.updates && data.updates.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">Updates</h2>
+            {data.updates.map((update) => (
+              <div key={update.id} className="border rounded-lg p-4">
+                <h3 className="font-medium">{update.title}</h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{update.description}</p>
+                <p className="text-xs text-slate-500 mt-2">
+                  {new Date(update.created_at).toLocaleDateString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       <aside className="space-y-4">
         <div className="rounded-lg border p-4 bg-white dark:bg-slate-900">
           <div className="text-sm text-slate-500">Progress</div>
-          <div className="text-lg font-medium">₵{data.current_amount.toLocaleString()} / ₵{data.target_amount.toLocaleString()}</div>
-          <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden mt-2" aria-label={`Progress ${Math.round(data.progress_percentage)}%`}>
-            <div className="h-full bg-emerald-500" style={{ width: `${data.progress_percentage}%` }} />
+          <div className="text-lg font-medium">₵{data.current_amount?.toLocaleString() || 0} / ₵{data.target_amount?.toLocaleString() || 0}</div>
+          <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden mt-2" aria-label={`Progress ${Math.round(data.progress_percentage || 0)}%`}>
+            <div className="h-full bg-emerald-500" style={{ width: `${data.progress_percentage || 0}%` }} />
+          </div>
+          <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+            {data.progress_percentage?.toFixed(1) || 0}% funded
           </div>
         </div>
-        <div className="rounded-lg border p-4 bg-white dark:bg-slate-900 space-y-3">
-          <label className="block text-sm" htmlFor="amount">Donation Amount (GHS)</label>
-          <Input id="amount" type="number" min={1} value={amount} onChange={(e)=> setAmount(Number(e.target.value))} />
-          <Button onClick={()=> donate.mutate()} disabled={donate.isPending} className="w-full">{donate.isPending? 'Processing…':'Donate Now'}</Button>
-          <Button onClick={()=> addToCart.mutate()} disabled={addToCart.isPending} className="w-full" variant="outline">Add to Cart</Button>
+        
+        <div className="rounded-lg border p-4 bg-white dark:bg-slate-900">
+          <div className="text-sm text-slate-500">Category</div>
+          <div className="font-medium">{data.category?.name}</div>
+          {data.category?.description && (
+            <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+              {data.category.description}
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-lg border p-4 bg-white dark:bg-slate-900">
+          <div className="text-sm text-slate-500">Organizer</div>
+          <div className="font-medium">{data.creator?.full_name || data.organizer_id || 'Anonymous'}</div>
+          {data.creator?.profile_picture && (
+            <img 
+              src={data.creator.profile_picture} 
+              alt={data.creator.full_name || 'Organizer'} 
+              className="w-12 h-12 rounded-full mt-2"
+            />
+          )}
+        </div>
+
+        <div className="rounded-lg border p-4 bg-white dark:bg-slate-900">
+          <div className="text-sm text-slate-500">Status</div>
+          <div className="font-medium capitalize">{data.status}</div>
+          <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+            Created {data.created_at ? new Date(data.created_at).toLocaleDateString() : 'Unknown'}
+          </div>
+          {data.deadline && (
+            <div className="text-sm text-slate-600 dark:text-slate-400">
+              Deadline: {new Date(data.deadline).toLocaleDateString()}
+            </div>
+          )}
+        </div>
+
+        {/* Donation/Cart functionality will be added later */}
+        <div className="rounded-lg border p-4 bg-slate-50 dark:bg-slate-800">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Donation and cart functionality coming soon...
+          </p>
         </div>
       </aside>
     </div>
