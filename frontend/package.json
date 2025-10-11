@@ -16,29 +16,30 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-toast": "^1.2.15",
+    "@sentry/react": "^8.30.0",
     "@tanstack/react-query": "^5.89.0",
     "@tanstack/react-virtual": "^3.13.12",
     "@types/node": "^24.5.2",
+    "axios": "^1.7.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.15",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.540.0",
+    "nprogress": "^0.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-helmet-async": "^2.0.5",
     "react-hook-form": "^7.62.0",
     "react-icons": "^5.5.0",
     "react-intersection-observer": "^9.16.0",
-  "react-router-dom": "^6.14.1",
+    "react-router-dom": "^6.14.1",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "web-vitals": "^5.0.3",
     "zod": "^4.1.9",
-  "zustand": "^5.0.8",
-    "@sentry/react": "^8.30.0",
-    "axios": "^1.7.7",
-    "nprogress": "^0.2.0"
+    "zustand": "^5.0.8"
   },
   "scripts": {
     "dev": "vite",
@@ -48,7 +49,6 @@
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write ."
   },
-
   "devDependencies": {
     "@tanstack/react-query-devtools": "^5.59.0",
     "@testing-library/jest-dom": "^6.6.3",

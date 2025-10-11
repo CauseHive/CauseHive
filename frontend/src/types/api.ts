@@ -99,8 +99,11 @@ export type Notification = {
   title: string
   message: string
   type: string
+  priority?: string
   is_read: boolean
+  is_archived?: boolean
   created_at: string
+  read_at?: string | null
   data?: Record<string, unknown>
 }
 

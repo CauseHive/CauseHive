@@ -1,12 +1,13 @@
 import { Outlet, Link, NavLink, useLocation, useNavigation, useNavigate } from 'react-router-dom'
 import { authStore } from '@/lib/auth'
 import { useQuery } from '@tanstack/react-query'
-import { api } from '@/lib/api'
 import { useUserProfile } from '@/hooks/useUserProfile'
 import { useEffect } from 'react'
 import { Toaster } from '@/components/ui/toast'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
+import { notificationsService } from '@/lib/services'
+import { api } from '@/lib/api'
 
 export function AppLayout() {
   const user = authStore.getUser()
@@ -17,14 +18,16 @@ export function AppLayout() {
   const { data: unreadCount } = useQuery({
     queryKey: ['notifications-unread-count'],
     queryFn: async () => {
-      const { data } = await api.get('/notifications/', { params: { unread_only: true, page_size: 1 } })
-      return data.count as number
+      const data = await notificationsService.getNotifications({ unread_only: true, page_size: 1 })
+      return typeof data.count === 'number' ? data.count : data.results.length
     },
     enabled: !!user,
     staleTime: 30_000
   })
   const { data: combined } = useUserProfile()
   const profile = combined?.profile
+  const displayName = user?.first_name || user?.email || 'User'
+  const displayInitial = displayName.charAt(0).toUpperCase()
 
   // Google OAuth is now handled by dedicated callback page
 
@@ -75,9 +78,9 @@ export function AppLayout() {
                     <div className="h-8 w-8 rounded-full animate-pulse bg-slate-300 dark:bg-slate-700" aria-label="Loading avatar" />
                   )}
                   {profile?.profile_picture ? (
-                    <img src={profile.profile_picture} alt={user.first_name || user.email} className="h-8 w-8 rounded-full object-cover border border-slate-200 dark:border-slate-700" />
+                    <img src={profile.profile_picture} alt={displayName} className="h-8 w-8 rounded-full object-cover border border-slate-200 dark:border-slate-700" />
                   ) : profile && (
-                    <div className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-sm">{(user.first_name || user.email).slice(0,1).toUpperCase()}</div>
+                    <div className="h-8 w-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-sm">{displayInitial}</div>
                   )}
                 </NavLink>
                 <button onClick={signOut} className="text-slate-600 text-xs">Sign out</button>

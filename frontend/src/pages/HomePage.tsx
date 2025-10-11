@@ -6,7 +6,7 @@ import type { AxiosError } from 'axios'
 import { api } from '@/lib/api'
 import { mapCategory, mapCauseListItem } from '@/lib/mappers'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ShieldCheck, HeartHandshake, Zap, CheckCircle2, TrendingUp, Users, Award, Globe } from 'lucide-react'
+import { ShieldCheck, HeartHandshake, Zap, CheckCircle2, Users, Award } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 
 export function HomePage() {
@@ -237,15 +237,21 @@ export function HomePage() {
             <div className="space-y-8">
               <div className="space-y-4">
                 <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-200 px-3 py-1 text-sm font-medium">
-                  🇬🇭 Ghana's Premier Crowdfunding Platform
+                  🇬🇭 CauseHive · Ghana's Premier Crowdfunding Platform
                 </Badge>
                 <h1 className="text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-r from-gray-900 via-emerald-800 to-emerald-600 bg-clip-text text-transparent">
                   Building Ghana's Future,
                   <span className="block text-emerald-600">One Donation at a Time</span>
                 </h1>
                 <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
-                  Join thousands of Ghanaians transforming communities through transparent,
-                  secure crowdfunding. From education to healthcare, your impact matters.
+                  CauseHive is a regulated crowdfunding and community impact platform purpose-built for Ghana.
+                  We help nonprofits, social enterprises, and community leaders launch compliant fundraising
+                  campaigns, receive mobile money or card donations instantly, and report back to donors with
+                  auditable updates.
+                </p>
+                <p className="text-lg text-gray-600 leading-relaxed max-w-xl">
+                  Join thousands of supporters who trust CauseHive to connect transparent projects with the
+                  resources they need—from classrooms and clinics to clean water systems across Ghana.
                 </p>
               </div>
 
@@ -329,6 +335,68 @@ export function HomePage() {
 
       {/* Content Sections */}
       <div className="max-w-7xl mx-auto space-y-16 px-8 lg:px-16">
+
+        {/* Purpose Statement */}
+        <section className="bg-white rounded-2xl shadow-lg p-8 -mt-10 lg:-mt-16 relative z-10">
+          <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] items-start">
+            <div className="space-y-5">
+              <h2 className="text-3xl font-bold text-gray-900">What is CauseHive?</h2>
+              <p className="text-gray-600 text-lg leading-relaxed">
+                CauseHive is a secure fundraising hub that gives Ghanaian organizations a compliant, trustworthy
+                way to share their mission, collect donations, and show real impact. By combining donor protections,
+                transparent reporting, and mobile-first payments, we make it easy for verified causes to turn local
+                support into lasting change.
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {[{
+                  title: 'For Cause Creators',
+                  desc: 'Launch campaigns with built-in KYC, payout automation, and storytelling tools tailored to Ghana.'
+                }, {
+                  title: 'For Donors & Partners',
+                  desc: 'See campaign milestones, verify organizers, and track how every cedi moves from pledge to project.'
+                }, {
+                  title: 'For Compliance Teams',
+                  desc: 'Use detailed audit trails, disbursement controls, and export-ready reports to stay aligned with Bank of Ghana guidelines.'
+                }, {
+                  title: 'For Developers',
+                  desc: 'Integrate CauseHive APIs and webhooks to extend donation flows into your own apps or internal tools.'
+                }].map((item, idx) => (
+                  <div key={idx} className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+                    <h3 className="text-base font-semibold text-emerald-800 mb-1">{item.title}</h3>
+                    <p className="text-sm text-emerald-900 leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="bg-gray-50 rounded-xl border border-gray-200 p-6 shadow-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Verification Snapshot</h3>
+                <ul className="space-y-3 text-sm text-gray-600">
+                  <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5" />
+                    Registered brand name: <span className="font-medium text-gray-900">CauseHive</span>
+                  </li>
+                  <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5" />
+                    Primary audience: nonprofits, social enterprises, CSR programs, and diaspora donors supporting Ghana.
+                  </li>
+                  <li className="flex items-start gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5" />
+                    Core offering: fundraising campaign management, donor engagement, payout orchestration, and impact analytics.
+                  </li>
+                </ul>
+              </div>
+              <div className="bg-emerald-600 text-white rounded-xl p-6 shadow-md">
+                <h3 className="text-lg font-semibold mb-2">Ready to verify us?</h3>
+                <p className="text-sm text-emerald-100 mb-4">
+                  Review our OAuth consent screen, privacy policy, and demo access using the links provided in your
+                  verification dashboard. We keep them synchronized with the live CauseHive experience.
+                </p>
+                <div className="space-y-2 text-sm">
+                  <p><span className="font-semibold">Support:</span> support@causehive.com</p>
+                  <p><span className="font-semibold">Docs:</span> <a className="underline" href="https://docs.causehive.com" target="_blank" rel="noreferrer">docs.causehive.com</a></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Value props */}
         <section>

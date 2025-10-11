@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/lib/api'
-import type { Pagination, Notification } from '@/types/api'
+import type { Pagination } from '@/types/api'
 import { useSearchParams } from 'react-router-dom'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
@@ -9,6 +8,7 @@ import { Pagination as UIPagination } from '@/components/ui/pagination'
 import { useToast } from '@/components/ui/toast'
 import { useEffect } from 'react'
 import { Empty } from '@/components/ui/empty'
+import { notificationsService, type NotificationResponse } from '@/lib/services'
 
 export function NotificationsPage() {
   const { notify } = useToast()
@@ -18,18 +18,15 @@ export function NotificationsPage() {
   const unreadOnly = params.get('unread_only') === 'true'
   const type = params.get('type') || ''
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError } = useQuery<Pagination<NotificationResponse>>({
     queryKey: ['notifications', { page, unreadOnly, type }],
     queryFn: async () => {
-      const { data } = await api.get<Pagination<Notification>>('/notifications/', {
-        params: {
-          page,
-          unread_only: unreadOnly || undefined,
-          type: type || undefined,
-          ordering: '-created_at'
-        }
+      return notificationsService.getNotifications({
+        page,
+        unread_only: unreadOnly || undefined,
+        type: type || undefined,
+        ordering: '-created_at'
       })
-      return data
     }
   })
 
@@ -37,7 +34,7 @@ export function NotificationsPage() {
 
   const markRead = useMutation({
     mutationFn: async (id: string) => {
-      await api.patch(`/notifications/${id}/read/`)
+      await notificationsService.markAsRead(id)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] })
@@ -47,7 +44,7 @@ export function NotificationsPage() {
 
   const markAll = useMutation({
     mutationFn: async () => {
-      await api.post('/notifications/mark-all-read/')
+      await notificationsService.markAllAsRead()
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] })

@@ -5,7 +5,7 @@ import { authStore } from '@/lib/auth'
 import { useAuth } from '@/hooks/api'
 import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { useMutation } from '@tanstack/react-query'  
+import { useMutation } from '@tanstack/react-query'
 import { authService } from '@/lib/services'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -134,7 +134,9 @@ export function LoginPage() {
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="text-center mb-8">
-            
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+              <HeartHandshake className="h-6 w-6 text-emerald-600" />
+            </div>
             <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-gray-900 via-emerald-800 to-emerald-600 bg-clip-text text-transparent mb-2">
               Welcome Back
             </h1>

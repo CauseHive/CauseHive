@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .views import (register_user, LoginView, LogoutView, GoogleLogin, request_password_reset, reset_password_confirm,
                     UserProfileDetailView, UserAccountDeleteView, UserDetailView, AdminUserListView, BankListAPIView,
                     MobileMoneyListAPIView, ValidateBankAccountAPIView, google_oauth_callback, google_oauth_url,
-                    verify_account, resend_verification_email)
+                    verify_account, resend_verification_email, CurrentUserView, UserDetailsView)
 # from .google_oauth_views import google_oauth_callback, google_oauth_url  # Deleted file
 
 # JWT Authentication URLs
@@ -33,6 +33,8 @@ urlpatterns = [
     path('auth/verify/<str:uidb64>/<str:token>/', verify_account, name='verify_account'),
     path('auth/resend-verification/', resend_verification_email, name='resend_verification_email'),
     path('profile/', UserProfileDetailView.as_view(), name='profile_view'),
+    path('me/', CurrentUserView.as_view(), name='current_user'),
+    path('details/', UserDetailsView.as_view(), name='user_details'),
     path('users/<uuid:id>/', UserDetailView.as_view(), name='user_detail'),
     path('profile/delete', UserAccountDeleteView.as_view(), name='account_delete'),
     # path('admin-see/users/', AdminUserListView.as_view(), name='user_list'),

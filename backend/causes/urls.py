@@ -1,8 +1,18 @@
 from django.urls import path
-from .views import CauseCreateView, CauseDeleteView, CauseListView, CauseDetailView, AdminCauseListView, \
-    AdminCauseUpdateView
+from .views import (
+    CauseCreateView,
+    CauseDeleteView,
+    CauseListView,
+    CauseDetailView,
+    AdminCauseListView,
+    AdminCauseUpdateView,
+    CauseListCreateView,
+    CauseRetrieveUpdateView,
+)
 
 urlpatterns = [
+    path('', CauseListCreateView.as_view(), name='cause_list_create'),
+    path('<uuid:id>/', CauseRetrieveUpdateView.as_view(), name='cause_retrieve_update'),
     path('create/', CauseCreateView.as_view(), name='cause_create'),
     path('list/', CauseListView.as_view(), name='cause_list'),
     path('delete/<uuid:id>/', CauseDeleteView.as_view(), name='cause_delete'),

@@ -10,7 +10,7 @@ export { donationsService, type DonationFilters, type CreateDonationData } from 
 export { userService, type UpdateProfileData, type UserProfileResponse } from './user.service'
 export { cartService, type AddToCartData } from './cart.service'
 export { paymentsService, type InitiatePaymentData } from './payments.service'
-export { notificationsService, type NotificationFilters } from './notifications.service'
+export { notificationsService, type NotificationFilters, type NotificationResponse } from './notifications.service'
 export { withdrawalsService, type CreateWithdrawalData } from './withdrawals.service'
 
 // Import all service instances

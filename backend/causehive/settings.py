@@ -213,16 +213,23 @@ TEMPLATES = [
 WSGI_APPLICATION = 'causehive.wsgi.application'
 
 
-DATABASES = {
-    'default': {
-        **dj_database_url.parse(env('DATABASE_URL')),
+database_config = dj_database_url.parse(env('DATABASE_URL'))
+
+if database_config.get('ENGINE') == 'django.db.backends.postgresql':
+    database_config.update({
         'ENGINE': 'django.db.backends.postgresql',
         'CONN_MAX_AGE': 300,  # Keep connections alive for 5 minutes (Supabase optimized)
         'OPTIONS': {
             'connect_timeout': 30,  # Longer timeout for Supabase
             'options': '-c default_transaction_isolation=read_committed -c statement_timeout=30000 -c idle_in_transaction_session_timeout=300000'
         }
-    }
+    })
+else:
+    # Ensure SQLite and other engines work in local/test environments
+    database_config.setdefault('ENGINE', 'django.db.backends.sqlite3')
+
+DATABASES = {
+    'default': database_config
 }
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -440,20 +447,26 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DATABASE_ROUTERS = []
 DATABASE_APPS_MAPPING = {}
 
-# Supabase-specific optimizations
-DATABASES['default']['CONN_MAX_AGE'] = 600  # 10 minutes for Supabase (keep connections longer)
-DATABASES['default']['CONN_HEALTH_CHECKS'] = True  # Enable connection health checks
+if DATABASES['default'].get('ENGINE') == 'django.db.backends.postgresql':
+    # Supabase-specific optimizations
+    DATABASES['default']['CONN_MAX_AGE'] = 600  # 10 minutes for Supabase (keep connections longer)
+    DATABASES['default']['CONN_HEALTH_CHECKS'] = True  # Enable connection health checks
 
-# Force connection reuse
-DATABASES['default']['ATOMIC_REQUESTS'] = False  # Disable atomic requests for better performance
+    # Force connection reuse
+    DATABASES['default']['ATOMIC_REQUESTS'] = False  # Disable atomic requests for better performance
 
-# Additional Supabase optimizations
-DATABASES['default']['OPTIONS'].update({
-    'sslmode': 'require',  # Ensure SSL for Supabase
-    'application_name': 'causehive_backend',  # Help with connection tracking
-    'connect_timeout': 30,
-    'options': '-c default_transaction_isolation=read_committed -c statement_timeout=30000 -c idle_in_transaction_session_timeout=300000 -c tcp_keepalives_idle=600 -c tcp_keepalives_interval=30 -c tcp_keepalives_count=3'
-})
+    # Additional Supabase optimizations
+    options = DATABASES['default'].setdefault('OPTIONS', {})
+    options.update({
+        'sslmode': 'require',  # Ensure SSL for Supabase
+        'application_name': 'causehive_backend',  # Help with connection tracking
+        'connect_timeout': 30,
+        'options': '-c default_transaction_isolation=read_committed -c statement_timeout=30000 -c idle_in_transaction_session_timeout=300000 -c tcp_keepalives_idle=600 -c tcp_keepalives_interval=30 -c tcp_keepalives_count=3'
+    })
+else:
+    # Reasonable defaults for local/testing environments
+    DATABASES['default'].setdefault('CONN_MAX_AGE', 0)
+    DATABASES['default'].setdefault('ATOMIC_REQUESTS', False)
 
 # Logging configuration for Railway
 LOGGING = {

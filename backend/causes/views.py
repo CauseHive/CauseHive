@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import generics, permissions
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
@@ -18,9 +19,8 @@ class CauseCreateView(generics.CreateAPIView):
     queryset = Causes.objects.all()
     serializer_class = CausesSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def perform_create(self, serializer):
-        # Automatically set the organizer to the current authenticated user
         serializer.save(organizer_id=self.request.user)
 
 class CauseListView(generics.ListAPIView):
@@ -34,8 +34,20 @@ class CauseListView(generics.ListAPIView):
     def get_queryset(self):
         # Optimize queryset: select_related/prefetch_related if organizer/category exist
         return Causes.objects.exclude(status__in=['under_review', 'rejected']) \
-            .select_related('organizer_id') \
-            .only('id', 'name', 'description', 'category', 'organizer_id', 'status', 'created_at')
+            .select_related('organizer_id', 'category') \
+            .only(
+                'id',
+                'name',
+                'description',
+                'category',
+                'organizer_id',
+                'status',
+                'created_at',
+                'target_amount',
+                'current_amount',
+                'cover_image',
+                'rejection_reason',
+            )
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -44,7 +56,19 @@ class CauseListView(generics.ListAPIView):
         return super().list(request, *args, **kwargs)
 
 class CauseDetailView(generics.RetrieveAPIView):
-    queryset = Causes.objects.select_related('organizer_id').only('id', 'title', 'description', 'category', 'organizer_id', 'status', 'created_at')
+    queryset = Causes.objects.select_related('organizer_id', 'category').only(
+        'id',
+        'name',
+        'description',
+        'category',
+        'organizer_id',
+        'status',
+        'created_at',
+        'target_amount',
+        'current_amount',
+        'cover_image',
+        'rejection_reason',
+    )
     serializer_class = CausesSerializer
     lookup_field = 'id'
 
@@ -93,5 +117,63 @@ class AdminCauseApproveView(generics.UpdateAPIView):
             return Response({'status': 'approved'})
         except Causes.DoesNotExist:
             return Response({'error': 'Cause not found'}, status=404)
+
+
+class CauseListCreateView(generics.ListCreateAPIView):
+    serializer_class = CausesSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        base = Causes.objects.select_related('organizer_id', 'category').only(
+            'id',
+            'name',
+            'description',
+            'category',
+            'organizer_id',
+            'status',
+            'created_at',
+            'target_amount',
+            'current_amount',
+            'cover_image',
+            'rejection_reason',
+        )
+        if self.request.method == 'GET':
+            return base.exclude(status__in=['under_review', 'rejected'])
+        return base
+
+    def perform_create(self, serializer):
+        if not self.request.user.is_authenticated:
+            raise PermissionDenied('Authentication is required to create a cause.')
+        serializer.save(organizer_id=self.request.user)
+
+
+class CauseRetrieveUpdateView(generics.RetrieveUpdateAPIView):
+    serializer_class = CausesSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        return Causes.objects.select_related('organizer_id', 'category').only(
+            'id',
+            'name',
+            'description',
+            'category',
+            'organizer_id',
+            'status',
+            'created_at',
+            'target_amount',
+            'current_amount',
+            'cover_image',
+            'rejection_reason',
+        )
+
+    def perform_update(self, serializer):
+        instance = serializer.instance
+        user = self.request.user
+        if not user.is_authenticated:
+            raise PermissionDenied('Authentication is required to update a cause.')
+        if instance.organizer_id_id != user.id and not user.is_staff:
+            raise PermissionDenied('You do not have permission to update this cause.')
+        serializer.save()
 
 # Ensure status, organizer_id, and category fields are indexed in the Causes model for optimal performance.

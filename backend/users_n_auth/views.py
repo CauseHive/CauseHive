@@ -33,7 +33,12 @@ from twisted.mail.scripts.mailmail import failure
 from .email_utils import send_account_verification_email, send_password_reset_email
 from .models import User, UserProfile
 from .permissions import IsAdminService
-from .serializers import UserSerializer, UserProfileSerializer
+from .serializers import (
+    UserSerializer,
+    UserProfileSerializer,
+    CurrentUserSerializer,
+    UserUpdateSerializer,
+)
 from .throttles import PasswordResetThrottle
 
 
@@ -411,9 +416,30 @@ def google_oauth_callback(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+
+class CurrentUserView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        serializer = CurrentUserSerializer(request.user)
+        return Response(serializer.data)
+
+
+class UserDetailsView(generics.RetrieveUpdateAPIView):
+    serializer_class = UserUpdateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
 class UserDetailView(RetrieveAPIView):
     queryset = User.objects.only('id', 'email', 'first_name', 'last_name', 'date_joined', 'is_active')
-    serializer_class = UserSerializer
+    serializer_class = CurrentUserSerializer
     lookup_field = 'id'
     @method_decorator(cache_page(60 * 5))  # Cache for 5 minutes
     def dispatch(self, *args, **kwargs):

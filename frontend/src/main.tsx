@@ -9,6 +9,7 @@ import ErrorBoundary from '@/components/common/ErrorBoundary'
 import { emitToast } from '@/lib/notify'
 import { prefetchRoutes } from '@/lib/prefetchRoutes'
 import { loadRuntimeConfig, SENTRY_DSN, APP_ENV } from '@/lib/config'
+import { initializeAuthCompatibility } from '@/lib/security/compatibility'
 
 // Lazy import Sentry only if DSN provided (avoid bundle cost otherwise)
 async function initSentry() {
@@ -57,6 +58,9 @@ const queryClient = new QueryClient({
 
 export function Boot() {
   useEffect(() => {
+    // Initialize enterprise security compatibility layer
+    initializeAuthCompatibility()
+    
     // Prefetch most visited routes; can be tuned based on analytics.
     prefetchRoutes(['/causes', '/donations', '/profile'])
   }, [])

@@ -1,4 +1,5 @@
 import { BaseService, type QueryParams } from './base'
+import type { Pagination } from '@/types/api'
 
 export interface NotificationFilters extends QueryParams {
   unread_only?: boolean
@@ -10,20 +11,12 @@ export interface NotificationResponse {
   title: string
   message: string
   type: string
+  priority?: string
   is_read: boolean
+  is_archived?: boolean
   created_at: string
-  data?: {
-    donation_id?: string
-    amount?: number
-    cause_id?: string
-  }
-}
-
-export interface NotificationListResponse {
-  count: number
-  next: string | null
-  previous: string | null
-  results: NotificationResponse[]
+  read_at?: string | null
+  data?: Record<string, unknown> | null
 }
 
 /**
@@ -35,22 +28,34 @@ class NotificationsService extends BaseService {
   /**
    * Get paginated notifications for current user
    */
-  async getNotifications(params?: NotificationFilters): Promise<NotificationListResponse> {
-    return this.getPaginated<NotificationResponse>('/', params)
+  async getNotifications(params?: NotificationFilters): Promise<Pagination<NotificationResponse>> {
+    const response = await this.getPaginated<NotificationResponse>('/', params)
+    response.results = (response.results ?? []).map((notification) => ({
+      ...notification,
+      id: String(notification.id),
+    }))
+    return response
   }
 
   /**
    * Mark notification as read
    */
-  async markAsRead(id: string): Promise<{ message: string; is_read: boolean }> {
-    return this.patch<{ message: string; is_read: boolean }>(`/${id}/read/`)
+  async markAsRead(id: string | number): Promise<{ message: string; notification: NotificationResponse }> {
+    const response = await this.patch<{ message: string; notification: NotificationResponse }>(`/${id}/read/`)
+    return {
+      ...response,
+      notification: {
+        ...response.notification,
+        id: String(response.notification.id),
+      },
+    }
   }
 
   /**
    * Mark all notifications as read
    */
   async markAllAsRead(): Promise<{ message: string; updated_count: number }> {
-    return this.post<{ message: string; updated_count: number }>('/mark-all-read/')
+    return this.post<{ message: string; updated_count: number }>('/read-all/')
   }
 }
 
